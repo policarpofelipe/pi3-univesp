@@ -1,5 +1,5 @@
 import { useState } from "react";
-import univespLogo from "./imagens/univesp_logo.jpg";
+import univespLogo from "./imagens/Univesp_logo.jpg";
 import "./App.css";
 
 export default function App() {
