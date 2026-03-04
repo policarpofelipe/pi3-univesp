@@ -22,7 +22,7 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Deploy frontend dist -> public_html/pi3
