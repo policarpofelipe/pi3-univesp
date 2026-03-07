@@ -1,0 +1,862 @@
+MATRIZ DE DESENVOLVIMENTO E ESTRUTURA DE CÓDIGO
+
+==================================================
+1. MATRIZ DE DIVISÃO DO DESENVOLVIMENTO
+==================================================
+
+Sugestão de divisão por frentes de trabalho:
+
+FRENTE A — AUTENTICAÇÃO, BASE E NAVEGAÇÃO
+Responsável ideal:
+- pessoa com mais segurança em estrutura de projeto e integração geral
+
+Escopo:
+- login
+- cadastro
+- sessão/token
+- proteção de rotas
+- layout base
+- navegação principal
+- página inicial
+- seleção de organização
+- seleção de quadro
+
+Dependências:
+- nenhuma forte no início
+- serve de base para todas as outras frentes
+
+Entregas:
+- fluxo de autenticação funcionando
+- usuário entra e consegue navegar até os quadros
+- rotas privadas funcionando
+- layout geral padronizado
+
+Status sugerido:
+- começar primeiro
+
+--------------------------------------------------
+
+FRENTE B — ORGANIZAÇÕES, QUADROS, MEMBROS E PAPÉIS
+Responsável ideal:
+- pessoa com bom domínio de CRUD e modelagem relacional
+
+Escopo:
+- CRUD de organização
+- CRUD de quadro
+- membros da organização
+- membros do quadro
+- papéis do quadro
+- associação de papéis aos membros do quadro
+- preferências visuais do quadro por usuário
+
+Dependências:
+- autenticação pronta
+- layout base pronto
+
+Entregas:
+- organização criada
+- quadro criado
+- membros vinculados ao quadro
+- papéis configurados
+
+Status sugerido:
+- iniciar logo após autenticação básica
+
+--------------------------------------------------
+
+FRENTE C — LISTAS, PERMISSÕES E TRANSIÇÕES
+Responsável ideal:
+- pessoa cuidadosa com regra de negócio
+
+Escopo:
+- CRUD de listas
+- reordenação de listas
+- preferências de listas por usuário
+- permissões por verbo (ver, editar, enviar_para)
+- regras de transição entre listas
+- validações de acesso e movimento
+
+Dependências:
+- quadro e papéis existentes
+
+Entregas:
+- listas funcionando
+- ordem personalizada por usuário
+- controle de visibilidade por papel
+- transição livre por padrão e restrita quando configurada
+
+Status sugerido:
+- começar quando quadro e papéis já estiverem minimamente prontos
+
+--------------------------------------------------
+
+FRENTE D — CARTÕES E RECURSOS INTERNOS
+Responsável ideal:
+- pessoa com mais fôlego para volume de telas e integrações
+
+Escopo:
+- CRUD de cartões
+- detalhe do cartão
+- atribuições N:N
+- comentários
+- checklists
+- anexos
+- tags
+- histórico de eventos
+- visualizações do cartão
+
+Dependências:
+- listas prontas
+- autenticação pronta
+
+Entregas:
+- cartão completo operando dentro do fluxo
+- detalhes do cartão funcionando
+- recursos internos integrados
+
+Status sugerido:
+- iniciar assim que listas já estiverem funcionando
+
+--------------------------------------------------
+
+FRENTE E — VISÕES, CAMPOS PERSONALIZADOS E AUTOMAÇÕES
+Responsável ideal:
+- pessoa com mais maturidade técnica
+- é a frente mais conceitualmente difícil
+
+Escopo:
+- visões do quadro
+- visões de sistema
+- visões personalizadas
+- campos personalizados
+- opções de campos
+- valores por cartão
+- automações
+- ações de automação
+- execuções de automação
+- handoff entre quadros
+- relações entre cartões
+
+Dependências:
+- cartões funcionando
+- quadros/lists/papéis prontos
+- backend estável
+
+Entregas:
+- diferenciais do sistema
+- maior valor de produto
+- fluxo interquadros automatizado
+
+Status sugerido:
+- iniciar depois do núcleo funcional
+
+==================================================
+2. MATRIZ DE TAREFAS COM RESPONSÁVEL E DEPENDÊNCIAS
+==================================================
+
+[Tarefa] Autenticação
+Responsável: Frente A
+Depende de: nada
+Entregável: login, cadastro, sessão, proteção de rotas
+
+[Tarefa] Layout base e navegação
+Responsável: Frente A
+Depende de: autenticação
+Entregável: sidebar, topbar, rotas principais
+
+[Tarefa] Organizações
+Responsável: Frente B
+Depende de: autenticação
+Entregável: CRUD de organização e membros
+
+[Tarefa] Quadros
+Responsável: Frente B
+Depende de: organizações
+Entregável: CRUD de quadro, membros e papéis
+
+[Tarefa] Listas
+Responsável: Frente C
+Depende de: quadros
+Entregável: CRUD, ordenação, preferências por usuário
+
+[Tarefa] Permissões por lista
+Responsável: Frente C
+Depende de: papéis do quadro e listas
+Entregável: ver, editar, enviar_para
+
+[Tarefa] Regras de transição
+Responsável: Frente C
+Depende de: listas e papéis
+Entregável: restrições opcionais de fluxo
+
+[Tarefa] Cartões
+Responsável: Frente D
+Depende de: listas
+Entregável: CRUD de cartões e movimentação
+
+[Tarefa] Recursos do cartão
+Responsável: Frente D
+Depende de: cartões
+Entregável: comentários, checklists, anexos, tags, histórico
+
+[Tarefa] Visões
+Responsável: Frente E
+Depende de: cartões, listas e permissões
+Entregável: minhas demandas, atrasados, sem atribuição etc.
+
+[Tarefa] Campos personalizados
+Responsável: Frente E
+Depende de: quadros e cartões
+Entregável: definição de campos e valores por cartão
+
+[Tarefa] Automações
+Responsável: Frente E
+Depende de: cartões, listas, quadros
+Entregável: gatilhos, ações, execuções, handoff
+
+[Tarefa] Relações entre cartões
+Responsável: Frente E
+Depende de: cartões
+Entregável: ligação origem-destino e dependências
+
+==================================================
+3. ESTRUTURA SUGERIDA DE DIRETÓRIOS
+==================================================
+
+Sugestão geral do repositório:
+
+/
+├── frontend/
+├── backend/
+├── database/
+├── docs/
+├── .env.example
+├── README.md
+
+--------------------------------------------------
+3.1. FRONTEND
+--------------------------------------------------
+
+frontend/
+├── public/
+├── src/
+│   ├── assets/
+│   │   ├── imagens/
+│   │   ├── icones/
+│   │   └── estilos/
+│   ├── components/
+│   │   ├── common/
+│   │   ├── layout/
+│   │   ├── auth/
+│   │   ├── organizacoes/
+│   │   ├── quadros/
+│   │   ├── listas/
+│   │   ├── cartoes/
+│   │   ├── visoes/
+│   │   ├── camposPersonalizados/
+│   │   ├── automacoes/
+│   │   └── ui/
+│   ├── pages/
+│   │   ├── auth/
+│   │   ├── organizacoes/
+│   │   ├── quadros/
+│   │   ├── listas/
+│   │   ├── cartoes/
+│   │   ├── visoes/
+│   │   ├── automacoes/
+│   │   └── configuracoes/
+│   ├── routes/
+│   ├── services/
+│   ├── hooks/
+│   ├── context/
+│   ├── utils/
+│   ├── constants/
+│   ├── styles/
+│   ├── App.jsx
+│   └── main.jsx
+├── package.json
+└── vite.config.js
+
+--------------------------------------------------
+3.2. BACKEND
+--------------------------------------------------
+
+backend/
+├── src/
+│   ├── config/
+│   ├── controllers/
+│   ├── services/
+│   ├── repositories/
+│   ├── routes/
+│   ├── middlewares/
+│   ├── validators/
+│   ├── utils/
+│   ├── jobs/
+│   ├── events/
+│   ├── database/
+│   │   ├── migrations/
+│   │   ├── seeds/
+│   │   └── connection.js
+│   ├── app.js
+│   └── server.js
+├── package.json
+└── .env.example
+
+--------------------------------------------------
+3.3. DATABASE / DOCUMENTAÇÃO
+--------------------------------------------------
+
+database/
+├── schema.sql
+├── seeds.sql
+└── exemplos_consultas.sql
+
+docs/
+├── README.md
+├── FUNCIONALIDADES_E_FLUXOS.md
+├── ARQUITETURA.md
+├── MODELAGEM_BANCO.md
+├── MATRIZ_DE_DESENVOLVIMENTO.md
+└── PADRAO_DE_PASTAS_E_ARQUIVOS.md
+
+==================================================
+4. NOMES DE ARQUIVOS — FRONTEND
+==================================================
+
+4.1. Autenticação
+
+pages/auth/LoginPage.jsx
+pages/auth/CadastroPage.jsx
+pages/auth/EsqueciSenhaPage.jsx
+pages/auth/RedefinirSenhaPage.jsx
+
+components/auth/LoginForm.jsx
+components/auth/CadastroForm.jsx
+components/auth/RecuperacaoSenhaForm.jsx
+
+context/AuthContext.jsx
+hooks/useAuth.js
+services/authService.js
+routes/PrivateRoute.jsx
+
+--------------------------------------------------
+
+4.2. Layout e navegação
+
+components/layout/AppLayout.jsx
+components/layout/Sidebar.jsx
+components/layout/Topbar.jsx
+components/layout/Breadcrumb.jsx
+
+pages/HomePage.jsx
+pages/SelecaoOrganizacaoPage.jsx
+pages/SelecaoQuadroPage.jsx
+
+--------------------------------------------------
+
+4.3. Organizações
+
+pages/organizacoes/OrganizacoesPage.jsx
+pages/organizacoes/OrganizacaoDetalhePage.jsx
+pages/organizacoes/OrganizacaoMembrosPage.jsx
+pages/organizacoes/OrganizacaoConfiguracoesPage.jsx
+
+components/organizacoes/OrganizacaoCard.jsx
+components/organizacoes/OrganizacaoForm.jsx
+components/organizacoes/MembroOrganizacaoTable.jsx
+components/organizacoes/ConviteMembroForm.jsx
+
+services/organizacaoService.js
+
+--------------------------------------------------
+
+4.4. Quadros
+
+pages/quadros/QuadrosPage.jsx
+pages/quadros/QuadroDetalhePage.jsx
+pages/quadros/QuadroConfiguracoesPage.jsx
+pages/quadros/QuadroMembrosPage.jsx
+pages/quadros/QuadroPapeisPage.jsx
+
+components/quadros/QuadroCard.jsx
+components/quadros/QuadroForm.jsx
+components/quadros/QuadroHeader.jsx
+components/quadros/QuadroPreferenciasForm.jsx
+components/quadros/QuadroMembrosTable.jsx
+components/quadros/QuadroPapelForm.jsx
+
+services/quadroService.js
+services/quadroMembroService.js
+services/quadroPapelService.js
+
+--------------------------------------------------
+
+4.5. Listas
+
+components/listas/ListaColumn.jsx
+components/listas/ListaHeader.jsx
+components/listas/ListaForm.jsx
+components/listas/ListaPermissoesForm.jsx
+components/listas/ListaTransicoesForm.jsx
+components/listas/ReordenacaoListas.jsx
+
+pages/listas/ListaConfiguracoesPage.jsx
+pages/listas/ListaPermissoesPage.jsx
+pages/listas/ListaTransicoesPage.jsx
+
+services/listaService.js
+services/listaPermissaoService.js
+services/listaTransicaoService.js
+
+--------------------------------------------------
+
+4.6. Cartões
+
+pages/cartoes/CartaoDetalhePage.jsx
+
+components/cartoes/CartaoCard.jsx
+components/cartoes/CartaoModal.jsx
+components/cartoes/CartaoForm.jsx
+components/cartoes/CartaoHeader.jsx
+components/cartoes/CartaoDescricao.jsx
+components/cartoes/CartaoPrazo.jsx
+components/cartoes/CartaoPrioridade.jsx
+components/cartoes/CartaoAtribuicoes.jsx
+components/cartoes/CartaoTags.jsx
+components/cartoes/CartaoCamposPersonalizados.jsx
+components/cartoes/CartaoChecklist.jsx
+components/cartoes/CartaoChecklistItem.jsx
+components/cartoes/CartaoComentarios.jsx
+components/cartoes/CartaoAnexos.jsx
+components/cartoes/CartaoHistorico.jsx
+components/cartoes/CartaoRelacoes.jsx
+components/cartoes/CriacaoRapidaCartao.jsx
+
+services/cartaoService.js
+services/cartaoComentarioService.js
+services/cartaoChecklistService.js
+services/cartaoAnexoService.js
+services/cartaoAtribuicaoService.js
+services/cartaoHistoricoService.js
+services/cartaoRelacaoService.js
+
+--------------------------------------------------
+
+4.7. Visões
+
+pages/visoes/VisoesPage.jsx
+pages/visoes/VisaoFormPage.jsx
+
+components/visoes/VisaoTabs.jsx
+components/visoes/VisaoListaResultados.jsx
+components/visoes/VisaoForm.jsx
+components/visoes/FiltroBuilder.jsx
+
+services/visaoService.js
+
+--------------------------------------------------
+
+4.8. Tags
+
+components/cartoes/TagBadge.jsx
+components/cartoes/TagSelector.jsx
+components/quadros/TagForm.jsx
+components/quadros/TagList.jsx
+
+services/tagService.js
+
+--------------------------------------------------
+
+4.9. Campos personalizados
+
+pages/configuracoes/CamposPersonalizadosPage.jsx
+
+components/camposPersonalizados/CampoPersonalizadoForm.jsx
+components/camposPersonalizados/CampoPersonalizadoList.jsx
+components/camposPersonalizados/CampoOpcaoForm.jsx
+components/camposPersonalizados/RenderCampoTexto.jsx
+components/camposPersonalizados/RenderCampoNumero.jsx
+components/camposPersonalizados/RenderCampoData.jsx
+components/camposPersonalizados/RenderCampoDataHora.jsx
+components/camposPersonalizados/RenderCampoBooleano.jsx
+components/camposPersonalizados/RenderCampoSelecao.jsx
+components/camposPersonalizados/RenderCampoUsuario.jsx
+
+services/campoPersonalizadoService.js
+
+--------------------------------------------------
+
+4.10. Automações
+
+pages/automacoes/AutomacoesPage.jsx
+pages/automacoes/AutomacaoFormPage.jsx
+
+components/automacoes/AutomacaoForm.jsx
+components/automacoes/AutomacaoList.jsx
+components/automacoes/GatilhoSelector.jsx
+components/automacoes/CondicaoBuilder.jsx
+components/automacoes/AcaoBuilder.jsx
+components/automacoes/HandoffConfigForm.jsx
+components/automacoes/ExecucaoAutomacaoList.jsx
+
+services/automacaoService.js
+
+--------------------------------------------------
+
+4.11. Utilitários
+
+components/common/ConfirmDialog.jsx
+components/common/LoadingSpinner.jsx
+components/common/EmptyState.jsx
+components/common/ErrorMessage.jsx
+
+components/ui/Button.jsx
+components/ui/Input.jsx
+components/ui/Select.jsx
+components/ui/Modal.jsx
+components/ui/Badge.jsx
+components/ui/Tabs.jsx
+components/ui/Textarea.jsx
+
+hooks/useDebounce.js
+hooks/useModal.js
+hooks/useToast.js
+
+utils/dateUtils.js
+utils/permissionUtils.js
+utils/positionUtils.js
+utils/filterUtils.js
+
+constants/roles.js
+constants/prioridades.js
+constants/tiposCampo.js
+constants/tiposEvento.js
+
+==================================================
+5. NOMES DE ARQUIVOS — BACKEND
+==================================================
+
+5.1. Configuração e bootstrap
+
+src/app.js
+src/server.js
+src/config/env.js
+src/config/jwt.js
+src/config/upload.js
+
+--------------------------------------------------
+
+5.2. Rotas
+
+src/routes/authRoutes.js
+src/routes/usuarioRoutes.js
+src/routes/organizacaoRoutes.js
+src/routes/quadroRoutes.js
+src/routes/quadroMembroRoutes.js
+src/routes/quadroPapelRoutes.js
+src/routes/listaRoutes.js
+src/routes/listaPermissaoRoutes.js
+src/routes/listaTransicaoRoutes.js
+src/routes/visaoRoutes.js
+src/routes/tagRoutes.js
+src/routes/campoPersonalizadoRoutes.js
+src/routes/cartaoRoutes.js
+src/routes/cartaoComentarioRoutes.js
+src/routes/cartaoChecklistRoutes.js
+src/routes/cartaoAnexoRoutes.js
+src/routes/cartaoAtribuicaoRoutes.js
+src/routes/cartaoRelacaoRoutes.js
+src/routes/automacaoRoutes.js
+
+--------------------------------------------------
+
+5.3. Controllers
+
+src/controllers/AuthController.js
+src/controllers/UsuarioController.js
+src/controllers/OrganizacaoController.js
+src/controllers/QuadroController.js
+src/controllers/QuadroMembroController.js
+src/controllers/QuadroPapelController.js
+src/controllers/ListaController.js
+src/controllers/ListaPermissaoController.js
+src/controllers/ListaTransicaoController.js
+src/controllers/VisaoController.js
+src/controllers/TagController.js
+src/controllers/CampoPersonalizadoController.js
+src/controllers/CartaoController.js
+src/controllers/CartaoComentarioController.js
+src/controllers/CartaoChecklistController.js
+src/controllers/CartaoAnexoController.js
+src/controllers/CartaoAtribuicaoController.js
+src/controllers/CartaoRelacaoController.js
+src/controllers/AutomacaoController.js
+
+--------------------------------------------------
+
+5.4. Services
+
+src/services/AuthService.js
+src/services/UsuarioService.js
+src/services/OrganizacaoService.js
+src/services/QuadroService.js
+src/services/QuadroMembroService.js
+src/services/QuadroPapelService.js
+src/services/ListaService.js
+src/services/ListaPermissaoService.js
+src/services/ListaTransicaoService.js
+src/services/VisaoService.js
+src/services/TagService.js
+src/services/CampoPersonalizadoService.js
+src/services/CartaoService.js
+src/services/CartaoComentarioService.js
+src/services/CartaoChecklistService.js
+src/services/CartaoAnexoService.js
+src/services/CartaoAtribuicaoService.js
+src/services/CartaoRelacaoService.js
+src/services/CartaoEventoService.js
+src/services/CartaoVisualizacaoService.js
+src/services/AutomacaoService.js
+src/services/AutomacaoExecutorService.js
+src/services/HandoffService.js
+src/services/PermissaoService.js
+src/services/TransicaoService.js
+src/services/UploadService.js
+src/services/BuscaService.js
+
+--------------------------------------------------
+
+5.5. Repositories
+
+src/repositories/UsuarioRepository.js
+src/repositories/OrganizacaoRepository.js
+src/repositories/QuadroRepository.js
+src/repositories/QuadroMembroRepository.js
+src/repositories/QuadroPapelRepository.js
+src/repositories/ListaRepository.js
+src/repositories/ListaPermissaoRepository.js
+src/repositories/ListaTransicaoRepository.js
+src/repositories/VisaoRepository.js
+src/repositories/TagRepository.js
+src/repositories/CampoPersonalizadoRepository.js
+src/repositories/CampoOpcaoRepository.js
+src/repositories/CartaoRepository.js
+src/repositories/CartaoComentarioRepository.js
+src/repositories/CartaoChecklistRepository.js
+src/repositories/CartaoChecklistItemRepository.js
+src/repositories/CartaoAnexoRepository.js
+src/repositories/CartaoAtribuicaoRepository.js
+src/repositories/CartaoRelacaoRepository.js
+src/repositories/CartaoEventoRepository.js
+src/repositories/CartaoVisualizacaoRepository.js
+src/repositories/AutomacaoRepository.js
+src/repositories/AutomacaoAcaoRepository.js
+src/repositories/AutomacaoExecucaoRepository.js
+
+--------------------------------------------------
+
+5.6. Middlewares
+
+src/middlewares/authMiddleware.js
+src/middlewares/errorMiddleware.js
+src/middlewares/permissionMiddleware.js
+src/middlewares/validateRequestMiddleware.js
+src/middlewares/uploadMiddleware.js
+
+--------------------------------------------------
+
+5.7. Validators
+
+src/validators/authValidator.js
+src/validators/organizacaoValidator.js
+src/validators/quadroValidator.js
+src/validators/listaValidator.js
+src/validators/cartaoValidator.js
+src/validators/campoPersonalizadoValidator.js
+src/validators/automacaoValidator.js
+
+--------------------------------------------------
+
+5.8. Jobs e eventos internos
+
+src/jobs/automacaoJob.js
+src/jobs/prazoJob.js
+
+src/events/cartaoCriadoEvent.js
+src/events/cartaoMovidoEvent.js
+src/events/prazoVencidoEvent.js
+
+--------------------------------------------------
+
+5.9. Utilitários
+
+src/utils/dateUtils.js
+src/utils/jsonFilterParser.js
+src/utils/positionUtils.js
+src/utils/hashUtils.js
+src/utils/fileUtils.js
+src/utils/paginationUtils.js
+
+==================================================
+6. BANCO / MIGRAÇÕES / SEEDS
+==================================================
+
+backend/src/database/
+├── connection.js
+├── migrations/
+│   ├── 001_create_usuarios.sql
+│   ├── 002_create_organizacoes.sql
+│   ├── 003_create_organizacao_membros.sql
+│   ├── 004_create_quadros.sql
+│   ├── 005_create_quadro_membros.sql
+│   ├── 006_create_quadro_papeis.sql
+│   ├── 007_create_quadro_membro_papeis.sql
+│   ├── 008_create_quadro_preferencias_usuario.sql
+│   ├── 009_create_listas.sql
+│   ├── 010_create_lista_preferencias_usuario.sql
+│   ├── 011_create_lista_permissoes_papel.sql
+│   ├── 012_create_lista_regras_transicao.sql
+│   ├── 013_create_visoes_quadro.sql
+│   ├── 014_create_visao_preferencias_usuario.sql
+│   ├── 015_create_tags.sql
+│   ├── 016_create_campos_personalizados.sql
+│   ├── 017_create_campo_personalizado_opcoes.sql
+│   ├── 018_create_cartoes.sql
+│   ├── 019_create_cartao_atribuicoes.sql
+│   ├── 020_create_cartao_tags.sql
+│   ├── 021_create_cartao_campo_valores.sql
+│   ├── 022_create_cartao_comentarios.sql
+│   ├── 023_create_cartao_checklists.sql
+│   ├── 024_create_cartao_checklist_itens.sql
+│   ├── 025_create_cartao_anexos.sql
+│   ├── 026_create_cartao_visualizacoes.sql
+│   ├── 027_create_cartao_eventos.sql
+│   ├── 028_create_cartao_relacoes.sql
+│   ├── 029_create_automacoes.sql
+│   ├── 030_create_automacao_acoes.sql
+│   └── 031_create_automacao_execucoes.sql
+└── seeds/
+    ├── 001_seed_usuario_admin.sql
+    ├── 002_seed_organizacao_exemplo.sql
+    ├── 003_seed_quadro_exemplo.sql
+    ├── 004_seed_papeis_padrao.sql
+    ├── 005_seed_visoes_sistema.sql
+    └── 006_seed_listas_exemplo.sql
+
+==================================================
+7. SUGESTÃO DE DISTRIBUIÇÃO REAL ENTRE 4 OU 5 PESSOAS
+==================================================
+
+Se forem 4 pessoas:
+
+Pessoa 1
+- autenticação
+- layout
+- organizações
+- quadros
+
+Pessoa 2
+- membros do quadro
+- papéis
+- listas
+- permissões
+- transições
+
+Pessoa 3
+- cartões
+- comentários
+- checklists
+- anexos
+- tags
+- histórico
+
+Pessoa 4
+- visões
+- campos personalizados
+- automações
+- relações entre cartões
+- handoff entre quadros
+
+Se forem 5 pessoas:
+
+Pessoa 1
+- autenticação
+- layout
+- rotas privadas
+
+Pessoa 2
+- organizações
+- quadros
+- membros do quadro
+- papéis
+
+Pessoa 3
+- listas
+- preferências de listas
+- permissões
+- regras de transição
+
+Pessoa 4
+- cartões
+- comentários
+- checklists
+- anexos
+- tags
+- histórico
+
+Pessoa 5
+- visões
+- campos personalizados
+- automações
+- relações entre cartões
+- integrações avançadas
+
+==================================================
+8. ORDEM PRÁTICA DE DESENVOLVIMENTO
+==================================================
+
+Sprint 1
+- autenticação
+- organizações
+- quadros
+- layout principal
+
+Sprint 2
+- listas
+- cartões básicos
+- movimentação de cartões
+- membros e papéis
+
+Sprint 3
+- permissões por lista
+- comentários
+- checklists
+- tags
+- anexos
+
+Sprint 4
+- visões
+- histórico
+- campos personalizados
+
+Sprint 5
+- automações
+- relações entre cartões
+- handoff entre quadros
+- refinamentos
+
+==================================================
+9. OBSERVAÇÃO CRÍTICA
+==================================================
+
+O maior risco do projeto não é técnico; é de acoplamento desorganizado.
+Se cada integrante “for fazendo sua parte” sem contrato claro de API, nomes de arquivos, padrão de pastas e modelo de dados congelado, vocês vão perder tempo integrando.
+
+Então, antes de começar a codar, vale definir:
+- padrão de nomes
+- rotas principais da API
+- formato de resposta JSON
+- estratégia de autenticação
+- convenção de componentes
+- convenção de commits
+- ordem de entrega por dependência
