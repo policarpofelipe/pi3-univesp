@@ -33,6 +33,12 @@ jobs:
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/public_html/pi3/
 
       # BACKEND
+            - name: Build backend
+        working-directory: backend
+        run: |
+          npm install express cors dotenv jsonwebtoken bcryptjs mysql2 multer
+          npm run build
+          
       - name: Deploy backend -> apps/pi3-api
         run: |
           rsync -az --delete \
