@@ -22,10 +22,9 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         run: |
-          npm ci
+          npm install
           npm run build
-          npm install react-router-dom axios
-
+        
       - name: Deploy frontend dist -> public_html/pi3
         run: |
           rsync -az --delete \
