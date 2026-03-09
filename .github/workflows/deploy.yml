@@ -32,23 +32,21 @@ jobs:
             frontend/dist/ \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/public_html/pi3/
 
-      # BACKEND
-            - name: Build backend
-        working-directory: backend
-        run: |
-          npm install express cors dotenv jsonwebtoken bcryptjs mysql2 multer
-          npm run build
-          
-      - name: Deploy backend -> apps/pi3-api
-        run: |
-          rsync -az --delete \
-            --exclude=node_modules --exclude=.env --exclude=.git \
-            -e "ssh -p ${{ secrets.VPS_PORT }} -o StrictHostKeyChecking=no -o BatchMode=yes" \
-            backend/ \
-            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/apps/pi3-api/
+  # BACKEND
+- name: Install backend dependencies
+  working-directory: backend
+  run: npm install
 
-      - name: Restart Passenger app
-        run: |
-          ssh -p ${{ secrets.VPS_PORT }} -o StrictHostKeyChecking=no -o BatchMode=yes \
-            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
-            "mkdir -p /home/${{ secrets.VPS_USER }}/apps/pi3-api/tmp && touch /home/${{ secrets.VPS_USER }}/apps/pi3-api/tmp/restart.txt"
+- name: Deploy backend -> apps/pi3-api
+  run: |
+    rsync -az --delete \
+      --exclude=node_modules --exclude=.env --exclude=.git \
+      -e "ssh -p ${{ secrets.VPS_PORT }} -o StrictHostKeyChecking=no -o BatchMode=yes" \
+      backend/ \
+      ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/apps/pi3-api/
+
+- name: Restart Passenger app
+  run: |
+    ssh -p ${{ secrets.VPS_PORT }} -o StrictHostKeyChecking=no -o BatchMode=yes \
+      ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+      "mkdir -p /home/${{ secrets.VPS_USER }}/apps/pi3-api/tmp && touch /home/${{ secrets.VPS_USER }}/apps/pi3-api/tmp/restart.txt"
