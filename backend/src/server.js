@@ -1,9 +1,20 @@
 require("dotenv").config();
 
 const app = require("./app");
+const env = require("./config/env");
+const { testConnection } = require("./database/connection");
 
-const PORT = process.env.PORT || 3000;
+async function startServer() {
+  try {
+    await testConnection();
 
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
-});
+    app.listen(env.port, () => {
+      console.log(`🚀 Servidor rodando na porta ${env.port}`);
+    });
+  } catch (error) {
+    console.error("❌ Erro ao iniciar o servidor:", error.message);
+    process.exit(1);
+  }
+}
+
+startServer();
