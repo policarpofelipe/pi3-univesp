@@ -2,10 +2,10 @@
   "name": "pi3-api",
   "version": "1.0.0",
   "description": "Backend do sistema de gestão de tarefas PI3",
-  "main": "src/server.js",
+  "main": "app.js",
   "scripts": {
-    "dev": "node src/server.js",
-    "start": "node src/server.js"
+    "dev": "node app.js",
+    "start": "node app.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
