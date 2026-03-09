@@ -24,6 +24,7 @@ jobs:
         run: |
           npm ci
           npm run build
+          npm install react-router-dom axios
 
       - name: Deploy frontend dist -> public_html/pi3
         run: |
