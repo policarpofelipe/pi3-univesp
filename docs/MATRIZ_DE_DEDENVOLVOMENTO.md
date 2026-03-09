@@ -572,7 +572,7 @@ src/routes/automacaoRoutes.js
 
 5.3. Controllers
 
-src/controllers/AuthController.js
+✅ src/controllers/AuthController.js - Felipe Policarpo 09/03/2026
 src/controllers/UsuarioController.js
 src/controllers/OrganizacaoController.js
 src/controllers/QuadroController.js
@@ -596,7 +596,7 @@ src/controllers/AutomacaoController.js
 
 5.4. Services
 
-src/services/AuthService.js
+✅src/services/AuthService.js - Felipe Policarpo 09/03/2026
 src/services/UsuarioService.js
 src/services/OrganizacaoService.js
 src/services/QuadroService.js
@@ -628,7 +628,7 @@ src/services/BuscaService.js
 
 5.5. Repositories
 
-src/repositories/UsuarioRepository.js
+✅src/repositories/UsuarioRepository.js - Felipe Policarpo 09/03/2026
 src/repositories/OrganizacaoRepository.js
 src/repositories/QuadroRepository.js
 src/repositories/QuadroMembroRepository.js
@@ -657,8 +657,8 @@ src/repositories/AutomacaoExecucaoRepository.js
 
 5.6. Middlewares
 
-src/middlewares/authMiddleware.js
-src/middlewares/errorMiddleware.js
+✅src/middlewares/authMiddleware.js - Felipe Policarpo 09/03/2026
+✅ src/middlewares/errorMiddleware.js - Felipe Policarpo 09/03/2026
 src/middlewares/permissionMiddleware.js
 src/middlewares/validateRequestMiddleware.js
 src/middlewares/uploadMiddleware.js
