@@ -1,118 +1,66 @@
-import { useState } from "react";
-import univespLogo from "./assets/imagens/Univesp_logo.jpg";
-import "./App.css";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
 
-export default function App() {
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [mostrarSenha, setMostrarSenha] = useState(false);
+import PrivateRoute from "./routes/PrivateRoute";
 
-  function onSubmit(e) {
-    e.preventDefault();
-    // Placeholder: aqui você vai chamar a API depois
-    alert(`Login: ${email}`);
-  }
+import LoginPage from "./pages/auth/LoginPage";
+import CadastroPage from "./pages/auth/CadastroPage";
+import EsqueciSenhaPage from "./pages/auth/EsqueciSenhaPage";
+import RedefinirSenhaPage from "./pages/auth/RedefinirSenhaPage";
 
+function HomePage() {
   return (
-    <div className="bg">
-      <div className="card" role="main" aria-label="Tela de login do PI3">
-        <header className="header">
-          <img className="logo" src={univespLogo} alt="Logo da UNIVESP" />
-          <div>
-            <h1 className="title">UNIVESP — Projeto Integrador III (PI3)</h1>
-            <p className="subtitle">Grupo 3 · 2023</p>
-          </div>
-        </header>
-
-        <section className="grid">
-          <div className="panel">
-            <h2 className="h2">Acesso</h2>
-
-            <form onSubmit={onSubmit} className="form" aria-label="Formulário de login">
-              <div className="field">
-                <label htmlFor="email" className="label">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  inputMode="email"
-                  required
-                  placeholder="seuemail@exemplo.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="input"
-                />
-              </div>
-
-              <div className="field">
-                <label htmlFor="senha" className="label">
-                  Senha
-                </label>
-                <div className="passwordRow">
-                  <input
-                    id="senha"
-                    name="senha"
-                    type={mostrarSenha ? "text" : "password"}
-                    autoComplete="current-password"
-                    required
-                    placeholder="••••••••"
-                    value={senha}
-                    onChange={(e) => setSenha(e.target.value)}
-                    className="input"
-                  />
-                  <button
-                    type="button"
-                    className="btnGhost"
-                    onClick={() => setMostrarSenha((v) => !v)}
-                    aria-pressed={mostrarSenha}
-                    aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
-                    title={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
-                  >
-                    {mostrarSenha ? "Ocultar" : "Mostrar"}
-                  </button>
-                </div>
-              </div>
-
-              <button type="submit" className="btnPrimary">
-                Entrar
-              </button>
-
-              <p className="hint" aria-live="polite">
-                Dica: este login ainda é “mock”. Depois vamos ligar na API.
-              </p>
-            </form>
-          </div>
-
-          <aside className="panel">
-            <h2 className="h2">Integrantes</h2>
-            <ol className="list" aria-label="Lista de integrantes do Grupo 3">
-              <li>Isabella Aparecida Marzola</li>
-              <li>Julio Cesar Monteiro dos Santos</li>
-              <li>Edenilson Cordeiro Joares</li>
-              <li>Ana Flavia Damasceno Silva</li>
-              <li>Diogo Katto Mimatani</li>
-              <li>Felipe Martins Policarpo</li>
-              <li>Norma Terezinha da Silva</li>
-              <li>Jair Waldo Jara Palomino</li>
-              <li>Cesar Yukio Kato</li>
-            </ol>
-
-            <div className="badge" aria-label="Contexto acadêmico">
-              <span className="badgeDot" aria-hidden="true" />
-              <span>Entrega: PI3 · Sistema de gestão de tarefas</span>
-            </div>
-          </aside>
-        </section>
-
-        <footer className="footer">
-          <span>Flivo · Ambiente PI3</span>
-          <span className="sep" aria-hidden="true">•</span>
-          <span>Acessibilidade: labels, foco visível, sem depender de cor</span>
-        </footer>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#f8fafc",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "#ffffff",
+          padding: "32px",
+          borderRadius: "16px",
+          boxShadow: "0 12px 30px rgba(0, 0, 0, 0.10)",
+          maxWidth: "600px",
+          width: "100%",
+          textAlign: "center",
+        }}
+      >
+        <h1 style={{ marginTop: 0, color: "#0f172a" }}>
+          Sistema de Gestão de Tarefas
+        </h1>
+        <p style={{ color: "#475569", lineHeight: 1.6 }}>
+          Login realizado com sucesso. Esta é a área protegida inicial do sistema.
+        </p>
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/cadastro" element={<CadastroPage />} />
+          <Route path="/esqueci-senha" element={<EsqueciSenhaPage />} />
+          <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
+
+          <Route element={<PrivateRoute />}>
+            <Route path="/home" element={<HomePage />} />
+          </Route>
+
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
