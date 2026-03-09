@@ -325,14 +325,14 @@ docs/
 
 4.1. Autenticação
 
-pages/auth/LoginPage.jsx
-pages/auth/CadastroPage.jsx
-pages/auth/EsqueciSenhaPage.jsx
-pages/auth/RedefinirSenhaPage.jsx
+pages/auth/LoginPage.jsx - Felipe Policarpo 09/03/2026
+pages/auth/CadastroPage.jsx - Felipe Policarpo 09/03/2026
+pages/auth/EsqueciSenhaPage.jsx - Felipe Policarpo 09/03/2026
+pages/auth/RedefinirSenhaPage.jsx - Felipe Policarpo 09/03/2026
 
-components/auth/LoginForm.jsx
-components/auth/CadastroForm.jsx
-components/auth/RecuperacaoSenhaForm.jsx
+components/auth/LoginForm.jsx - Felipe Policarpo 09/03/2026
+components/auth/CadastroForm.jsx - Felipe Policarpo 09/03/2026
+components/auth/RecuperacaoSenhaForm.jsx - Felipe Policarpo 09/03/2026
 
 context/AuthContext.jsx
 hooks/useAuth.js
