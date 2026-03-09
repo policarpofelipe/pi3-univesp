@@ -1,6 +1,9 @@
+const path = require("path");
 const dotenv = require("dotenv");
 
-dotenv.config();
+dotenv.config({
+  path: path.resolve(__dirname, "../../.env"),
+});
 
 function getEnv(name, defaultValue = undefined) {
   const value = process.env[name];
@@ -18,21 +21,20 @@ function getEnv(name, defaultValue = undefined) {
 
 const env = {
   nodeEnv: getEnv("NODE_ENV", "development"),
+  port: parseInt(getEnv("PORT", "3001"), 10),
 
-  port: parseInt(getEnv("PORT", "3000"), 10),
-
-  jwtSecret: getEnv("JWT_SECRET", "dev_secret_change_in_production"),
+  jwtSecret: getEnv("JWT_SECRET"),
   jwtExpiresIn: getEnv("JWT_EXPIRES_IN", "1d"),
+
+  corsOrigin: getEnv("CORS_ORIGIN", "*"),
 
   database: {
     host: getEnv("DB_HOST", "localhost"),
     port: parseInt(getEnv("DB_PORT", "3306"), 10),
-    name: getEnv("DB_NAME", "sgt_db"),
-    user: getEnv("DB_USER", "root"),
-    password: getEnv("DB_PASSWORD", ""),
+    name: getEnv("DB_NAME"),
+    user: getEnv("DB_USER"),
+    password: getEnv("DB_PASSWORD"),
   },
-
-  corsOrigin: getEnv("CORS_ORIGIN", "*"),
 
   upload: {
     directory: getEnv("UPLOAD_DIR", "uploads"),
