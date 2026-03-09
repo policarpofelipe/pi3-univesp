@@ -325,19 +325,19 @@ docs/
 
 4.1. Autenticação
 
-pages/auth/LoginPage.jsx - Felipe Policarpo 09/03/2026
-pages/auth/CadastroPage.jsx - Felipe Policarpo 09/03/2026
-pages/auth/EsqueciSenhaPage.jsx - Felipe Policarpo 09/03/2026
-pages/auth/RedefinirSenhaPage.jsx - Felipe Policarpo 09/03/2026
+✅pages/auth/LoginPage.jsx - Felipe Policarpo 09/03/2026
+✅pages/auth/CadastroPage.jsx - Felipe Policarpo 09/03/2026
+✅pages/auth/EsqueciSenhaPage.jsx - Felipe Policarpo 09/03/2026
+✅pages/auth/RedefinirSenhaPage.jsx - Felipe Policarpo 09/03/2026
 
-components/auth/LoginForm.jsx - Felipe Policarpo 09/03/2026
-components/auth/CadastroForm.jsx - Felipe Policarpo 09/03/2026
-components/auth/RecuperacaoSenhaForm.jsx - Felipe Policarpo 09/03/2026
+✅components/auth/LoginForm.jsx - Felipe Policarpo 09/03/2026
+✅components/auth/CadastroForm.jsx - Felipe Policarpo 09/03/2026
+✅components/auth/RecuperacaoSenhaForm.jsx - Felipe Policarpo 09/03/2026
 
-context/AuthContext.jsx
-hooks/useAuth.js
-services/authService.js
-routes/PrivateRoute.jsx
+✅context/AuthContext.jsx - Felipe Policarpo 09/03/2026
+✅hooks/useAuth.js - Felipe Policarpo 09/03/2026
+✅services/authService.js - Felipe Policarpo 09/03/2026
+✅routes/PrivateRoute.jsx - Felipe Policarpo 09/03/2026
 
 --------------------------------------------------
 
@@ -538,18 +538,18 @@ constants/tiposEvento.js
 
 5.1. Configuração e bootstrap
 
-src/app.js
-src/server.js
-src/config/env.js
-src/config/jwt.js
-src/config/upload.js
+✅src/app.js - Felipe Policarpo 09/03/2026
+✅src/server.js - Felipe Policarpo 09/03/2026
+✅src/config/env.js - Felipe Policarpo 09/03/2026
+✅src/config/jwt.js - Felipe Policarpo 09/03/2026
+✅src/config/upload.js - Felipe Policarpo 09/03/2026
 
 --------------------------------------------------
 
 5.2. Rotas
 
-src/routes/authRoutes.js
-src/routes/usuarioRoutes.js
+✅src/routes/authRoutes.js - Felipe Policarpo 09/03/2026
+✅src/routes/usuarioRoutes.js - Felipe Policarpo 09/03/2026
 src/routes/organizacaoRoutes.js
 src/routes/quadroRoutes.js
 src/routes/quadroMembroRoutes.js
