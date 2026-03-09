@@ -7,6 +7,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -19,17 +20,12 @@ jobs:
           ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
       # FRONTEND
-      - name: Build frontend
+      - name: Install and build frontend
         working-directory: frontend
         run: |
           npm install
           npm run build
-      - name: Build backend
-        working-directory: backend
-        run: |
-          npm install
-          npm run build
-        
+
       - name: Deploy frontend dist -> public_html/pi3
         run: |
           rsync -az --delete \
@@ -38,6 +34,11 @@ jobs:
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/public_html/pi3/
 
       # BACKEND
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          npm install
+
       - name: Deploy backend -> apps/pi3-api
         run: |
           rsync -az --delete \
