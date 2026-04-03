@@ -367,17 +367,17 @@ docs/
 
 4.3. Organizações
 
-pages/organizacoes/OrganizacoesPage.jsx
-pages/organizacoes/OrganizacaoDetalhePage.jsx
-pages/organizacoes/OrganizacaoMembrosPage.jsx
-pages/organizacoes/OrganizacaoConfiguracoesPage.jsx
+✅pages/organizacoes/OrganizacoesPage.jsx
+✅pages/organizacoes/OrganizacaoDetalhePage.jsx
+✅pages/organizacoes/OrganizacaoMembrosPage.jsx
+✅pages/organizacoes/OrganizacaoConfiguracoesPage.jsx
 
-components/organizacoes/OrganizacaoCard.jsx
-components/organizacoes/OrganizacaoForm.jsx
-components/organizacoes/MembroOrganizacaoTable.jsx
-components/organizacoes/ConviteMembroForm.jsx
+✅components/organizacoes/OrganizacaoCard.jsx
+✅components/organizacoes/OrganizacaoForm.jsx
+✅components/organizacoes/MembroOrganizacaoTable.jsx
+✅components/organizacoes/ConviteMembroForm.jsx
 
-services/organizacaoService.js
+✅services/organizacaoService.js
 
 --------------------------------------------------
 
