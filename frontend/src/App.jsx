@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 
 import PrivateRoute from "./routes/PrivateRoute";
@@ -44,23 +44,21 @@ function HomePage() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/cadastro" element={<CadastroPage />} />
-          <Route path="/esqueci-senha" element={<EsqueciSenhaPage />} />
-          <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/cadastro" element={<CadastroPage />} />
+        <Route path="/esqueci-senha" element={<EsqueciSenhaPage />} />
+        <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
 
-          <Route element={<PrivateRoute />}>
-            <Route path="/home" element={<HomePage />} />
-          </Route>
+        <Route element={<PrivateRoute />}>
+          <Route path="/home" element={<HomePage />} />
+        </Route>
 
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </AuthProvider>
   );
 }
