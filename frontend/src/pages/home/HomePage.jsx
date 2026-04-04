@@ -1,7 +1,7 @@
-import AppLayout from "../components/layout/AppLayout";
-import PageHeader from "../components/ui/PageHeader";
-import EmptyState from "../components/ui/EmptyState";
-import Button from "../components/ui/Button";
+import AppLayout from "../../components/layout/AppLayout";
+import PageHeader from "../../components/ui/PageHeader";
+import EmptyState from "../../components/ui/EmptyState";
+import Button from "../../components/ui/Button";
 import {
   LayoutDashboard,
   Plus,
@@ -23,8 +23,18 @@ const sidebarGroups = [
     label: "Estrutura",
     sectionLabel: "Workspace",
     items: [
-      { key: "organizacoes", label: "Organizações", href: "/organizacoes", icon: Building2 },
-      { key: "quadros", label: "Quadros", href: "/quadros", icon: KanbanSquare },
+      {
+        key: "organizacoes",
+        label: "Organizações",
+        href: "/organizacoes",
+        icon: Building2,
+      },
+      {
+        key: "quadros",
+        label: "Quadros",
+        href: "/quadros",
+        icon: KanbanSquare,
+      },
     ],
   },
   {
@@ -32,8 +42,18 @@ const sidebarGroups = [
     label: "Gestão",
     sectionLabel: "Operacional",
     items: [
-      { key: "listas", label: "Listas", href: "/listas", icon: ListTodo },
-      { key: "cartoes", label: "Cartões", href: "/cartoes", icon: CheckSquare },
+      {
+        key: "listas",
+        label: "Listas",
+        href: "/listas",
+        icon: ListTodo,
+      },
+      {
+        key: "cartoes",
+        label: "Cartões",
+        href: "/cartoes",
+        icon: CheckSquare,
+      },
     ],
   },
 ];
@@ -87,7 +107,7 @@ export default function HomePage() {
       <div className="home-page">
         <PageHeader
           title="Dashboard"
-          description="Acompanhe organizações, quadros e estrutura inicial do sistema de gestão de tarefas."
+          description="Acompanhe organizações, quadros e a estrutura inicial do sistema de gestão de tarefas."
           actions={
             <Button
               variant="primary"
@@ -98,7 +118,10 @@ export default function HomePage() {
           }
         />
 
-        <section className="home-page__hero" aria-label="Resumo da área inicial">
+        <section
+          className="home-page__hero"
+          aria-label="Resumo inicial da plataforma"
+        >
           <div className="home-page__hero-content">
             <div className="home-page__hero-badge">
               <LayoutDashboard size={16} aria-hidden="true" />
@@ -110,9 +133,9 @@ export default function HomePage() {
             </h2>
 
             <p className="home-page__hero-description">
-              Este painel centraliza os pontos de entrada da aplicação. A partir daqui,
-              o usuário deve conseguir localizar organizações, acessar quadros e iniciar
-              o fluxo principal de trabalho com clareza.
+              Este painel concentra os pontos de entrada da aplicação. A partir
+              daqui, o usuário deve conseguir localizar organizações, acessar
+              quadros e iniciar o fluxo principal de trabalho com clareza.
             </p>
           </div>
 
@@ -127,7 +150,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="home-page__stats" aria-label="Indicadores gerais">
+        <section
+          className="home-page__stats"
+          aria-label="Indicadores gerais"
+        >
           {stats.map((item) => {
             const Icon = item.icon;
 
@@ -147,7 +173,10 @@ export default function HomePage() {
           })}
         </section>
 
-        <section className="home-page__content-grid" aria-label="Conteúdo principal">
+        <section
+          className="home-page__content-grid"
+          aria-label="Conteúdo principal"
+        >
           <div className="home-page__panel home-page__panel--main">
             <EmptyState
               icon={<KanbanSquare size={32} />}
@@ -198,9 +227,9 @@ export default function HomePage() {
             <div className="home-page__section">
               <h3 className="home-page__section-title">Observação</h3>
               <p className="home-page__note">
-                Esta home ainda está em estado inicial. O papel dela, por enquanto,
-                é validar layout, navegação, consistência visual e composição dos
-                componentes reutilizáveis.
+                Esta home ainda está em estado inicial. O papel dela, por
+                enquanto, é validar layout, navegação, consistência visual e
+                composição dos componentes reutilizáveis.
               </p>
             </div>
           </aside>
