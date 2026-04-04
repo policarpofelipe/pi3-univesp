@@ -7,7 +7,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import CadastroPage from "./pages/auth/CadastroPage";
 import EsqueciSenhaPage from "./pages/auth/EsqueciSenhaPage";
 import RedefinirSenhaPage from "./pages/auth/RedefinirSenhaPage";
-import HomePage from "./pages/HomePage";
+import HomePage from "./pages/home/HomePage";
 
 export default function App() {
   return (
