@@ -23,7 +23,7 @@ jobs:
       - name: Install and build frontend
         working-directory: frontend
         run: |
-          npm install
+          npm install lucide-react
           npm run build
 
       - name: Deploy frontend dist -> public_html/pi3
