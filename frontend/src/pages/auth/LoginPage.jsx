@@ -1,6 +1,7 @@
+// LoginPage.jsx - Versão melhorada
 import { useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, LogIn, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, LogIn, ShieldCheck, Mail, Lock } from "lucide-react";
 
 import useAuth from "../../hooks/useAuth";
 import Button from "../../components/ui/Button";
@@ -19,6 +20,8 @@ function validateLoginForm({ email, senha }) {
 
   if (!senha) {
     errors.senha = "A senha é obrigatória.";
+  } else if (senha.length < 6) {
+    errors.senha = "A senha deve ter pelo menos 6 caracteres.";
   }
 
   return errors;
@@ -44,12 +47,17 @@ export default function LoginPage() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (erro) setErro("");
+    // Limpa erro do campo específico quando o usuário começa a digitar
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   }
 
   function handleBlur(e) {
     const { name } = e.target;
     setTouched((prev) => ({ ...prev, [name]: true }));
-    setFieldErrors(validateLoginForm(formData));
+    const errors = validateLoginForm(formData);
+    setFieldErrors(errors);
   }
 
   async function handleSubmit(e) {
@@ -72,7 +80,7 @@ export default function LoginPage() {
       setErro(
         err?.response?.data?.message ||
           err?.message ||
-          "Erro ao autenticar."
+          "Erro ao autenticar. Verifique suas credenciais."
       );
     } finally {
       setCarregando(false);
@@ -82,7 +90,6 @@ export default function LoginPage() {
   return (
     <div className="login">
       <main className="login__container">
-        {/* LADO INSTITUCIONAL */}
         <section className="login__hero">
           <div className="login__hero-content">
             <div className="login__brand">
@@ -94,7 +101,7 @@ export default function LoginPage() {
             </div>
 
             <div className="login__hero-text">
-              <h2>Gestão de tarefas com estrutura e clareza</h2>
+              <h2>Gestão de tarefas<br />com estrutura e clareza</h2>
               <p>
                 Organize quadros, listas e cartões com controle de acesso,
                 consistência visual e arquitetura preparada para evolução.
@@ -103,12 +110,11 @@ export default function LoginPage() {
           </div>
         </section>
 
-        {/* FORM */}
         <section className="login__form">
           <div className="login__card">
             <header>
-              <h2>Entrar</h2>
-              <p>Acesse suas organizações e quadros.</p>
+              <h2>Bem-vindo 👋</h2>
+              <p>Entre com suas credenciais para continuar</p>
             </header>
 
             <form onSubmit={handleSubmit}>
@@ -121,6 +127,8 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={handleChange}
                   onBlur={handleBlur}
+                  autoComplete="email"
+                  autoFocus
                 />
                 {touched.email && fieldErrors.email && (
                   <span className="error">{fieldErrors.email}</span>
@@ -130,7 +138,7 @@ export default function LoginPage() {
               <div className="login__field">
                 <div className="login__field-row">
                   <label>Senha</label>
-                  <Link to="/esqueci-senha">Esqueci</Link>
+                  <Link to="/esqueci-senha">Esqueceu a senha?</Link>
                 </div>
 
                 <div className="login__password">
@@ -141,6 +149,7 @@ export default function LoginPage() {
                     value={formData.senha}
                     onChange={handleChange}
                     onBlur={handleBlur}
+                    autoComplete="current-password"
                   />
 
                   <IconButton
@@ -153,6 +162,7 @@ export default function LoginPage() {
                         <Eye size={18} />
                       )
                     }
+                    aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
                   />
                 </div>
 
@@ -175,7 +185,7 @@ export default function LoginPage() {
 
             <footer>
               <span>
-                Não tem conta? <Link to="/cadastro">Criar conta</Link>
+                Ainda não tem uma conta? <Link to="/cadastro">Criar conta gratuita</Link>
               </span>
             </footer>
           </div>
