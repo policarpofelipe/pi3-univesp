@@ -298,7 +298,6 @@ export default function LoginPage() {
                 {carregando ? "Entrando..." : "Entrar"}
               </Button>
             </form>
-
             <footer className="login-card__footer">
               <p className="login-card__footer-text">
                 Ainda não tem conta?{" "}
