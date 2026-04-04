@@ -14,10 +14,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
-          cache-dependency-path: |
-            frontend/package-lock.json
-            backend/package-lock.json
 
       - uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -27,7 +23,7 @@ jobs:
       - name: Install and build frontend
         working-directory: frontend
         run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Deploy frontend dist -> public_html/pi3
@@ -41,7 +37,7 @@ jobs:
       - name: Install backend dependencies
         working-directory: backend
         run: |
-          npm ci
+          npm install
 
       - name: Deploy backend -> apps/pi3-api
         run: |
