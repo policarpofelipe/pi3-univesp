@@ -59,7 +59,12 @@ export default function LoginPage() {
     const { name } = event.target;
     const nextTouched = { ...touched, [name]: true };
     setTouched(nextTouched);
-    setFieldErrors(validateLoginForm(formData));
+    setFieldErrors(
+      validateLoginForm({
+        ...formData,
+        [name]: formData[name],
+      })
+    );
   }
 
   async function handleSubmit(event) {
@@ -105,7 +110,7 @@ export default function LoginPage() {
       <main id="login-main" className="login-layout">
         <section
           className="login-hero"
-          aria-label="Informações sobre a plataforma"
+          aria-label="Apresentação institucional do sistema"
         >
           <div className="login-hero__overlay" />
 
@@ -116,10 +121,8 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <p className="login-hero__brand-title">PI3 Tasks</p>
-                <p className="login-hero__brand-subtitle">
-                  Gestão de tarefas, quadros e organizações
-                </p>
+                <p className="login-hero__brand-title">Projeto Integrador 3</p>
+                <p className="login-hero__brand-subtitle">UNIVESP 2026</p>
               </div>
             </div>
 
@@ -127,12 +130,13 @@ export default function LoginPage() {
               <p className="login-hero__eyebrow">Acesso seguro</p>
 
               <h1 className="login-hero__title">
-                Entre no sistema e continue seu trabalho com contexto, clareza e controle.
+                Entre no sistema com organização, clareza e controle.
               </h1>
 
               <p className="login-hero__description">
-                Acesse suas organizações, selecione quadros e mantenha uma navegação consistente,
-                com suporte a contraste elevado e ajuste de tipografia.
+                Acesse suas organizações, quadros e recursos do sistema com uma
+                navegação consistente, suporte a acessibilidade visual e estrutura
+                preparada para evolução modular.
               </p>
             </div>
 
@@ -147,14 +151,14 @@ export default function LoginPage() {
               <article className="login-hero__feature">
                 <h2 className="login-hero__feature-title">Acessibilidade</h2>
                 <p className="login-hero__feature-text">
-                  Suporte a alto contraste e escala global de fonte.
+                  Suporte a contraste elevado e ajuste global de fonte.
                 </p>
               </article>
 
               <article className="login-hero__feature">
-                <h2 className="login-hero__feature-title">Navegação</h2>
+                <h2 className="login-hero__feature-title">Estrutura</h2>
                 <p className="login-hero__feature-text">
-                  Entrada orientada por organização e quadro ativo.
+                  Base organizada para páginas, quadros, listas e cartões.
                 </p>
               </article>
             </div>
@@ -162,150 +166,164 @@ export default function LoginPage() {
         </section>
 
         <section className="login-form-section">
-          <div className="login-mobile-brand">
-            <div className="login-mobile-brand__icon" aria-hidden="true">
-              <ShieldCheck size={22} />
-            </div>
-
-            <div>
-              <p className="login-mobile-brand__title">PI3 Tasks</p>
-              <p className="login-mobile-brand__subtitle">Acesso à plataforma</p>
-            </div>
-          </div>
-
-          <div className="login-card">
-            <header className="login-card__header">
-              <h2 className="login-card__title">Entrar no sistema</h2>
-              <p className="login-card__subtitle">
-                Faça login para acessar suas organizações e quadros.
-              </p>
-            </header>
-
-            <form onSubmit={handleSubmit} noValidate className="login-form">
-              <div className="form-field">
-                <label htmlFor="email" className="form-field__label">
-                  E-mail
-                </label>
-
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="seuemail@exemplo.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  autoComplete="email"
-                  disabled={carregando}
-                  aria-invalid={Boolean(touched.email && fieldErrors.email)}
-                  aria-describedby={
-                    touched.email && fieldErrors.email
-                      ? "login-email-erro"
-                      : "login-email-ajuda"
-                  }
-                  className="form-field__input"
-                />
-
-                {touched.email && fieldErrors.email ? (
-                  <p
-                    id="login-email-erro"
-                    className="form-field__message form-field__message--error"
-                    role="alert"
-                  >
-                    {fieldErrors.email}
-                  </p>
-                ) : (
-                  <p
-                    id="login-email-ajuda"
-                    className="form-field__message form-field__message--hint"
-                  >
-                    Use o e-mail vinculado à sua conta.
-                  </p>
-                )}
+          <div className="login-form-shell">
+            <div className="login-mobile-brand">
+              <div className="login-mobile-brand__icon" aria-hidden="true">
+                <ShieldCheck size={22} />
               </div>
 
-              <div className="form-field">
-                <div className="form-field__label-row">
-                  <label htmlFor="senha" className="form-field__label">
-                    Senha
+              <div>
+                <p className="login-mobile-brand__title">Projeto Integrador 3</p>
+                <p className="login-mobile-brand__subtitle">UNIVESP 2026</p>
+              </div>
+            </div>
+
+            <div className="login-card">
+              <header className="login-card__header">
+                <h2 className="login-card__title">Entrar no sistema</h2>
+                <p className="login-card__subtitle">
+                  Faça login para acessar suas organizações e quadros.
+                </p>
+              </header>
+
+              <form onSubmit={handleSubmit} noValidate className="login-form">
+                <div className="form-field">
+                  <label htmlFor="email" className="form-field__label">
+                    E-mail
                   </label>
 
-                  <Link to="/esqueci-senha" className="login-link login-link--small">
-                    Esqueci minha senha
-                  </Link>
-                </div>
-
-                <div className="password-field">
                   <input
-                    id="senha"
-                    name="senha"
-                    type={mostrarSenha ? "text" : "password"}
-                    placeholder="Digite sua senha"
-                    value={formData.senha}
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="seuemail@exemplo.com"
+                    value={formData.email}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    autoComplete="current-password"
+                    autoComplete="email"
                     disabled={carregando}
-                    aria-invalid={Boolean(touched.senha && fieldErrors.senha)}
+                    aria-invalid={Boolean(touched.email && fieldErrors.email)}
                     aria-describedby={
-                      touched.senha && fieldErrors.senha
-                        ? "login-senha-erro"
-                        : undefined
+                      touched.email && fieldErrors.email
+                        ? "login-email-erro"
+                        : "login-email-ajuda"
                     }
-                    className="form-field__input password-field__input"
+                    className="form-field__input"
                   />
 
-                  <div className="password-field__action">
-                    <IconButton
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      icon={
-                        mostrarSenha ? <EyeOff size={18} /> : <Eye size={18} />
-                      }
-                      label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
-                      onClick={() => setMostrarSenha((prev) => !prev)}
-                      disabled={carregando}
-                    />
+                  {touched.email && fieldErrors.email ? (
+                    <p
+                      id="login-email-erro"
+                      className="form-field__message form-field__message--error"
+                      role="alert"
+                    >
+                      {fieldErrors.email}
+                    </p>
+                  ) : (
+                    <p
+                      id="login-email-ajuda"
+                      className="form-field__message form-field__message--hint"
+                    >
+                      Use o e-mail vinculado à sua conta.
+                    </p>
+                  )}
+                </div>
+
+                <div className="form-field">
+                  <div className="form-field__label-row">
+                    <label htmlFor="senha" className="form-field__label">
+                      Senha
+                    </label>
+
+                    <Link
+                      to="/esqueci-senha"
+                      className="login-link login-link--small"
+                    >
+                      Esqueci minha senha
+                    </Link>
                   </div>
+
+                  <div className="password-field">
+                    <input
+                      id="senha"
+                      name="senha"
+                      type={mostrarSenha ? "text" : "password"}
+                      placeholder="Digite sua senha"
+                      value={formData.senha}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      autoComplete="current-password"
+                      disabled={carregando}
+                      aria-invalid={Boolean(touched.senha && fieldErrors.senha)}
+                      aria-describedby={
+                        touched.senha && fieldErrors.senha
+                          ? "login-senha-erro"
+                          : undefined
+                      }
+                      className="form-field__input password-field__input"
+                    />
+
+                    <div className="password-field__action">
+                      <IconButton
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        icon={
+                          mostrarSenha ? (
+                            <EyeOff size={18} />
+                          ) : (
+                            <Eye size={18} />
+                          )
+                        }
+                        label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                        onClick={() => setMostrarSenha((prev) => !prev)}
+                        disabled={carregando}
+                      />
+                    </div>
+                  </div>
+
+                  {touched.senha && fieldErrors.senha ? (
+                    <p
+                      id="login-senha-erro"
+                      className="form-field__message form-field__message--error"
+                      role="alert"
+                    >
+                      {fieldErrors.senha}
+                    </p>
+                  ) : null}
                 </div>
 
-                {touched.senha && fieldErrors.senha ? (
-                  <p
-                    id="login-senha-erro"
-                    className="form-field__message form-field__message--error"
+                {erro ? (
+                  <div
+                    className="login-alert login-alert--error"
                     role="alert"
+                    aria-live="assertive"
                   >
-                    {fieldErrors.senha}
-                  </p>
+                    {erro}
+                  </div>
                 ) : null}
-              </div>
 
-              {erro ? (
-                <div className="login-alert login-alert--error" role="alert" aria-live="assertive">
-                  {erro}
-                </div>
-              ) : null}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  loading={carregando}
+                  leftIcon={!carregando ? <LogIn size={18} /> : null}
+                >
+                  {carregando ? "Entrando..." : "Entrar"}
+                </Button>
+              </form>
 
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                fullWidth
-                loading={carregando}
-                leftIcon={!carregando ? <LogIn size={18} /> : null}
-              >
-                {carregando ? "Entrando..." : "Entrar"}
-              </Button>
-            </form>
-            <footer className="login-card__footer">
-              <p className="login-card__footer-text">
-                Ainda não tem conta?{" "}
-                <Link to="/cadastro" className="login-link">
-                  Criar conta
-                </Link>
-              </p>
-            </footer>
+              <footer className="login-card__footer">
+                <p className="login-card__footer-text">
+                  Ainda não tem conta?{" "}
+                  <Link to="/cadastro" className="login-link">
+                    Criar conta
+                  </Link>
+                </p>
+              </footer>
+            </div>
           </div>
         </section>
       </main>
