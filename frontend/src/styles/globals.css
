@@ -5,7 +5,7 @@
    - tipografia
    - superfícies
    - foco visível
-   - acessibilidade.
+   - acessibilidade
    ========================================================= */
 
 @import "./tokens.css";
