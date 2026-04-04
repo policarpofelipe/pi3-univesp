@@ -1,0 +1,68 @@
+import React from "react";
+import clsx from "clsx";
+
+export default function EmptyState({
+  title,
+  description = null,
+  icon = null,
+  action = null,
+  secondaryAction = null,
+  compact = false,
+  className = "",
+}) {
+  if (!title || typeof title !== "string") {
+    throw new Error("EmptyState requires a non-empty 'title' prop.");
+  }
+
+  return (
+    <section
+      className={clsx(
+        "w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-center",
+        compact ? "px-4 py-6" : "px-6 py-10 md:px-8 md:py-12",
+        className
+      )}
+      aria-live="polite"
+    >
+      <div className="mx-auto flex max-w-2xl flex-col items-center">
+        {icon ? (
+          <div
+            className={clsx(
+              "mb-4 flex items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface-alt)] text-[var(--color-text-muted)]",
+              compact ? "h-12 w-12" : "h-16 w-16"
+            )}
+            aria-hidden="true"
+          >
+            {icon}
+          </div>
+        ) : null}
+
+        <h2
+          className={clsx(
+            "font-semibold tracking-tight text-[var(--color-text)]",
+            compact ? "text-[var(--font-size-lg)]" : "text-[var(--font-size-heading-2)]"
+          )}
+        >
+          {title}
+        </h2>
+
+        {description ? (
+          <p
+            className={clsx(
+              "mt-2 max-w-xl leading-6 text-[var(--color-text-muted)]",
+              compact ? "text-[var(--font-size-sm)]" : "text-[var(--font-size-md)]"
+            )}
+          >
+            {description}
+          </p>
+        ) : null}
+
+        {(action || secondaryAction) ? (
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+            {action}
+            {secondaryAction}
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
