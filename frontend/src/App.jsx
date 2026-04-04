@@ -23,7 +23,6 @@ export default function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/home" element={<HomePage />} />
         </Route>
-
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </AuthProvider>
