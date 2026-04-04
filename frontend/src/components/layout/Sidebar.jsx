@@ -4,42 +4,12 @@ import {
   ChevronDown,
   ChevronRight,
   LayoutDashboard,
-  Building2,
-  KanbanSquare,
-  Users,
   Settings,
   Briefcase,
   ListTodo,
 } from "lucide-react";
 
-/*
-Contrato sugerido:
-- items: navegação simples
-- groups: navegação agrupada
-- collapsed: controla sidebar recolhida
-- onToggleCollapse: alterna estado externo
-- currentPath: rota atual para item ativo
-- brand: título curto do sistema
-- footer: conteúdo opcional no rodapé
-
-Exemplo de items:
-[
-  { key: "home", label: "Início", href: "/home", icon: LayoutDashboard }
-]
-
-Exemplo de groups:
-[
-  {
-    key: "workspace",
-    label: "Workspace",
-    icon: Briefcase,
-    items: [
-      { key: "orgs", label: "Organizações", href: "/organizacoes", icon: Building2 },
-      { key: "boards", label: "Quadros", href: "/quadros", icon: KanbanSquare }
-    ]
-  }
-]
-*/
+import "../../styles/components/sidebar.css";
 
 function isItemActive(item, currentPath) {
   if (!item?.href || !currentPath) return false;
@@ -56,6 +26,7 @@ function SidebarLink({
   item,
   collapsed = false,
   active = false,
+  nested = false,
 }) {
   const Icon = item.icon || ListTodo;
 
@@ -65,20 +36,18 @@ function SidebarLink({
       aria-current={active ? "page" : undefined}
       title={collapsed ? item.label : undefined}
       className={clsx(
-        "group flex w-full items-center rounded-lg border transition-all duration-150",
-        "min-h-[44px]",
-        collapsed ? "justify-center px-2" : "justify-start px-3 py-2",
-        active
-          ? "border-[var(--color-sidebar-border)] bg-[var(--color-sidebar-active-bg)] text-[var(--color-sidebar-active-text)]"
-          : "border-transparent text-[var(--color-sidebar-text)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-sidebar-active-text)]"
+        "sidebar__link",
+        collapsed && "sidebar__link--collapsed",
+        active && "sidebar__link--active",
+        nested && "sidebar__link--nested"
       )}
     >
-      <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center" aria-hidden="true">
-        <Icon className="h-5 w-5" />
+      <span className="sidebar__link-icon" aria-hidden="true">
+        <Icon size={18} />
       </span>
 
       {!collapsed && (
-        <span className="ml-3 truncate text-[var(--font-size-sm)] font-medium">
+        <span className="sidebar__link-label">
           {item.label}
         </span>
       )}
@@ -98,45 +67,46 @@ function SidebarGroup({
   const activeGroup = isGroupActive(group, currentPath);
 
   return (
-    <div className="w-full">
+    <div className="sidebar__group">
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         title={collapsed ? group.label : undefined}
         className={clsx(
-          "group flex w-full items-center rounded-lg border transition-all duration-150",
-          "min-h-[44px]",
-          collapsed ? "justify-center px-2" : "justify-start px-3 py-2",
-          activeGroup
-            ? "border-[var(--color-sidebar-border)] bg-[var(--color-sidebar-active-bg)] text-[var(--color-sidebar-active-text)]"
-            : "border-transparent text-[var(--color-sidebar-text)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-sidebar-active-text)]"
+          "sidebar__group-trigger",
+          collapsed && "sidebar__group-trigger--collapsed",
+          activeGroup && "sidebar__group-trigger--active"
         )}
       >
-        <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center" aria-hidden="true">
-          <Icon className="h-5 w-5" />
+        <span className="sidebar__group-icon" aria-hidden="true">
+          <Icon size={18} />
         </span>
 
         {!collapsed && (
           <>
-            <span className="ml-3 truncate text-left text-[var(--font-size-sm)] font-medium">
-              {group.label}
-            </span>
-            <span className="ml-auto flex items-center justify-center" aria-hidden="true">
-              {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            <span className="sidebar__group-label">{group.label}</span>
+            <span className="sidebar__group-chevron" aria-hidden="true">
+              {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
             </span>
           </>
         )}
       </button>
 
       {open && (
-        <div className={clsx("mt-1 space-y-1", collapsed ? "pl-0" : "pl-4")}>
+        <div
+          className={clsx(
+            "sidebar__group-content",
+            collapsed && "sidebar__group-content--collapsed"
+          )}
+        >
           {group.items?.map((item) => (
             <SidebarLink
               key={item.key}
               item={item}
               collapsed={collapsed}
               active={isItemActive(item, currentPath)}
+              nested={!collapsed}
             />
           ))}
         </div>
@@ -154,76 +124,64 @@ export default function Sidebar({
   footer = null,
   className = "",
 }) {
-  const normalizedItems = useMemo(() => (Array.isArray(items) ? items : []), [items]);
-  const normalizedGroups = useMemo(() => (Array.isArray(groups) ? groups : []), [groups]);
+  const normalizedItems = useMemo(
+    () => (Array.isArray(items) ? items : []),
+    [items]
+  );
+
+  const normalizedGroups = useMemo(
+    () => (Array.isArray(groups) ? groups : []),
+    [groups]
+  );
 
   return (
     <aside
       className={clsx(
-        "hidden md:flex h-screen flex-col border-r bg-[var(--color-sidebar-bg)]",
-        "border-[var(--color-sidebar-border)] text-[var(--color-sidebar-text)]",
-        "transition-[width] duration-200 overflow-x-hidden",
-        collapsed ? "w-[var(--sidebar-width-collapsed)]" : "w-[var(--sidebar-width-open)]",
+        "sidebar",
+        collapsed && "sidebar--collapsed",
         className
       )}
       aria-label="Barra lateral de navegação"
     >
-      <div
-        className={clsx(
-          "flex min-h-[72px] items-center border-b border-[var(--color-sidebar-border)]",
-          collapsed ? "justify-center px-2" : "px-4"
-        )}
-      >
-        <div className="flex items-center min-w-0">
-          <span
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-[var(--color-sidebar-border)] bg-[var(--color-sidebar-surface)]"
-            aria-hidden="true"
-          >
-            <LayoutDashboard className="h-5 w-5" />
+      <div className="sidebar__header">
+        <div className="sidebar__brand">
+          <span className="sidebar__brand-icon" aria-hidden="true">
+            <LayoutDashboard size={18} />
           </span>
 
           {!collapsed && (
-            <div className="ml-3 min-w-0">
-              <p className="truncate text-[var(--font-size-md)] font-semibold text-[var(--color-sidebar-active-text)]">
-                {brand}
-              </p>
-              <p className="text-[var(--font-size-xs)] text-[var(--color-sidebar-text-muted)]">
-                Navegação principal
-              </p>
+            <div className="sidebar__brand-text">
+              <p className="sidebar__brand-title">{brand}</p>
+              <p className="sidebar__brand-subtitle">Navegação principal</p>
             </div>
           )}
         </div>
       </div>
 
-      <nav
-        className="flex-1 space-y-4 overflow-y-auto px-3 py-3"
-        aria-label="Navegação principal"
-      >
+      <nav className="sidebar__nav" aria-label="Navegação principal">
         {normalizedItems.length > 0 && (
-          <div className="space-y-1">
+          <div className="sidebar__section">
             {!collapsed && (
-              <p className="px-2 text-[var(--font-size-xs)] font-semibold uppercase tracking-wide text-[var(--color-sidebar-text-muted)]">
-                Geral
-              </p>
+              <p className="sidebar__section-label">Geral</p>
             )}
 
-            {normalizedItems.map((item) => (
-              <SidebarLink
-                key={item.key}
-                item={item}
-                collapsed={collapsed}
-                active={isItemActive(item, currentPath)}
-              />
-            ))}
+            <div className="sidebar__section-links">
+              {normalizedItems.map((item) => (
+                <SidebarLink
+                  key={item.key}
+                  item={item}
+                  collapsed={collapsed}
+                  active={isItemActive(item, currentPath)}
+                />
+              ))}
+            </div>
           </div>
         )}
 
         {normalizedGroups.map((group) => (
-          <div key={group.key} className="space-y-1">
+          <div key={group.key} className="sidebar__section">
             {!collapsed && group.sectionLabel && (
-              <p className="px-2 text-[var(--font-size-xs)] font-semibold uppercase tracking-wide text-[var(--color-sidebar-text-muted)]">
-                {group.sectionLabel}
-              </p>
+              <p className="sidebar__section-label">{group.sectionLabel}</p>
             )}
 
             <SidebarGroup
@@ -236,24 +194,22 @@ export default function Sidebar({
         ))}
       </nav>
 
-      <div className="border-t border-[var(--color-sidebar-border)] p-3">
+      <div className="sidebar__footer">
         {footer ? (
           footer
         ) : (
           <div
             className={clsx(
-              "rounded-lg border border-[var(--color-sidebar-border)] bg-[var(--color-sidebar-surface)]",
-              collapsed ? "px-2 py-3 text-center" : "px-3 py-3"
+              "sidebar__preferences",
+              collapsed && "sidebar__preferences--collapsed"
             )}
           >
             {collapsed ? (
-              <Settings className="mx-auto h-5 w-5" aria-hidden="true" />
+              <Settings size={18} aria-hidden="true" />
             ) : (
               <>
-                <p className="text-[var(--font-size-sm)] font-medium text-[var(--color-sidebar-active-text)]">
-                  Preferências
-                </p>
-                <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-sidebar-text-muted)]">
+                <p className="sidebar__preferences-title">Preferências</p>
+                <p className="sidebar__preferences-text">
                   Tema, fonte e opções de navegação
                 </p>
               </>
