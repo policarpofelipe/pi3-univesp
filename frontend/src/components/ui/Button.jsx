@@ -1,40 +1,23 @@
 import React from "react";
 import clsx from "clsx";
+import "../../styles/components/button.css";
 
-/*
-Princípios aplicados:
-- Semântica correta (button vs link)
-- Estados acessíveis (focus, disabled, aria)
-- Contraste dependente de variáveis globais (tokens.css)
-- Tamanho controlado por escala tipográfica global
-- Evita cores hardcoded (usa CSS variables)
-*/
-
-const VARIANTS = {
-  primary: "bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:opacity-90",
-  secondary: "bg-[var(--color-secondary)] text-[var(--color-on-secondary)] hover:opacity-90",
-  ghost: "bg-transparent text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]",
-  danger: "bg-[var(--color-danger)] text-[var(--color-on-danger)] hover:opacity-90",
-};
-
-const SIZES = {
-  sm: "h-8 px-3 text-sm",
-  md: "h-10 px-4 text-base",
-  lg: "h-12 px-6 text-lg",
-};
+function Spinner() {
+  return <span className="button__spinner" aria-hidden="true" />;
+}
 
 export default function Button({
   children,
+  type = "button",
   variant = "primary",
   size = "md",
-  type = "button",
-  disabled = false,
-  loading = false,
   fullWidth = false,
+  loading = false,
+  disabled = false,
   leftIcon = null,
   rightIcon = null,
+  className = "",
   onClick,
-  className,
   ...props
 }) {
   const isDisabled = disabled || loading;
@@ -42,49 +25,35 @@ export default function Button({
   return (
     <button
       type={type}
-      onClick={isDisabled ? undefined : onClick}
-      disabled={isDisabled}
-      aria-disabled={isDisabled}
-      aria-busy={loading}
       className={clsx(
-        "inline-flex items-center justify-center gap-2 rounded-lg",
-        "font-medium transition-all duration-150",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2",
-        "disabled:opacity-50 disabled:cursor-not-allowed",
-        "select-none",
-        VARIANTS[variant],
-        SIZES[size],
-        fullWidth && "w-full",
+        "button",
+        `button--${variant}`,
+        `button--${size}`,
+        fullWidth && "button--full-width",
+        loading && "button--loading",
         className
       )}
+      disabled={isDisabled}
+      onClick={onClick}
       {...props}
     >
-      {/* Ícone esquerdo */}
-      {leftIcon && (
-        <span aria-hidden="true" className="flex items-center">
-          {leftIcon}
-        </span>
-      )}
+      <span className="button__content">
+        {loading ? (
+          <Spinner />
+        ) : leftIcon ? (
+          <span className="button__icon button__icon--left" aria-hidden="true">
+            {leftIcon}
+          </span>
+        ) : null}
 
-      {/* Loading substitui conteúdo */}
-      {loading ? (
-        <span className="flex items-center gap-2">
-          <span
-            className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
-            aria-hidden="true"
-          />
-          <span className="sr-only">Carregando</span>
-        </span>
-      ) : (
-        <span className="whitespace-nowrap">{children}</span>
-      )}
+        <span className="button__label">{children}</span>
 
-      {/* Ícone direito */}
-      {rightIcon && !loading && (
-        <span aria-hidden="true" className="flex items-center">
-          {rightIcon}
-        </span>
-      )}
+        {!loading && rightIcon ? (
+          <span className="button__icon button__icon--right" aria-hidden="true">
+            {rightIcon}
+          </span>
+        ) : null}
+      </span>
     </button>
   );
 }
