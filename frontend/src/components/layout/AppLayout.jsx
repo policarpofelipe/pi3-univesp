@@ -18,7 +18,7 @@ export default function AppLayout({
   searchValue = "",
   onSearchChange,
   notificationCount = 0,
-  sidebarBrand = "PI3 Tasks",
+  sidebarBrand = "PI.3",
   sidebarFooter = null,
   defaultSidebarCollapsed = false,
   mainClassName = "",
