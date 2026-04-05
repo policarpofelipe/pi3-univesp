@@ -238,7 +238,7 @@ export default function Sidebar({
   collapsed = false,
   mobileOpen = false,
   currentPath = "",
-  brand = "PI3 Tasks",
+  brand = "PI.3",
   footer = null,
   className = "",
   onCloseMobile,
