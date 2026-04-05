@@ -26,7 +26,8 @@ function getUserInitials(name = "") {
 export default function Topbar({
   title = "",
   subtitle = "",
-  onToggleSidebar,
+  onToggleDesktopSidebar,
+  onToggleMobileSidebar,
   sidebarCollapsed = false,
   showSidebarToggle = true,
   searchValue = "",
@@ -64,7 +65,7 @@ export default function Topbar({
                       : "Recolher barra lateral"
                   }
                   variant="ghost"
-                  onClick={onToggleSidebar}
+                  onClick={onToggleDesktopSidebar}
                 />
               </div>
 
@@ -73,7 +74,7 @@ export default function Topbar({
                   icon={<Menu size={18} />}
                   label="Abrir menu"
                   variant="ghost"
-                  onClick={onToggleSidebar}
+                  onClick={onToggleMobileSidebar}
                 />
               </div>
             </>
@@ -146,10 +147,7 @@ export default function Topbar({
                 className="topbar__user-avatar-image"
               />
             ) : (
-              <div
-                className="topbar__user-avatar"
-                aria-hidden="true"
-              >
+              <div className="topbar__user-avatar" aria-hidden="true">
                 {initials}
               </div>
             )}
