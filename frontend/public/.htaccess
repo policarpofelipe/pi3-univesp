@@ -3,6 +3,11 @@
 
   RewriteRule ^index\.html$ - [L]
 
+  # não reescrever chamadas da API
+  RewriteCond %{REQUEST_URI} ^/api/ [NC]
+  RewriteRule ^ - [L]
+
+  # não reescrever arquivos e diretórios reais
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule . /index.html [L]
