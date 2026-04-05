@@ -3,12 +3,18 @@
 
   RewriteRule ^index\.html$ - [L]
 
-  # não reescrever chamadas da API
   RewriteCond %{REQUEST_URI} ^/api/ [NC]
   RewriteRule ^ - [L]
 
-  # não reescrever arquivos e diretórios reais
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule . /index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "^index\.html$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
 </IfModule>
