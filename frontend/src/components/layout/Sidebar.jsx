@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
 import {
   ChevronDown,
@@ -7,6 +7,7 @@ import {
   Settings,
   Briefcase,
   ListTodo,
+  X,
 } from "lucide-react";
 
 import "../../styles/components/sidebar.css";
@@ -27,8 +28,15 @@ function SidebarLink({
   collapsed = false,
   active = false,
   nested = false,
+  onNavigate,
 }) {
   const Icon = item.icon || ListTodo;
+
+  function handleClick() {
+    if (typeof onNavigate === "function") {
+      onNavigate();
+    }
+  }
 
   return (
     <a
@@ -41,15 +49,14 @@ function SidebarLink({
         active && "sidebar__link--active",
         nested && "sidebar__link--nested"
       )}
+      onClick={handleClick}
     >
       <span className="sidebar__link-icon" aria-hidden="true">
         <Icon size={18} />
       </span>
 
       {!collapsed && (
-        <span className="sidebar__link-label">
-          {item.label}
-        </span>
+        <span className="sidebar__link-label">{item.label}</span>
       )}
     </a>
   );
@@ -60,11 +67,18 @@ function SidebarGroup({
   collapsed = false,
   currentPath,
   defaultOpen = true,
+  onNavigate,
 }) {
   const initiallyOpen = defaultOpen || isGroupActive(group, currentPath);
   const [open, setOpen] = useState(initiallyOpen);
   const Icon = group.icon || Briefcase;
   const activeGroup = isGroupActive(group, currentPath);
+
+  useEffect(() => {
+    if (isGroupActive(group, currentPath)) {
+      setOpen(true);
+    }
+  }, [group, currentPath]);
 
   return (
     <div className="sidebar__group">
@@ -107,6 +121,7 @@ function SidebarGroup({
               collapsed={collapsed}
               active={isItemActive(item, currentPath)}
               nested={!collapsed}
+              onNavigate={onNavigate}
             />
           ))}
         </div>
@@ -115,34 +130,19 @@ function SidebarGroup({
   );
 }
 
-export default function Sidebar({
-  items = [],
-  groups = [],
-  collapsed = false,
-  currentPath = "",
-  brand = "PI3 Tasks",
-  footer = null,
-  className = "",
+function SidebarInner({
+  items,
+  groups,
+  collapsed,
+  currentPath,
+  brand,
+  footer,
+  onNavigate,
+  mobile = false,
+  onCloseMobile,
 }) {
-  const normalizedItems = useMemo(
-    () => (Array.isArray(items) ? items : []),
-    [items]
-  );
-
-  const normalizedGroups = useMemo(
-    () => (Array.isArray(groups) ? groups : []),
-    [groups]
-  );
-
   return (
-    <aside
-      className={clsx(
-        "sidebar",
-        collapsed && "sidebar--collapsed",
-        className
-      )}
-      aria-label="Barra lateral de navegação"
-    >
+    <div className="sidebar__panel">
       <div className="sidebar__header">
         <div className="sidebar__brand">
           <span className="sidebar__brand-icon" aria-hidden="true">
@@ -156,29 +156,39 @@ export default function Sidebar({
             </div>
           )}
         </div>
+
+        {mobile && (
+          <button
+            type="button"
+            className="sidebar__mobile-close"
+            onClick={onCloseMobile}
+            aria-label="Fechar menu"
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
 
       <nav className="sidebar__nav" aria-label="Navegação principal">
-        {normalizedItems.length > 0 && (
+        {items.length > 0 && (
           <div className="sidebar__section">
-            {!collapsed && (
-              <p className="sidebar__section-label">Geral</p>
-            )}
+            {!collapsed && <p className="sidebar__section-label">Geral</p>}
 
             <div className="sidebar__section-links">
-              {normalizedItems.map((item) => (
+              {items.map((item) => (
                 <SidebarLink
                   key={item.key}
                   item={item}
                   collapsed={collapsed}
                   active={isItemActive(item, currentPath)}
+                  onNavigate={onNavigate}
                 />
               ))}
             </div>
           </div>
         )}
 
-        {normalizedGroups.map((group) => (
+        {groups.map((group) => (
           <div key={group.key} className="sidebar__section">
             {!collapsed && group.sectionLabel && (
               <p className="sidebar__section-label">{group.sectionLabel}</p>
@@ -189,6 +199,7 @@ export default function Sidebar({
               collapsed={collapsed}
               currentPath={currentPath}
               defaultOpen={true}
+              onNavigate={onNavigate}
             />
           </div>
         ))}
@@ -217,6 +228,100 @@ export default function Sidebar({
           </div>
         )}
       </div>
-    </aside>
+    </div>
+  );
+}
+
+export default function Sidebar({
+  items = [],
+  groups = [],
+  collapsed = false,
+  mobileOpen = false,
+  currentPath = "",
+  brand = "PI3 Tasks",
+  footer = null,
+  className = "",
+  onCloseMobile,
+}) {
+  const normalizedItems = useMemo(
+    () => (Array.isArray(items) ? items : []),
+    [items]
+  );
+
+  const normalizedGroups = useMemo(
+    () => (Array.isArray(groups) ? groups : []),
+    [groups]
+  );
+
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape" && typeof onCloseMobile === "function") {
+        onCloseMobile();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen, onCloseMobile]);
+
+  return (
+    <>
+      <aside
+        className={clsx(
+          "sidebar sidebar--desktop",
+          collapsed && "sidebar--collapsed",
+          className
+        )}
+        aria-label="Barra lateral de navegação"
+      >
+        <SidebarInner
+          items={normalizedItems}
+          groups={normalizedGroups}
+          collapsed={collapsed}
+          currentPath={currentPath}
+          brand={brand}
+          footer={footer}
+        />
+      </aside>
+
+      <div
+        className={clsx(
+          "sidebar-mobile",
+          mobileOpen && "sidebar-mobile--open"
+        )}
+        aria-hidden={!mobileOpen}
+      >
+        <button
+          type="button"
+          className="sidebar-mobile__backdrop"
+          onClick={onCloseMobile}
+          aria-label="Fechar menu lateral"
+        />
+
+        <aside
+          className="sidebar sidebar--mobile"
+          aria-label="Menu lateral móvel"
+        >
+          <SidebarInner
+            items={normalizedItems}
+            groups={normalizedGroups}
+            collapsed={false}
+            currentPath={currentPath}
+            brand={brand}
+            footer={footer}
+            mobile
+            onCloseMobile={onCloseMobile}
+            onNavigate={onCloseMobile}
+          />
+        </aside>
+      </div>
+    </>
   );
 }
