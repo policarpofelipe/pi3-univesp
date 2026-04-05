@@ -3,33 +3,7 @@ import clsx from "clsx";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import Breadcrumb from "./Breadcrumb";
-
-/*
-Responsabilidade:
-- compor layout base da aplicação
-- integrar Sidebar + Topbar + Breadcrumb + conteúdo principal
-- controlar estado de colapso da sidebar
-- oferecer skip link para acessibilidade
-- manter área principal semanticamente correta
-
-Contrato sugerido:
-- children: conteúdo da página
-- title: título principal da topbar
-- subtitle: subtítulo da topbar
-- breadcrumbItems: array consumido por Breadcrumb
-- sidebarItems: itens simples da Sidebar
-- sidebarGroups: grupos da Sidebar
-- currentPath: rota atual para item ativo
-- user: dados do usuário
-- topbarActions: ações extras na Topbar
-- searchValue / onSearchChange: busca controlada
-- notificationCount: contador de notificações
-- sidebarBrand: nome exibido no topo da Sidebar
-- sidebarFooter: conteúdo opcional no rodapé da Sidebar
-- defaultSidebarCollapsed: estado inicial da sidebar
-- mainClassName: customização da área principal
-- contentClassName: customização do container interno
-*/
+import "../../styles/components/app-layout.css";
 
 export default function AppLayout({
   children,
@@ -51,39 +25,52 @@ export default function AppLayout({
   contentClassName = "",
 }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(defaultSidebarCollapsed);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  const hasBreadcrumb = Array.isArray(breadcrumbItems) && breadcrumbItems.length > 0;
+  const hasBreadcrumb =
+    Array.isArray(breadcrumbItems) && breadcrumbItems.length > 0;
 
   const breadcrumbNode = useMemo(() => {
     if (!hasBreadcrumb) return null;
     return <Breadcrumb items={breadcrumbItems} />;
   }, [breadcrumbItems, hasBreadcrumb]);
 
-  function handleToggleSidebar() {
+  function handleToggleDesktopSidebar() {
     setSidebarCollapsed((prev) => !prev);
   }
 
+  function handleToggleMobileSidebar() {
+    setMobileSidebarOpen((prev) => !prev);
+  }
+
+  function handleCloseMobileSidebar() {
+    setMobileSidebarOpen(false);
+  }
+
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
+    <div className="app-layout">
       <a href="#main-content" className="skip-link">
         Ir para o conteúdo principal
       </a>
 
-      <div className="flex min-h-screen">
+      <div className="app-layout__shell">
         <Sidebar
           items={sidebarItems}
           groups={sidebarGroups}
           collapsed={sidebarCollapsed}
+          mobileOpen={mobileSidebarOpen}
           currentPath={currentPath}
           brand={sidebarBrand}
           footer={sidebarFooter}
+          onCloseMobile={handleCloseMobileSidebar}
         />
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="app-layout__main-column">
           <Topbar
             title={title}
             subtitle={subtitle}
-            onToggleSidebar={handleToggleSidebar}
+            onToggleDesktopSidebar={handleToggleDesktopSidebar}
+            onToggleMobileSidebar={handleToggleMobileSidebar}
             sidebarCollapsed={sidebarCollapsed}
             showSidebarToggle
             searchValue={searchValue}
@@ -95,25 +82,13 @@ export default function AppLayout({
 
           <main
             id="main-content"
-            className={clsx(
-              "flex-1 px-4 py-4 md:px-6 md:py-6",
-              mainClassName
-            )}
+            className={clsx("app-layout__main", mainClassName)}
             tabIndex={-1}
           >
-            <div
-              className={clsx(
-                "mx-auto flex w-full max-w-[var(--container-max-width)] flex-col gap-4 md:gap-6",
-                contentClassName
-              )}
-            >
+            <div className={clsx("app-layout__content", contentClassName)}>
               {breadcrumbNode}
 
-              <div
-                className={clsx(
-                  "flex min-h-0 flex-1 flex-col gap-4 md:gap-6"
-                )}
-              >
+              <div className="app-layout__content-body">
                 {children}
               </div>
             </div>
