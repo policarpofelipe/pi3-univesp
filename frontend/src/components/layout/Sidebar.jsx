@@ -152,7 +152,7 @@ function SidebarInner({
           {!collapsed && (
             <div className="sidebar__brand-text">
               <p className="sidebar__brand-title">{brand}</p>
-              <p className="sidebar__brand-subtitle">Navegação principal</p>
+              <p className="sidebar__brand-subtitle">Gestão de Tarefas</p>
             </div>
           )}
         </div>
@@ -169,7 +169,7 @@ function SidebarInner({
         )}
       </div>
 
-      <nav className="sidebar__nav" aria-label="Navegação principal">
+      <nav className="sidebar__nav" aria-label="Gestão de Tarefas">
         {items.length > 0 && (
           <div className="sidebar__section">
             {!collapsed && <p className="sidebar__section-label">Geral</p>}
@@ -220,9 +220,6 @@ function SidebarInner({
             ) : (
               <>
                 <p className="sidebar__preferences-title">Preferências</p>
-                <p className="sidebar__preferences-text">
-                  Tema, fonte e opções de navegação
-                </p>
               </>
             )}
           </div>
@@ -238,7 +235,7 @@ export default function Sidebar({
   collapsed = false,
   mobileOpen = false,
   currentPath = "",
-  brand = "PI.3",
+  brand = "Projeto Integrador III",
   footer = null,
   className = "",
   onCloseMobile,
