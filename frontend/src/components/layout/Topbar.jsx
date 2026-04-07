@@ -6,6 +6,7 @@ import {
   Bell,
   PanelLeftClose,
   PanelLeftOpen,
+  UserRound,
 } from "lucide-react";
 
 import ThemeToggle from "../ui/ThemeToggle";
@@ -13,15 +14,6 @@ import FontSizeControl from "../ui/FontSizeControl";
 import IconButton from "../ui/IconButton";
 
 import "../../styles/components/topbar.css";
-
-function getUserInitials(name = "") {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-
-  if (parts.length === 0) return "U";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-}
 
 export default function Topbar({
   title = "",
@@ -40,9 +32,7 @@ export default function Topbar({
 }) {
   const hasSearch = typeof onSearchChange === "function";
   const userName = user?.name || user?.nome || "Usuário";
-  const userEmail = user?.email || "";
   const userAvatar = user?.avatarUrl || null;
-  const initials = getUserInitials(userName);
 
   return (
     <header className={clsx("topbar", className)}>
@@ -115,7 +105,10 @@ export default function Topbar({
             </form>
           )}
 
-          <div className="topbar__accessibility">
+          <div
+            className="topbar__accessibility"
+            aria-label="Controles de acessibilidade"
+          >
             <ThemeToggle />
             <FontSizeControl showLabel={false} />
           </div>
@@ -139,7 +132,7 @@ export default function Topbar({
             )}
           </div>
 
-          <div className="topbar__user" aria-label="Informações do usuário">
+          <div className="topbar__user" aria-label="Sessão do usuário">
             {userAvatar ? (
               <img
                 src={userAvatar}
@@ -148,15 +141,12 @@ export default function Topbar({
               />
             ) : (
               <div className="topbar__user-avatar" aria-hidden="true">
-                {initials}
+                <UserRound size={18} />
               </div>
             )}
 
             <div className="topbar__user-text">
               <p className="topbar__user-name">{userName}</p>
-              {userEmail ? (
-                <p className="topbar__user-email">{userEmail}</p>
-              ) : null}
             </div>
           </div>
         </div>
