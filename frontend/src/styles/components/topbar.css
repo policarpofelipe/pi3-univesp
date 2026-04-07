@@ -5,6 +5,7 @@
   width: 100%;
   border-bottom: 1px solid var(--color-topbar-border);
   background: var(--color-topbar-bg);
+  backdrop-filter: blur(10px);
 }
 
 .topbar__inner {
@@ -27,4 +28,213 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+.topbar__desktop-toggle {
+  display: none;
+}
+
+.topbar__mobile-toggle {
+  display: flex;
+}
+
+.topbar__title-block {
+  min-width: 0;
+}
+
+.topbar__title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar__subtitle {
+  margin: 2px 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar__search {
+  align-items: center;
+}
+
+.topbar__search--desktop {
+  display: none;
+}
+
+.topbar__search-field {
+  height: 40px;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-lg);
+  background: var(--input-bg);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.topbar__search-field:focus-within {
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--color-focus-ring);
+}
+
+.topbar__search-icon {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.topbar__search-input {
+  height: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.topbar__search-input:focus,
+.topbar__search-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.topbar__accessibility {
+  display: none;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.topbar__actions {
+  display: none;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.topbar__notifications {
+  position: relative;
+}
+
+.topbar__notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 1.1rem;
+  min-height: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+.topbar__user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.topbar__user-avatar,
+.topbar__user-avatar-image {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.topbar__user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-alt);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+}
+
+.topbar__user-avatar-image {
+  object-fit: cover;
+}
+
+.topbar__user-text {
+  display: none;
+  min-width: 0;
+}
+
+.topbar__user-name {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar__mobile-search {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-topbar-border);
+}
+
+@media (min-width: 768px) {
+  .topbar__inner {
+    padding: var(--space-3) var(--space-6);
+  }
+
+  .topbar__desktop-toggle {
+    display: flex;
+  }
+
+  .topbar__mobile-toggle {
+    display: none;
+  }
+
+  .topbar__search--desktop {
+    display: flex;
+  }
+
+  .topbar__search-field {
+    width: 18rem;
+  }
+
+  .topbar__actions {
+    display: flex;
+  }
+
+  .topbar__user-text {
+    display: block;
+  }
+
+  .topbar__mobile-search {
+    display: none;
+  }
+}
+
+@media (min-width: 1200px) {
+  .topbar__accessibility {
+    display: flex;
+  }
 }
