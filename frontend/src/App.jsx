@@ -14,6 +14,10 @@ import RedefinirSenhaPage from "./pages/auth/RedefinirSenhaPage";
 // Core
 import HomePage from "./pages/home/HomePage";
 
+// Organizações
+import OrganizacoesPage from "./pages/organizacoes/OrganizacoesPage";
+import OrganizacaoDetalhePage from "./pages/organizacoes/OrganizacaoDetalhePage";
+
 // Quadros
 import QuadrosPage from "./pages/quadros/QuadrosPage";
 import QuadroDetalhePage from "./pages/quadros/QuadroDetalhePage";
@@ -30,21 +34,33 @@ export default function App() {
           {/* ROOT */}
           <Route path="/" element={<Navigate to="/home" replace />} />
 
-          {/* ROTAS PÚBLICAS */}
+          {/* PÚBLICO */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/cadastro" element={<CadastroPage />} />
           <Route path="/esqueci-senha" element={<EsqueciSenhaPage />} />
           <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
 
-          {/* ROTAS PRIVADAS */}
+          {/* PRIVADO */}
           <Route element={<PrivateRoute />}>
 
             {/* HOME */}
             <Route path="/home" element={<HomePage />} />
 
-            {/* QUADROS */}
-            <Route path="/quadros" element={<QuadrosPage />} />
+            {/* ORGANIZAÇÕES */}
+            <Route path="/organizacoes" element={<OrganizacoesPage />} />
 
+            <Route
+              path="/organizacoes/:organizacaoId"
+              element={<OrganizacaoDetalhePage />}
+            />
+
+            {/* QUADROS POR ORGANIZAÇÃO */}
+            <Route
+              path="/organizacoes/:organizacaoId/quadros"
+              element={<QuadrosPage />}
+            />
+
+            {/* QUADRO DIRETO */}
             <Route path="/quadros/:quadroId" element={<QuadroDetalhePage />} />
 
             <Route
