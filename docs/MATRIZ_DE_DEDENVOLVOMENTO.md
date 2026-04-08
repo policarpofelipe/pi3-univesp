@@ -492,7 +492,7 @@ constants/tiposEvento.js
 
 ✅src/routes/authRoutes.js - Felipe Policarpo 09/03/2026
 ✅src/routes/usuarioRoutes.js - Felipe Policarpo 09/03/2026
-src/routes/organizacaoRoutes.js
+✅src/routes/organizacaoRoutes.js
 ✅src/routes/quadroRoutes.js
 ✅src/routes/quadroMembroRoutes.js
 ✅src/routes/quadroPapelRoutes.js
