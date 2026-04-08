@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Building2, MailPlus, Users } from "lucide-react";
 
 import AppLayout from "../../components/layout/AppLayout";
@@ -17,43 +18,23 @@ import {
   atualizarMembro,
 } from "../../services/organizacaoService";
 
+import "../../styles/pages/organizacao-membros.css";
+
 /*
 Premissa:
 - página de gestão de membros, não de detalhe geral da organização
 - usa tabela para listagem e formulário separado para convite
 - mantém estados explícitos: loading, erro, vazio e sucesso
-
-Observação:
-- quando o roteamento estiver consolidado, trocar extração manual por useParams()
+- navegação global fica no AppLayout
 */
 
-const sidebarItems = [];
-
-const sidebarGroups = [
-  {
-    key: "estrutura",
-    label: "Estrutura",
-    sectionLabel: "Workspace",
-    items: [
-      {
-        key: "organizacoes",
-        label: "Organizações",
-        href: "/organizacoes",
-        icon: Building2,
-      },
-    ],
-  },
-];
-
-function extrairOrganizacaoIdDaUrl() {
-  const partes = window.location.pathname.split("/").filter(Boolean);
-  const indice = partes.findIndex((parte) => parte === "organizacoes");
-  const valor = indice >= 0 ? partes[indice + 1] : null;
-  return valor || null;
-}
+const currentUser = {
+  name: "Usuário",
+};
 
 export default function OrganizacaoMembrosPage() {
-  const organizacaoId = extrairOrganizacaoIdDaUrl();
+  const navigate = useNavigate();
+  const { organizacaoId } = useParams();
 
   const [organizacao, setOrganizacao] = useState(null);
   const [membros, setMembros] = useState([]);
@@ -78,19 +59,22 @@ export default function OrganizacaoMembrosPage() {
       ]);
 
       const organizacaoData =
-        organizacaoResponse && !Array.isArray(organizacaoResponse) && "data" in organizacaoResponse
+        organizacaoResponse &&
+        !Array.isArray(organizacaoResponse) &&
+        "data" in organizacaoResponse
           ? organizacaoResponse.data
           : organizacaoResponse;
 
-      const membrosData =
-        Array.isArray(membrosResponse)
-          ? membrosResponse
-          : membrosResponse?.data;
+      const membrosData = Array.isArray(membrosResponse)
+        ? membrosResponse
+        : membrosResponse?.data;
 
       setOrganizacao(organizacaoData || null);
       setMembros(Array.isArray(membrosData) ? membrosData : []);
     } catch (error) {
-      setErro(error?.message || "Não foi possível carregar os membros da organização.");
+      setErro(
+        error?.message || "Não foi possível carregar os membros da organização."
+      );
       setOrganizacao(null);
       setMembros([]);
     } finally {
@@ -122,6 +106,19 @@ export default function OrganizacaoMembrosPage() {
     await carregarDados();
   }
 
+  function handleVoltar() {
+    navigate(-1);
+  }
+
+  function handleIrParaOrganizacoes() {
+    navigate("/organizacoes");
+  }
+
+  function handleVerOrganizacao() {
+    if (!organizacao?.id) return;
+    navigate(`/organizacoes/${organizacao.id}`);
+  }
+
   const breadcrumbItems = [
     { label: "Início", href: "/home" },
     { label: "Organizações", href: "/organizacoes" },
@@ -135,112 +132,119 @@ export default function OrganizacaoMembrosPage() {
     <AppLayout
       title="Membros da organização"
       subtitle="Gerencie convites, papéis e participação"
-      currentPath="/organizacoes"
-      sidebarItems={sidebarItems}
-      sidebarGroups={sidebarGroups}
       breadcrumbItems={breadcrumbItems}
-      user={{
-        name: "Usuário",
-        email: "usuario@email.com",
-      }}
+      user={currentUser}
     >
-      {loading ? (
-        <LoadingState
-          title="Carregando membros"
-          description="Buscando membros e informações da organização."
-          fullHeight
-        />
-      ) : erro ? (
-        <ErrorState
-          title="Falha ao carregar membros"
-          description={erro}
-          action={
-            <Button variant="danger" onClick={carregarDados}>
-              Tentar novamente
-            </Button>
-          }
-          secondaryAction={
-            <Button variant="ghost" onClick={() => window.history.back()}>
-              Voltar
-            </Button>
-          }
-        />
-      ) : !organizacao ? (
-        <EmptyState
-          icon={<Users className="h-8 w-8" />}
-          title="Organização não encontrada"
-          description="Não foi possível localizar a organização associada a esta rota."
-          action={
-            <Button variant="ghost" onClick={() => (window.location.href = "/organizacoes")}>
-              Voltar para organizações
-            </Button>
-          }
-        />
-      ) : (
-        <>
-          <PageHeader
-            title="Membros"
-            subtitle={organizacao.nome}
-            description="Gerencie quem participa da organização, seus papéis e o status de acesso."
-            actions={
-              <Button
-                variant="secondary"
-                leftIcon={<Building2 className="h-4 w-4" />}
-                onClick={() => (window.location.href = `/organizacoes/${organizacao.id}`)}
-              >
-                Ver organização
+      <div className="organizacao-membros-page">
+        {loading ? (
+          <LoadingState
+            title="Carregando membros"
+            description="Buscando membros e informações da organização."
+            fullHeight
+          />
+        ) : erro ? (
+          <ErrorState
+            title="Falha ao carregar membros"
+            description={erro}
+            action={
+              <Button variant="danger" onClick={carregarDados}>
+                Tentar novamente
+              </Button>
+            }
+            secondaryAction={
+              <Button variant="ghost" onClick={handleVoltar}>
+                Voltar
               </Button>
             }
           />
+        ) : !organizacao ? (
+          <EmptyState
+            icon={<Users size={32} />}
+            title="Organização não encontrada"
+            description="Não foi possível localizar a organização associada a esta rota."
+            action={
+              <Button variant="ghost" onClick={handleIrParaOrganizacoes}>
+                Voltar para organizações
+              </Button>
+            }
+          />
+        ) : (
+          <>
+            <PageHeader
+              title="Membros"
+              subtitle={organizacao.nome}
+              description="Gerencie quem participa da organização, seus papéis e o status de acesso."
+              actions={
+                <Button
+                  variant="secondary"
+                  leftIcon={<Building2 size={16} />}
+                  onClick={handleVerOrganizacao}
+                >
+                  Ver organização
+                </Button>
+              }
+            />
 
-          <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-            <div className="xl:col-span-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-              <div className="mb-4 flex items-center gap-2">
-                <Users className="h-5 w-5 text-[var(--color-primary)]" aria-hidden="true" />
-                <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text)]">
-                  Lista de membros
-                </h2>
+            <section
+              className="organizacao-membros-page__grid"
+              aria-label="Gestão de membros da organização"
+            >
+              <div className="organizacao-membros-page__panel organizacao-membros-page__panel--main">
+                <div className="organizacao-membros-page__panel-header">
+                  <Users
+                    size={20}
+                    className="organizacao-membros-page__panel-icon"
+                    aria-hidden="true"
+                  />
+                  <h2 className="organizacao-membros-page__panel-title">
+                    Lista de membros
+                  </h2>
+                </div>
+
+                {membros.length === 0 ? (
+                  <EmptyState
+                    compact
+                    icon={<Users size={24} />}
+                    title="Nenhum membro encontrado"
+                    description="Ainda não há membros cadastrados nesta organização além do contexto inicial."
+                  />
+                ) : (
+                  <MembroOrganizacaoTable
+                    membros={membros}
+                    onUpdateRole={async (membroId, papel) => {
+                      await handleAtualizarMembro(membroId, { papel });
+                    }}
+                    onUpdateStatus={async (membroId, status) => {
+                      await handleAtualizarMembro(membroId, { status });
+                    }}
+                    onRemove={async (membroId) => {
+                      await handleRemoverMembro(membroId);
+                    }}
+                  />
+                )}
               </div>
 
-              {membros.length === 0 ? (
-                <EmptyState
-                  compact
-                  icon={<Users className="h-6 w-6" />}
-                  title="Nenhum membro encontrado"
-                  description="Ainda não há membros cadastrados nesta organização além do contexto inicial."
-                />
-              ) : (
-                <MembroOrganizacaoTable
-                  membros={membros}
-                  onUpdateRole={async (membroId, papel) => {
-                    await handleAtualizarMembro(membroId, { papel });
-                  }}
-                  onUpdateStatus={async (membroId, status) => {
-                    await handleAtualizarMembro(membroId, { status });
-                  }}
-                  onRemove={async (membroId) => {
-                    await handleRemoverMembro(membroId);
-                  }}
-                />
-              )}
-            </div>
+              <aside className="organizacao-membros-page__panel organizacao-membros-page__panel--side">
+                <div className="organizacao-membros-page__panel-header">
+                  <MailPlus
+                    size={20}
+                    className="organizacao-membros-page__panel-icon"
+                    aria-hidden="true"
+                  />
+                  <h2 className="organizacao-membros-page__panel-title">
+                    Convidar membro
+                  </h2>
+                </div>
 
-            <aside className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-              <div className="mb-4 flex items-center gap-2">
-                <MailPlus className="h-5 w-5 text-[var(--color-primary)]" aria-hidden="true" />
-                <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text)]">
-                  Convidar membro
-                </h2>
-              </div>
-
-              <ConviteMembroForm
-                loading={submittingInvite}
-                onSubmit={handleConvidarMembro}
-              />
-            </aside>
-          </section>
-        </>
-      )}
+                <ConviteMembroForm
+                  loading={submittingInvite}
+                  onSubmit={handleConvidarMembro}
+                />
+              </aside>
+            </section>
+          </>
+        )}
+      </div>
     </AppLayout>
   );
 }
