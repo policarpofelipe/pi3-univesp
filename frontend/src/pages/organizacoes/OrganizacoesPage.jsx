@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Building2, Plus } from "lucide-react";
 
 import AppLayout from "../../components/layout/AppLayout";
@@ -10,33 +11,24 @@ import Button from "../../components/ui/Button";
 import OrganizacaoCard from "../../components/organizacoes/OrganizacaoCard";
 import { listarOrganizacoes } from "../../services/organizacaoService";
 
+import "../../styles/pages/organizacoes.css";
+
 /*
 Decisão de arquitetura:
 - esta página apenas orquestra estado e composição
 - listagem vem do service
 - renderiza loading / error / empty / success
 - não mistura criação/edição dentro da listagem
+- sidebar e navegação global ficam no AppLayout
 */
 
-const sidebarItems = [];
-
-const sidebarGroups = [
-  {
-    key: "estrutura",
-    label: "Estrutura",
-    sectionLabel: "Workspace",
-    items: [
-      {
-        key: "organizacoes",
-        label: "Organizações",
-        href: "/organizacoes",
-        icon: Building2,
-      },
-    ],
-  },
-];
+const currentUser = {
+  name: "Usuário",
+};
 
 export default function OrganizacoesPage() {
+  const navigate = useNavigate();
+
   const [organizacoes, setOrganizacoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
@@ -69,101 +61,99 @@ export default function OrganizacoesPage() {
     carregarOrganizacoes();
   }, [carregarOrganizacoes]);
 
+  function handleNovaOrganizacao() {
+    console.log("Abrir fluxo de criação de organização");
+  }
+
+  function handleAbrirOrganizacao(id) {
+    navigate(`/organizacoes/${id}`);
+  }
+
+  function handleEditarOrganizacao(id) {
+    console.log("Editar organização:", id);
+  }
+
   return (
     <AppLayout
       title="Organizações"
       subtitle="Gerencie organizações e acesse seus ambientes de trabalho"
-      currentPath="/organizacoes"
-      sidebarItems={sidebarItems}
-      sidebarGroups={sidebarGroups}
       breadcrumbItems={[
         { label: "Início", href: "/home" },
         { label: "Organizações" },
       ]}
-      user={{
-        name: "Usuário",
-        email: "usuario@email.com",
-      }}
+      user={currentUser}
       topbarActions={
         <Button
           variant="primary"
-          leftIcon={<Plus className="h-4 w-4" />}
-          onClick={() => {
-            console.log("Abrir fluxo de criação de organização");
-          }}
+          leftIcon={<Plus size={16} />}
+          onClick={handleNovaOrganizacao}
         >
           Nova organização
         </Button>
       }
     >
-      <PageHeader
-        title="Organizações"
-        description="Visualize, crie e administre as organizações às quais você pertence."
-        actions={
-          <Button
-            variant="primary"
-            leftIcon={<Plus className="h-4 w-4" />}
-            onClick={() => {
-              console.log("Abrir fluxo de criação de organização");
-            }}
-          >
-            Nova organização
-          </Button>
-        }
-      />
-
-      {loading ? (
-        <LoadingState
-          title="Carregando organizações"
-          description="Buscando as organizações disponíveis para o usuário autenticado."
-          fullHeight
-        />
-      ) : erro ? (
-        <ErrorState
-          title="Falha ao carregar organizações"
-          description={erro}
-          action={
-            <Button variant="danger" onClick={carregarOrganizacoes}>
-              Tentar novamente
-            </Button>
-          }
-        />
-      ) : organizacoes.length === 0 ? (
-        <EmptyState
-          icon={<Building2 className="h-8 w-8" />}
-          title="Nenhuma organização encontrada"
-          description="Você ainda não participa de nenhuma organização. Crie uma nova para começar a estruturar quadros, membros e permissões."
-          action={
+      <div className="organizacoes-page">
+        <PageHeader
+          title="Organizações"
+          description="Visualize, crie e administre as organizações às quais você pertence."
+          actions={
             <Button
               variant="primary"
-              leftIcon={<Plus className="h-4 w-4" />}
-              onClick={() => {
-                console.log("Abrir fluxo de criação de organização");
-              }}
+              leftIcon={<Plus size={16} />}
+              onClick={handleNovaOrganizacao}
             >
-              Criar organização
+              Nova organização
             </Button>
           }
         />
-      ) : (
-        <section
-          aria-label="Lista de organizações"
-          className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
-        >
-          {organizacoes.map((organizacao) => (
-            <OrganizacaoCard
-              key={organizacao.id}
-              organizacao={organizacao}
-              onOpen={(id) => {
-                console.log("Abrir detalhe da organização:", id);
-              }}
-              onEdit={(id) => {
-                console.log("Editar organização:", id);
-              }}
-            />
-          ))}
-        </section>
-      )}
+
+        {loading ? (
+          <LoadingState
+            title="Carregando organizações"
+            description="Buscando as organizações disponíveis para o usuário autenticado."
+            fullHeight
+          />
+        ) : erro ? (
+          <ErrorState
+            title="Falha ao carregar organizações"
+            description={erro}
+            action={
+              <Button variant="danger" onClick={carregarOrganizacoes}>
+                Tentar novamente
+              </Button>
+            }
+          />
+        ) : organizacoes.length === 0 ? (
+          <EmptyState
+            icon={<Building2 size={32} />}
+            title="Nenhuma organização encontrada"
+            description="Você ainda não participa de nenhuma organização. Crie uma nova para começar a estruturar quadros, membros e permissões."
+            action={
+              <Button
+                variant="primary"
+                leftIcon={<Plus size={16} />}
+                onClick={handleNovaOrganizacao}
+              >
+                Criar organização
+              </Button>
+            }
+          />
+        ) : (
+          <section
+            aria-label="Lista de organizações"
+            className="organizacoes-page__grid"
+          >
+            {organizacoes.map((organizacao) => (
+              <OrganizacaoCard
+                key={organizacao.id}
+                organizacao={organizacao}
+                onOpen={handleAbrirOrganizacao}
+                onEdit={handleEditarOrganizacao}
+              />
+            ))}
+          </section>
+        )}
+      </div>
     </AppLayout>
   );
 }
