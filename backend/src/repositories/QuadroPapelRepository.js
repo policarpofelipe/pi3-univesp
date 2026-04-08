@@ -2,6 +2,36 @@ const connectionModule = require("../database/connection");
 
 const db = connectionModule.pool || connectionModule.db || connectionModule;
 
+/*
+  Convenção assumida de tabelas:
+  - quadro_papeis
+  - quadro_papel_permissoes
+  - quadro_membros
+
+  Campos assumidos em quadro_papeis:
+  - id
+  - quadro_id
+  - nome
+  - descricao
+  - criado_em
+  - atualizado_em
+
+  Campos assumidos em quadro_papel_permissoes:
+  - papel_id
+  - visualizar_quadro
+  - editar_quadro
+  - excluir_quadro
+  - gerenciar_membros
+  - mover_cartoes
+  - editar_listas
+  - atualizado_em
+
+  Campos assumidos em quadro_membros:
+  - id
+  - quadro_id
+  - papel_id
+  - status
+*/
 
 class QuadroPapelRepository {
   async listar(quadroId, filtros = {}) {
@@ -240,4 +270,80 @@ class QuadroPapelRepository {
       papelId,
       permissoes.visualizarQuadro ? 1 : 0,
       permissoes.editarQuadro ? 1 : 0,
-      permissoes.excluirQuad
+      permissoes.excluirQuadro ? 1 : 0,
+      permissoes.gerenciarMembros ? 1 : 0,
+      permissoes.moverCartoes ? 1 : 0,
+      permissoes.editarListas ? 1 : 0,
+    ]);
+
+    return this.obterPorId(quadroId, papelId);
+  }
+
+  async remover(quadroId, papelId) {
+    const conn = await db.getConnection();
+
+    try {
+      await conn.beginTransaction();
+
+      await conn.query(
+        `
+          DELETE FROM quadro_papel_permissoes
+          WHERE papel_id = ?
+        `,
+        [papelId]
+      );
+
+      const [result] = await conn.query(
+        `
+          DELETE FROM quadro_papeis
+          WHERE quadro_id = ?
+            AND id = ?
+        `,
+        [quadroId, papelId]
+      );
+
+      await conn.commit();
+      return result.affectedRows > 0;
+    } catch (error) {
+      await conn.rollback();
+      throw error;
+    } finally {
+      conn.release();
+    }
+  }
+
+  async contarMembrosVinculados(quadroId, papelId) {
+    const sql = `
+      SELECT COUNT(*) AS total
+      FROM quadro_membros
+      WHERE quadro_id = ?
+        AND papel_id = ?
+        AND status = 'ativo'
+    `;
+
+    const [rows] = await db.query(sql, [quadroId, papelId]);
+    return rows[0]?.total || 0;
+  }
+
+  #mapRowToEntity(row) {
+    return {
+      id: row.id,
+      quadroId: row.quadroId,
+      nome: row.nome,
+      descricao: row.descricao,
+      membros: Number(row.membros || 0),
+      criadoEm: row.criadoEm,
+      atualizadoEm: row.atualizadoEm,
+      permissoes: {
+        visualizarQuadro: Boolean(row.visualizarQuadro),
+        editarQuadro: Boolean(row.editarQuadro),
+        excluirQuadro: Boolean(row.excluirQuadro),
+        gerenciarMembros: Boolean(row.gerenciarMembros),
+        moverCartoes: Boolean(row.moverCartoes),
+        editarListas: Boolean(row.editarListas),
+      },
+    };
+  }
+}
+
+module.exports = new QuadroPapelRepository();
