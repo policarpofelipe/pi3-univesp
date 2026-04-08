@@ -1,15 +1,13 @@
 import { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
 import AppLayout from "../../components/layout/AppLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import EmptyState from "../../components/ui/EmptyState";
 import Button from "../../components/ui/Button";
+
 import {
-  LayoutDashboard,
   Building2,
-  KanbanSquare,
-  ListTodo,
-  CheckSquare,
   Users,
   UserPlus,
   Search,
@@ -23,121 +21,113 @@ import {
 
 import "../../styles/pages/quadro-membros.css";
 
-const sidebarItems = [
-  { key: "home", label: "Início", href: "/home", icon: LayoutDashboard },
-];
-
-const sidebarGroups = [
-  {
-    key: "estrutura",
-    label: "Estrutura",
-    sectionLabel: "Workspace",
-    icon: Building2,
-    items: [
-      {
-        key: "organizacoes",
-        label: "Organizações",
-        href: "/organizacoes",
-        icon: Building2,
-      },
-      {
-        key: "quadros",
-        label: "Quadros",
-        href: "/quadros",
-        icon: KanbanSquare,
-      },
-    ],
-  },
-  {
-    key: "gestao",
-    label: "Gestão",
-    sectionLabel: "Operacional",
-    icon: ListTodo,
-    items: [
-      {
-        key: "listas",
-        label: "Listas",
-        href: "/listas",
-        icon: ListTodo,
-      },
-      {
-        key: "cartoes",
-        label: "Cartões",
-        href: "/cartoes",
-        icon: CheckSquare,
-      },
-    ],
-  },
-];
-
 const quadroMock = {
-  id: "qdr-001",
+  id: 1,
   nome: "Produto e Backlog",
   organizacao: {
-    id: "org-001",
+    id: 1,
     nome: "Projeto Integrador III",
   },
   membros: [
     {
-      id: "usr-001",
+      id: 1,
+      usuarioId: 1,
       nome: "Felipe Policarpo",
       email: "felipe@email.com",
-      papel: "Administrador",
       status: "ativo",
-      entrouEm: "2026-04-01",
+      criadoEm: "2026-04-01 09:00:00",
+      papeis: [
+        {
+          id: 1,
+          nome: "Administrador",
+          ativo: true,
+        },
+      ],
     },
     {
-      id: "usr-002",
+      id: 2,
+      usuarioId: 2,
       nome: "Ana Flávia",
       email: "ana@email.com",
-      papel: "Colaboradora",
       status: "ativo",
-      entrouEm: "2026-04-02",
+      criadoEm: "2026-04-02 10:00:00",
+      papeis: [
+        {
+          id: 2,
+          nome: "Colaborador",
+          ativo: true,
+        },
+      ],
     },
     {
-      id: "usr-003",
+      id: 3,
+      usuarioId: 3,
       nome: "Cesar Yukio",
       email: "cesar@email.com",
-      papel: "Colaborador",
       status: "ativo",
-      entrouEm: "2026-04-03",
+      criadoEm: "2026-04-03 11:00:00",
+      papeis: [
+        {
+          id: 2,
+          nome: "Colaborador",
+          ativo: true,
+        },
+        {
+          id: 3,
+          nome: "Revisor",
+          ativo: true,
+        },
+      ],
     },
     {
-      id: "usr-004",
+      id: 4,
+      usuarioId: 4,
       nome: "Isabella Marzola",
       email: "isabella@email.com",
-      papel: "Leitora",
       status: "pendente",
-      entrouEm: "2026-04-04",
+      criadoEm: "2026-04-04 12:00:00",
+      papeis: [],
     },
   ],
 };
 
-function formatarData(dataIso) {
+function formatarData(data) {
+  if (!data) return "Não informado";
+
   try {
     return new Intl.DateTimeFormat("pt-BR", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
-    }).format(new Date(`${dataIso}T00:00:00`));
+    }).format(new Date(data));
   } catch {
-    return dataIso;
+    return data;
   }
 }
 
-function obterIconePapel(papel) {
-  if (papel === "Administrador") return Crown;
-  if (papel === "Colaboradora" || papel === "Colaborador") return ShieldCheck;
+function obterIconePapel(nomePapel) {
+  if (nomePapel === "Administrador") return Crown;
+  if (nomePapel === "Colaborador") return ShieldCheck;
   return UserRound;
 }
 
+function formatarPapeis(papeis = []) {
+  if (!Array.isArray(papeis) || papeis.length === 0) {
+    return "Sem papel vinculado";
+  }
+
+  return papeis.map((papel) => papel.nome).join(", ");
+}
+
 export default function QuadroMembrosPage() {
+  const navigate = useNavigate();
   const { quadroId } = useParams();
+
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
 
   const quadro = useMemo(() => {
-    if (!quadroId || quadroId === quadroMock.id) {
+    if (!quadroId || String(quadroId) === String(quadroMock.id)) {
       return quadroMock;
     }
 
@@ -150,12 +140,13 @@ export default function QuadroMembrosPage() {
   const membrosFiltrados = useMemo(() => {
     return quadro.membros.filter((membro) => {
       const termo = busca.trim().toLowerCase();
+      const papeisTexto = formatarPapeis(membro.papeis).toLowerCase();
 
       const correspondeBusca =
         !termo ||
         membro.nome.toLowerCase().includes(termo) ||
         membro.email.toLowerCase().includes(termo) ||
-        membro.papel.toLowerCase().includes(termo);
+        papeisTexto.includes(termo);
 
       const correspondeStatus =
         filtroStatus === "todos" || membro.status === filtroStatus;
@@ -163,6 +154,14 @@ export default function QuadroMembrosPage() {
       return correspondeBusca && correspondeStatus;
     });
   }, [busca, filtroStatus, quadro.membros]);
+
+  const totalAtivos = useMemo(() => {
+    return membrosFiltrados.filter((membro) => membro.status === "ativo").length;
+  }, [membrosFiltrados]);
+
+  const totalPendentes = useMemo(() => {
+    return membrosFiltrados.filter((membro) => membro.status === "pendente").length;
+  }, [membrosFiltrados]);
 
   function handleConvidarMembro() {
     console.log("Convidar membro para quadro:", quadro.id);
@@ -172,13 +171,14 @@ export default function QuadroMembrosPage() {
     console.log("Gerenciar membro:", membroId);
   }
 
+  function handleAbrirQuadro() {
+    navigate(`/quadros/${quadro.id}`);
+  }
+
   return (
     <AppLayout
       title="Membros do quadro"
       subtitle="Gerencie acesso, papéis e participação no quadro"
-      currentPath="/quadros"
-      sidebarItems={sidebarItems}
-      sidebarGroups={sidebarGroups}
       breadcrumbItems={[
         { label: "Início", href: "/home" },
         { label: "Quadros", href: "/quadros" },
@@ -188,20 +188,34 @@ export default function QuadroMembrosPage() {
       user={{
         name: "Usuário",
       }}
-      notificationCount={0}
+      topbarActions={
+        <Button
+          variant="primary"
+          leftIcon={<UserPlus size={16} />}
+          onClick={handleConvidarMembro}
+        >
+          Convidar membro
+        </Button>
+      }
     >
       <div className="quadro-membros-page">
         <PageHeader
           title="Membros do quadro"
           description={`Controle quem participa do quadro "${quadro.nome}" e como cada membro interage com o fluxo operacional.`}
           actions={
-            <Button
-              variant="primary"
-              leftIcon={<UserPlus size={16} />}
-              onClick={handleConvidarMembro}
-            >
-              Convidar membro
-            </Button>
+            <>
+              <Button variant="secondary" onClick={handleAbrirQuadro}>
+                Ver quadro
+              </Button>
+
+              <Button
+                variant="primary"
+                leftIcon={<UserPlus size={16} />}
+                onClick={handleConvidarMembro}
+              >
+                Convidar membro
+              </Button>
+            </>
           }
         />
 
@@ -219,14 +233,14 @@ export default function QuadroMembrosPage() {
               id="quadro-membros-hero-title"
               className="quadro-membros-page__hero-title"
             >
-              Estruture a colaboração com papéis claros.
+              Estruture a colaboração com vínculos e papéis claros.
             </h2>
 
             <p className="quadro-membros-page__hero-description">
               O quadro pertence à organização{" "}
               <strong>{quadro.organizacao.nome}</strong>. Nesta área, o foco é
-              administrar membros, estados de convite e distribuição de papéis,
-              evitando acoplamento desorganizado entre responsabilidades.
+              administrar membros, estados do vínculo e papéis associados,
+              evitando acoplamento desorganizado entre permissões e execução.
             </p>
           </div>
         </section>
@@ -241,7 +255,10 @@ export default function QuadroMembrosPage() {
             </label>
 
             <div className="quadro-membros-page__search">
-              <span className="quadro-membros-page__search-icon" aria-hidden="true">
+              <span
+                className="quadro-membros-page__search-icon"
+                aria-hidden="true"
+              >
                 <Search size={16} />
               </span>
 
@@ -288,20 +305,14 @@ export default function QuadroMembrosPage() {
           <article className="quadro-membros-page__summary-card">
             <p className="quadro-membros-page__summary-label">Ativos</p>
             <strong className="quadro-membros-page__summary-value">
-              {
-                membrosFiltrados.filter((membro) => membro.status === "ativo")
-                  .length
-              }
+              {totalAtivos}
             </strong>
           </article>
 
           <article className="quadro-membros-page__summary-card">
             <p className="quadro-membros-page__summary-label">Pendentes</p>
             <strong className="quadro-membros-page__summary-value">
-              {
-                membrosFiltrados.filter((membro) => membro.status === "pendente")
-                  .length
-              }
+              {totalPendentes}
             </strong>
           </article>
         </section>
@@ -329,7 +340,10 @@ export default function QuadroMembrosPage() {
             aria-label="Lista de membros do quadro"
           >
             {membrosFiltrados.map((membro) => {
-              const IconePapel = obterIconePapel(membro.papel);
+              const papelPrincipal = membro.papeis?.[0];
+              const IconePapel = obterIconePapel(
+                papelPrincipal?.nome || "Leitor"
+              );
 
               return (
                 <article
@@ -371,12 +385,12 @@ export default function QuadroMembrosPage() {
                       <div className="quadro-membros-page__meta">
                         <span className="quadro-membros-page__meta-item">
                           <IconePapel size={14} aria-hidden="true" />
-                          <span>{membro.papel}</span>
+                          <span>{formatarPapeis(membro.papeis)}</span>
                         </span>
 
                         <span className="quadro-membros-page__meta-item">
                           <CalendarDays size={14} aria-hidden="true" />
-                          <span>Desde {formatarData(membro.entrouEm)}</span>
+                          <span>Desde {formatarData(membro.criadoEm)}</span>
                         </span>
                       </div>
                     </div>
