@@ -1,8 +1,8 @@
-import { Router } from "express";
-import authMiddleware from "../middlewares/authMiddleware.js";
-import * as quadroMembroController from "../controllers/quadroMembroController.js";
+const express = require("express");
+const authMiddleware = require("../middlewares/authMiddleware");
+const quadroMembroController = require("../controllers/quadroMembroController");
 
-const router = Router();
+const router = express.Router();
 
 /*
   Base sugerida de montagem:
@@ -39,4 +39,4 @@ router.post(
 
 router.delete("/:quadroId/membros/:membroId", quadroMembroController.remover);
 
-export default router;
+module.exports = router;
