@@ -2,33 +2,6 @@ const connectionModule = require("../database/connection");
 
 const db = connectionModule.pool || connectionModule.db || connectionModule;
 
-/*
-  Convenção assumida de tabelas:
-  - quadros
-  - quadro_configuracoes
-
-  Campos assumidos em quadros:
-  - id
-  - organizacao_id
-  - nome
-  - descricao
-  - visibilidade
-  - arquivado
-  - criado_por
-  - criado_em
-  - atualizado_em
-
-  Campos assumidos em quadro_configuracoes:
-  - quadro_id
-  - permitir_convites
-  - permitir_comentarios
-  - exigir_permissao_mover_cartoes
-  - permitir_transicoes_livres
-  - atualizado_em
-
-  Se seus nomes reais divergirem, ajuste os SQLs.
-*/
-
 class QuadroRepository {
   async listar(filtros = {}) {
     const {
