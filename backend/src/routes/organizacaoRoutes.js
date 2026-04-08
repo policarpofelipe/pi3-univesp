@@ -6,19 +6,11 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-/* =========================
-   CRUD DE ORGANIZAÇÃO
-========================= */
-
 router.get("/", organizacaoController.listar);
 router.get("/:organizacaoId", organizacaoController.obterPorId);
 router.post("/", organizacaoController.criar);
 router.put("/:organizacaoId", organizacaoController.atualizar);
 router.delete("/:organizacaoId", organizacaoController.remover);
-
-/* =========================
-   CONFIGURAÇÕES
-========================= */
 
 router.get(
   "/:organizacaoId/configuracoes",
@@ -30,33 +22,10 @@ router.put(
   organizacaoController.atualizarConfiguracoes
 );
 
-/* =========================
-   MEMBROS DA ORGANIZAÇÃO
-========================= */
-
-router.get(
-  "/:organizacaoId/membros",
-  organizacaoController.listarMembros
-);
-
-router.get(
-  "/:organizacaoId/membros/:membroId",
-  organizacaoController.obterMembroPorId
-);
-
-router.post(
-  "/:organizacaoId/membros",
-  organizacaoController.convidarMembro
-);
-
-router.put(
-  "/:organizacaoId/membros/:membroId",
-  organizacaoController.atualizarMembro
-);
-
-router.delete(
-  "/:organizacaoId/membros/:membroId",
-  organizacaoController.removerMembro
-);
+// router.get("/:organizacaoId/membros", organizacaoController.listarMembros);
+// router.get("/:organizacaoId/membros/:membroId", organizacaoController.obterMembroPorId);
+// router.post("/:organizacaoId/membros", organizacaoController.convidarMembro);
+// router.put("/:organizacaoId/membros/:membroId", organizacaoController.atualizarMembro);
+// router.delete("/:organizacaoId/membros/:membroId", organizacaoController.removerMembro);
 
 module.exports = router;
