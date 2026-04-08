@@ -1,150 +1,195 @@
-// services/organizacaoService.js
+import { api } from "./authService";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+const organizacaoService = {
+  async listar(params = {}) {
+    const response = await api.get("/organizacoes", {
+      params,
+    });
 
-/*
-Função base para requisições
-Centraliza:
-- headers
-- tratamento de erro
-- parsing de resposta
-*/
-async function request(endpoint, options = {}) {
-  const token = localStorage.getItem("token");
+    return response.data;
+  },
 
-  const config = {
-    headers: {
-      "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
-    ...options,
-  };
-
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data?.message || "Erro na requisição");
+  async buscarPorId(organizacaoId) {
+    if (!organizacaoId) {
+      throw new Error("O identificador da organização é obrigatório.");
     }
 
-    return data;
-  } catch (error) {
-    console.error("organizacaoService error:", error);
-    throw error;
-  }
+    const response = await api.get(`/organizacoes/${organizacaoId}`);
+    return response.data;
+  },
+
+  async criar(payload) {
+    const response = await api.post("/organizacoes", payload);
+    return response.data;
+  },
+
+  async atualizar(organizacaoId, payload) {
+    if (!organizacaoId) {
+      throw new Error("O identificador da organização é obrigatório.");
+    }
+
+    const response = await api.put(`/organizacoes/${organizacaoId}`, payload);
+    return response.data;
+  },
+
+  async remover(organizacaoId) {
+    if (!organizacaoId) {
+      throw new Error("O identificador da organização é obrigatório.");
+    }
+
+    const response = await api.delete(`/organizacoes/${organizacaoId}`);
+    return response.data;
+  },
+
+  async buscarConfiguracoes(organizacaoId) {
+    if (!organizacaoId) {
+      throw new Error("O identificador da organização é obrigatório.");
+    }
+
+    const response = await api.get(
+      `/organizacoes/${organizacaoId}/configuracoes`
+    );
+
+    return response.data;
+  },
+
+  async atualizarConfiguracoes(organizacaoId, payload) {
+    if (!organizacaoId) {
+      throw new Error("O identificador da organização é obrigatório.");
+    }
+
+    const response = await api.put(
+      `/organizacoes/${organizacaoId}/configuracoes`,
+      payload
+    );
+
+    return response.data;
+  },
+
+  async listarMembros(organizacaoId, params = {}) {
+    if (!organizacaoId) {
+      throw new Error("O identificador da organização é obrigatório.");
+    }
+
+    const response = await api.get(
+      `/organizacoes/${organizacaoId}/membros`,
+      {
+        params,
+      }
+    );
+
+    return response.data;
+  },
+
+  async buscarMembroPorId(organizacaoId, membroId) {
+    if (!organizacaoId) {
+      throw new Error("O identificador da organização é obrigatório.");
+    }
+
+    if (!membroId) {
+      throw new Error("O identificador do membro é obrigatório.");
+    }
+
+    const response = await api.get(
+      `/organizacoes/${organizacaoId}/membros/${membroId}`
+    );
+
+    return response.data;
+  },
+
+  async convidarMembro(organizacaoId, payload) {
+    if (!organizacaoId) {
+      throw new Error("O identificador da organização é obrigatório.");
+    }
+
+    const response = await api.post(
+      `/organizacoes/${organizacaoId}/membros`,
+      payload
+    );
+
+    return response.data;
+  },
+
+  async atualizarMembro(organizacaoId, membroId, payload) {
+    if (!organizacaoId) {
+      throw new Error("O identificador da organização é obrigatório.");
+    }
+
+    if (!membroId) {
+      throw new Error("O identificador do membro é obrigatório.");
+    }
+
+    const response = await api.put(
+      `/organizacoes/${organizacaoId}/membros/${membroId}`,
+      payload
+    );
+
+    return response.data;
+  },
+
+  async removerMembro(organizacaoId, membroId) {
+    if (!organizacaoId) {
+      throw new Error("O identificador da organização é obrigatório.");
+    }
+
+    if (!membroId) {
+      throw new Error("O identificador do membro é obrigatório.");
+    }
+
+    const response = await api.delete(
+      `/organizacoes/${organizacaoId}/membros/${membroId}`
+    );
+
+    return response.data;
+  },
+};
+
+export function listarOrganizacoes(params = {}) {
+  return organizacaoService.listar(params);
 }
 
-/*
-===========================
-ORGANIZAÇÕES
-===========================
-*/
-
-// Listar organizações do usuário
-export async function listarOrganizacoes() {
-  return request("/organizacoes");
+export function buscarOrganizacaoPorId(organizacaoId) {
+  return organizacaoService.buscarPorId(organizacaoId);
 }
 
-// Buscar uma organização por ID
-export async function buscarOrganizacaoPorId(id) {
-  if (!id) throw new Error("ID da organização é obrigatório");
-  return request(`/organizacoes/${id}`);
+export function criarOrganizacao(payload) {
+  return organizacaoService.criar(payload);
 }
 
-// Criar nova organização
-export async function criarOrganizacao(payload) {
-  return request("/organizacoes", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+export function atualizarOrganizacao(organizacaoId, payload) {
+  return organizacaoService.atualizar(organizacaoId, payload);
 }
 
-// Atualizar organização
-export async function atualizarOrganizacao(id, payload) {
-  if (!id) throw new Error("ID da organização é obrigatório");
-
-  return request(`/organizacoes/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  });
+export function removerOrganizacao(organizacaoId) {
+  return organizacaoService.remover(organizacaoId);
 }
 
-// Excluir organização
-export async function excluirOrganizacao(id) {
-  if (!id) throw new Error("ID da organização é obrigatório");
-
-  return request(`/organizacoes/${id}`, {
-    method: "DELETE",
-  });
+export function buscarConfiguracoes(organizacaoId) {
+  return organizacaoService.buscarConfiguracoes(organizacaoId);
 }
 
-/*
-===========================
-MEMBROS DA ORGANIZAÇÃO
-===========================
-*/
-
-// Listar membros da organização
-export async function listarMembrosOrganizacao(organizacaoId) {
-  if (!organizacaoId) throw new Error("organizacaoId é obrigatório");
-
-  return request(`/organizacoes/${organizacaoId}/membros`);
+export function atualizarConfiguracoes(organizacaoId, payload) {
+  return organizacaoService.atualizarConfiguracoes(organizacaoId, payload);
 }
 
-// Convidar membro para organização
-export async function convidarMembro(organizacaoId, payload) {
-  if (!organizacaoId) throw new Error("organizacaoId é obrigatório");
-
-  return request(`/organizacoes/${organizacaoId}/membros`, {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+export function listarMembrosOrganizacao(organizacaoId, params = {}) {
+  return organizacaoService.listarMembros(organizacaoId, params);
 }
 
-// Atualizar papel do membro
-export async function atualizarMembro(organizacaoId, membroId, payload) {
-  if (!organizacaoId || !membroId) {
-    throw new Error("organizacaoId e membroId são obrigatórios");
-  }
-
-  return request(`/organizacoes/${organizacaoId}/membros/${membroId}`, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  });
+export function buscarMembroOrganizacaoPorId(organizacaoId, membroId) {
+  return organizacaoService.buscarMembroPorId(organizacaoId, membroId);
 }
 
-// Remover membro da organização
-export async function removerMembro(organizacaoId, membroId) {
-  if (!organizacaoId || !membroId) {
-    throw new Error("organizacaoId e membroId são obrigatórios");
-  }
-
-  return request(`/organizacoes/${organizacaoId}/membros/${membroId}`, {
-    method: "DELETE",
-  });
+export function convidarMembro(organizacaoId, payload) {
+  return organizacaoService.convidarMembro(organizacaoId, payload);
 }
 
-/*
-===========================
-CONFIGURAÇÕES
-===========================
-*/
-
-// Buscar configurações da organização
-export async function buscarConfiguracoes(organizacaoId) {
-  if (!organizacaoId) throw new Error("organizacaoId é obrigatório");
-
-  return request(`/organizacoes/${organizacaoId}/configuracoes`);
+export function atualizarMembro(organizacaoId, membroId, payload) {
+  return organizacaoService.atualizarMembro(organizacaoId, membroId, payload);
 }
 
-// Atualizar configurações da organização
-export async function atualizarConfiguracoes(organizacaoId, payload) {
-  if (!organizacaoId) throw new Error("organizacaoId é obrigatório");
-
-  return request(`/organizacoes/${organizacaoId}/configuracoes`, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  });
+export function removerMembro(organizacaoId, membroId) {
+  return organizacaoService.removerMembro(organizacaoId, membroId);
 }
+
+export default organizacaoService;
