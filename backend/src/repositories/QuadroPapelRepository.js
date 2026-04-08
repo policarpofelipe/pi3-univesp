@@ -2,40 +2,32 @@ const connectionModule = require("../database/connection");
 
 const db = connectionModule.pool || connectionModule.db || connectionModule;
 
-/*
-  Convenção assumida de tabelas:
-  - quadro_papeis
-  - quadro_papel_permissoes
-  - quadro_membros
-
-  Campos assumidos em quadro_papeis:
-  - id
-  - quadro_id
-  - nome
-  - descricao
-  - criado_em
-  - atualizado_em
-
-  Campos assumidos em quadro_papel_permissoes:
-  - papel_id
-  - visualizar_quadro
-  - editar_quadro
-  - excluir_quadro
-  - gerenciar_membros
-  - mover_cartoes
-  - editar_listas
-  - atualizado_em
-
-  Campos assumidos em quadro_membros:
-  - id
-  - quadro_id
-  - papel_id
-  - status
-*/
-
 class QuadroPapelRepository {
+  mapRowToEntity(row) {
+    if (!row) return null;
+
+    return {
+      id: row.id,
+      quadroId: row.quadroId,
+      nome: row.nome,
+      descricao: row.descricao,
+      ativo: Boolean(row.ativo),
+      membros: Number(row.membros || 0),
+      criadoEm: row.criadoEm,
+      atualizadoEm: row.atualizadoEm,
+      permissoes: {
+        podeGerenciarQuadro: Boolean(row.podeGerenciarQuadro),
+        podeGerenciarListas: Boolean(row.podeGerenciarListas),
+        podeGerenciarAutomacoes: Boolean(row.podeGerenciarAutomacoes),
+        podeGerenciarCampos: Boolean(row.podeGerenciarCampos),
+        podeConvidarMembros: Boolean(row.podeConvidarMembros),
+        podeCriarCartao: Boolean(row.podeCriarCartao),
+      },
+    };
+  }
+
   async listar(quadroId, filtros = {}) {
-    const { busca, limit, offset } = filtros;
+    const { busca, ativo, limit, offset } = filtros;
 
     const where = ["qp.quadro_id = ?"];
     const params = [quadroId];
@@ -45,42 +37,52 @@ class QuadroPapelRepository {
       params.push(`%${busca}%`, `%${busca}%`);
     }
 
+    if (typeof ativo === "boolean") {
+      where.push("qp.ativo = ?");
+      params.push(ativo ? 1 : 0);
+    }
+
     let sql = `
       SELECT
         qp.id,
         qp.quadro_id AS quadroId,
         qp.nome,
         qp.descricao,
+        qp.ativo,
+        qp.pode_gerenciar_quadro AS podeGerenciarQuadro,
+        qp.pode_gerenciar_listas AS podeGerenciarListas,
+        qp.pode_gerenciar_automacoes AS podeGerenciarAutomacoes,
+        qp.pode_gerenciar_campos AS podeGerenciarCampos,
+        qp.pode_convidar_membros AS podeConvidarMembros,
+        qp.pode_criar_cartao AS podeCriarCartao,
         qp.criado_em AS criadoEm,
         qp.atualizado_em AS atualizadoEm,
-        COALESCE(COUNT(qm.id), 0) AS membros,
-        qpp.visualizar_quadro AS visualizarQuadro,
-        qpp.editar_quadro AS editarQuadro,
-        qpp.excluir_quadro AS excluirQuadro,
-        qpp.gerenciar_membros AS gerenciarMembros,
-        qpp.mover_cartoes AS moverCartoes,
-        qpp.editar_listas AS editarListas
+        COUNT(
+          DISTINCT CASE
+            WHEN qm.status = 'ativo' THEN qm.id
+            ELSE NULL
+          END
+        ) AS membros
       FROM quadro_papeis qp
-      LEFT JOIN quadro_papel_permissoes qpp
-        ON qpp.papel_id = qp.id
+      LEFT JOIN quadro_membro_papeis qmp
+        ON qmp.papel_id = qp.id
       LEFT JOIN quadro_membros qm
-        ON qm.papel_id = qp.id
-       AND qm.quadro_id = qp.quadro_id
-       AND qm.status = 'ativo'
+        ON qm.id = qmp.quadro_membro_id
       WHERE ${where.join(" AND ")}
       GROUP BY
         qp.id,
         qp.quadro_id,
         qp.nome,
         qp.descricao,
+        qp.ativo,
+        qp.pode_gerenciar_quadro,
+        qp.pode_gerenciar_listas,
+        qp.pode_gerenciar_automacoes,
+        qp.pode_gerenciar_campos,
+        qp.pode_convidar_membros,
+        qp.pode_criar_cartao,
         qp.criado_em,
-        qp.atualizado_em,
-        qpp.visualizar_quadro,
-        qpp.editar_quadro,
-        qpp.excluir_quadro,
-        qpp.gerenciar_membros,
-        qpp.mover_cartoes,
-        qpp.editar_listas
+        qp.atualizado_em
       ORDER BY qp.nome ASC
     `;
 
@@ -95,8 +97,7 @@ class QuadroPapelRepository {
     }
 
     const [rows] = await db.query(sql, params);
-
-    return rows.map(this.#mapRowToEntity);
+    return rows.map((row) => this.mapRowToEntity(row));
   }
 
   async obterPorId(quadroId, papelId) {
@@ -106,22 +107,26 @@ class QuadroPapelRepository {
         qp.quadro_id AS quadroId,
         qp.nome,
         qp.descricao,
+        qp.ativo,
+        qp.pode_gerenciar_quadro AS podeGerenciarQuadro,
+        qp.pode_gerenciar_listas AS podeGerenciarListas,
+        qp.pode_gerenciar_automacoes AS podeGerenciarAutomacoes,
+        qp.pode_gerenciar_campos AS podeGerenciarCampos,
+        qp.pode_convidar_membros AS podeConvidarMembros,
+        qp.pode_criar_cartao AS podeCriarCartao,
         qp.criado_em AS criadoEm,
         qp.atualizado_em AS atualizadoEm,
-        COALESCE(COUNT(qm.id), 0) AS membros,
-        qpp.visualizar_quadro AS visualizarQuadro,
-        qpp.editar_quadro AS editarQuadro,
-        qpp.excluir_quadro AS excluirQuadro,
-        qpp.gerenciar_membros AS gerenciarMembros,
-        qpp.mover_cartoes AS moverCartoes,
-        qpp.editar_listas AS editarListas
+        COUNT(
+          DISTINCT CASE
+            WHEN qm.status = 'ativo' THEN qm.id
+            ELSE NULL
+          END
+        ) AS membros
       FROM quadro_papeis qp
-      LEFT JOIN quadro_papel_permissoes qpp
-        ON qpp.papel_id = qp.id
+      LEFT JOIN quadro_membro_papeis qmp
+        ON qmp.papel_id = qp.id
       LEFT JOIN quadro_membros qm
-        ON qm.papel_id = qp.id
-       AND qm.quadro_id = qp.quadro_id
-       AND qm.status = 'ativo'
+        ON qm.id = qmp.quadro_membro_id
       WHERE qp.quadro_id = ?
         AND qp.id = ?
       GROUP BY
@@ -129,19 +134,20 @@ class QuadroPapelRepository {
         qp.quadro_id,
         qp.nome,
         qp.descricao,
+        qp.ativo,
+        qp.pode_gerenciar_quadro,
+        qp.pode_gerenciar_listas,
+        qp.pode_gerenciar_automacoes,
+        qp.pode_gerenciar_campos,
+        qp.pode_convidar_membros,
+        qp.pode_criar_cartao,
         qp.criado_em,
-        qp.atualizado_em,
-        qpp.visualizar_quadro,
-        qpp.editar_quadro,
-        qpp.excluir_quadro,
-        qpp.gerenciar_membros,
-        qpp.mover_cartoes,
-        qpp.editar_listas
+        qp.atualizado_em
       LIMIT 1
     `;
 
     const [rows] = await db.query(sql, [quadroId, papelId]);
-    return rows[0] ? this.#mapRowToEntity(rows[0]) : null;
+    return this.mapRowToEntity(rows[0] || null);
   }
 
   async criar(dados) {
@@ -149,66 +155,47 @@ class QuadroPapelRepository {
       quadroId,
       nome,
       descricao = null,
-      permissoes = {},
+      podeGerenciarQuadro = false,
+      podeGerenciarListas = false,
+      podeGerenciarAutomacoes = false,
+      podeGerenciarCampos = false,
+      podeConvidarMembros = false,
+      podeCriarCartao = true,
+      ativo = true,
     } = dados;
 
-    const conn = await db.getConnection();
-
-    try {
-      await conn.beginTransaction();
-
-      const sqlPapel = `
-        INSERT INTO quadro_papeis (
-          quadro_id,
-          nome,
-          descricao,
-          criado_em,
-          atualizado_em
-        )
-        VALUES (?, ?, ?, NOW(), NOW())
-      `;
-
-      const [result] = await conn.query(sqlPapel, [
-        quadroId,
+    const sql = `
+      INSERT INTO quadro_papeis (
+        quadro_id,
         nome,
         descricao,
-      ]);
+        pode_gerenciar_quadro,
+        pode_gerenciar_listas,
+        pode_gerenciar_automacoes,
+        pode_gerenciar_campos,
+        pode_convidar_membros,
+        pode_criar_cartao,
+        ativo,
+        criado_em,
+        atualizado_em
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+    `;
 
-      const papelId = result.insertId;
+    const [result] = await db.query(sql, [
+      quadroId,
+      nome,
+      descricao,
+      podeGerenciarQuadro ? 1 : 0,
+      podeGerenciarListas ? 1 : 0,
+      podeGerenciarAutomacoes ? 1 : 0,
+      podeGerenciarCampos ? 1 : 0,
+      podeConvidarMembros ? 1 : 0,
+      podeCriarCartao ? 1 : 0,
+      ativo ? 1 : 0,
+    ]);
 
-      const sqlPermissoes = `
-        INSERT INTO quadro_papel_permissoes (
-          papel_id,
-          visualizar_quadro,
-          editar_quadro,
-          excluir_quadro,
-          gerenciar_membros,
-          mover_cartoes,
-          editar_listas,
-          atualizado_em
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
-      `;
-
-      await conn.query(sqlPermissoes, [
-        papelId,
-        permissoes.visualizarQuadro ? 1 : 0,
-        permissoes.editarQuadro ? 1 : 0,
-        permissoes.excluirQuadro ? 1 : 0,
-        permissoes.gerenciarMembros ? 1 : 0,
-        permissoes.moverCartoes ? 1 : 0,
-        permissoes.editarListas ? 1 : 0,
-      ]);
-
-      await conn.commit();
-
-      return this.obterPorId(quadroId, papelId);
-    } catch (error) {
-      await conn.rollback();
-      throw error;
-    } finally {
-      conn.release();
-    }
+    return this.obterPorId(quadroId, result.insertId);
   }
 
   async atualizar(quadroId, papelId, dados) {
@@ -223,6 +210,11 @@ class QuadroPapelRepository {
     if (dados.descricao !== undefined) {
       campos.push("descricao = ?");
       params.push(dados.descricao);
+    }
+
+    if (dados.ativo !== undefined) {
+      campos.push("ativo = ?");
+      params.push(dados.ativo ? 1 : 0);
     }
 
     if (campos.length === 0) {
@@ -244,38 +236,54 @@ class QuadroPapelRepository {
   }
 
   async atualizarPermissoes(quadroId, papelId, permissoes = {}) {
+    const campos = [];
+    const params = [];
+
+    if (permissoes.podeGerenciarQuadro !== undefined) {
+      campos.push("pode_gerenciar_quadro = ?");
+      params.push(permissoes.podeGerenciarQuadro ? 1 : 0);
+    }
+
+    if (permissoes.podeGerenciarListas !== undefined) {
+      campos.push("pode_gerenciar_listas = ?");
+      params.push(permissoes.podeGerenciarListas ? 1 : 0);
+    }
+
+    if (permissoes.podeGerenciarAutomacoes !== undefined) {
+      campos.push("pode_gerenciar_automacoes = ?");
+      params.push(permissoes.podeGerenciarAutomacoes ? 1 : 0);
+    }
+
+    if (permissoes.podeGerenciarCampos !== undefined) {
+      campos.push("pode_gerenciar_campos = ?");
+      params.push(permissoes.podeGerenciarCampos ? 1 : 0);
+    }
+
+    if (permissoes.podeConvidarMembros !== undefined) {
+      campos.push("pode_convidar_membros = ?");
+      params.push(permissoes.podeConvidarMembros ? 1 : 0);
+    }
+
+    if (permissoes.podeCriarCartao !== undefined) {
+      campos.push("pode_criar_cartao = ?");
+      params.push(permissoes.podeCriarCartao ? 1 : 0);
+    }
+
+    if (campos.length === 0) {
+      return this.obterPorId(quadroId, papelId);
+    }
+
+    campos.push("atualizado_em = NOW()");
+    params.push(quadroId, papelId);
+
     const sql = `
-      INSERT INTO quadro_papel_permissoes (
-        papel_id,
-        visualizar_quadro,
-        editar_quadro,
-        excluir_quadro,
-        gerenciar_membros,
-        mover_cartoes,
-        editar_listas,
-        atualizado_em
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
-      ON DUPLICATE KEY UPDATE
-        visualizar_quadro = VALUES(visualizar_quadro),
-        editar_quadro = VALUES(editar_quadro),
-        excluir_quadro = VALUES(excluir_quadro),
-        gerenciar_membros = VALUES(gerenciar_membros),
-        mover_cartoes = VALUES(mover_cartoes),
-        editar_listas = VALUES(editar_listas),
-        atualizado_em = NOW()
+      UPDATE quadro_papeis
+      SET ${campos.join(", ")}
+      WHERE quadro_id = ?
+        AND id = ?
     `;
 
-    await db.query(sql, [
-      papelId,
-      permissoes.visualizarQuadro ? 1 : 0,
-      permissoes.editarQuadro ? 1 : 0,
-      permissoes.excluirQuadro ? 1 : 0,
-      permissoes.gerenciarMembros ? 1 : 0,
-      permissoes.moverCartoes ? 1 : 0,
-      permissoes.editarListas ? 1 : 0,
-    ]);
-
+    await db.query(sql, params);
     return this.obterPorId(quadroId, papelId);
   }
 
@@ -287,10 +295,14 @@ class QuadroPapelRepository {
 
       await conn.query(
         `
-          DELETE FROM quadro_papel_permissoes
-          WHERE papel_id = ?
+          DELETE qmp
+          FROM quadro_membro_papeis qmp
+          INNER JOIN quadro_membros qm
+            ON qm.id = qmp.quadro_membro_id
+          WHERE qm.quadro_id = ?
+            AND qmp.papel_id = ?
         `,
-        [papelId]
+        [quadroId, papelId]
       );
 
       const [result] = await conn.query(
@@ -312,37 +324,28 @@ class QuadroPapelRepository {
     }
   }
 
-  async contarMembrosVinculados(quadroId, papelId) {
+  async contarMembrosVinculados(quadroId, papelId, filtros = {}) {
+    const where = [
+      "qm.quadro_id = ?",
+      "qmp.papel_id = ?",
+    ];
+    const params = [quadroId, papelId];
+
+    if (filtros.status) {
+      where.push("qm.status = ?");
+      params.push(filtros.status);
+    }
+
     const sql = `
-      SELECT COUNT(*) AS total
-      FROM quadro_membros
-      WHERE quadro_id = ?
-        AND papel_id = ?
-        AND status = 'ativo'
+      SELECT COUNT(DISTINCT qm.id) AS total
+      FROM quadro_membro_papeis qmp
+      INNER JOIN quadro_membros qm
+        ON qm.id = qmp.quadro_membro_id
+      WHERE ${where.join(" AND ")}
     `;
 
-    const [rows] = await db.query(sql, [quadroId, papelId]);
-    return rows[0]?.total || 0;
-  }
-
-  #mapRowToEntity(row) {
-    return {
-      id: row.id,
-      quadroId: row.quadroId,
-      nome: row.nome,
-      descricao: row.descricao,
-      membros: Number(row.membros || 0),
-      criadoEm: row.criadoEm,
-      atualizadoEm: row.atualizadoEm,
-      permissoes: {
-        visualizarQuadro: Boolean(row.visualizarQuadro),
-        editarQuadro: Boolean(row.editarQuadro),
-        excluirQuadro: Boolean(row.excluirQuadro),
-        gerenciarMembros: Boolean(row.gerenciarMembros),
-        moverCartoes: Boolean(row.moverCartoes),
-        editarListas: Boolean(row.editarListas),
-      },
-    };
+    const [rows] = await db.query(sql, params);
+    return Number(rows[0]?.total || 0);
   }
 }
 
