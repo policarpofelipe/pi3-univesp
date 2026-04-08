@@ -1,7 +1,10 @@
 const express = require("express");  
 const cors = require("cors");  
   
-const authRoutes = require("./routes/authRoutes");  
+const authRoutes = require("./routes/authRoutes");
+const quadroRoutes = require("./routes/quadroRoutes");
+const quadroMembroRoutes = require("./routes/quadroMembroRoutes");
+const quadroPapelRoutes = require("./routes/quadroPapelRoutes");  
 const errorMiddleware = require("./middlewares/errorMiddleware");  
   
 const app = express();  
@@ -25,6 +28,9 @@ app.get("/api/health", (req, res) => {
 });  
   
 app.use("/api/auth", authRoutes);  
+app.use("/api/quadros", quadroRoutes);
+app.use("/api/quadros", quadroMembroRoutes);
+app.use("/api/quadros", quadroPapelRoutes);
   
 app.use((req, res) => {  
   return res.status(404).json({  
