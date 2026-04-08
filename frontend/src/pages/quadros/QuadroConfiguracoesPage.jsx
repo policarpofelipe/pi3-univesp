@@ -1,95 +1,45 @@
 import { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
 import AppLayout from "../../components/layout/AppLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/Button";
+
 import {
-  LayoutDashboard,
-  Building2,
   KanbanSquare,
-  ListTodo,
-  CheckSquare,
-  Settings,
   Save,
-  Lock,
-  Globe,
+  Settings,
   Archive,
+  FolderOpen,
   ShieldCheck,
   Users,
-  ArrowLeftRight,
+  ArrowRightLeft,
 } from "lucide-react";
 
 import "../../styles/pages/quadro-configuracoes.css";
 
-const sidebarItems = [
-  { key: "home", label: "Início", href: "/home", icon: LayoutDashboard },
-];
-
-const sidebarGroups = [
-  {
-    key: "estrutura",
-    label: "Estrutura",
-    sectionLabel: "Workspace",
-    icon: Building2,
-    items: [
-      {
-        key: "organizacoes",
-        label: "Organizações",
-        href: "/organizacoes",
-        icon: Building2,
-      },
-      {
-        key: "quadros",
-        label: "Quadros",
-        href: "/quadros",
-        icon: KanbanSquare,
-      },
-    ],
-  },
-  {
-    key: "gestao",
-    label: "Gestão",
-    sectionLabel: "Operacional",
-    icon: ListTodo,
-    items: [
-      {
-        key: "listas",
-        label: "Listas",
-        href: "/listas",
-        icon: ListTodo,
-      },
-      {
-        key: "cartoes",
-        label: "Cartões",
-        href: "/cartoes",
-        icon: CheckSquare,
-      },
-    ],
-  },
-];
-
 const quadroMock = {
-  id: "qdr-001",
+  id: 1,
   nome: "Produto e Backlog",
   descricao:
     "Quadro principal para planejamento, priorização e acompanhamento das entregas do sistema.",
   organizacao: {
-    id: "org-001",
+    id: 1,
     nome: "Projeto Integrador III",
   },
-  visibilidade: "privado",
-  arquivado: false,
-  permitirConvites: true,
-  permitirComentarios: true,
-  exigirPermissaoMoverCartoes: false,
-  permitirTransicoesLivres: true,
+  organizacaoId: 1,
+  criadoPorUsuarioId: 1,
+  arquivadoEm: null,
+  criadoEm: "2026-04-01 09:00:00",
+  atualizadoEm: "2026-04-05 14:20:00",
 };
 
 export default function QuadroConfiguracoesPage() {
+  const navigate = useNavigate();
   const { quadroId } = useParams();
 
   const quadro = useMemo(() => {
-    if (!quadroId || quadroId === quadroMock.id) {
+    if (!quadroId || String(quadroId) === String(quadroMock.id)) {
       return quadroMock;
     }
 
@@ -101,13 +51,8 @@ export default function QuadroConfiguracoesPage() {
 
   const [formData, setFormData] = useState({
     nome: quadro.nome,
-    descricao: quadro.descricao,
-    visibilidade: quadro.visibilidade,
-    arquivado: quadro.arquivado,
-    permitirConvites: quadro.permitirConvites,
-    permitirComentarios: quadro.permitirComentarios,
-    exigirPermissaoMoverCartoes: quadro.exigirPermissaoMoverCartoes,
-    permitirTransicoesLivres: quadro.permitirTransicoesLivres,
+    descricao: quadro.descricao || "",
+    arquivado: Boolean(quadro.arquivadoEm),
   });
 
   const [salvando, setSalvando] = useState(false);
@@ -126,20 +71,29 @@ export default function QuadroConfiguracoesPage() {
     setSalvando(true);
 
     try {
-      console.log("Salvar configurações do quadro:", quadro.id, formData);
+      console.log("Salvar configurações reais do quadro:", quadro.id, formData);
       await new Promise((resolve) => setTimeout(resolve, 800));
     } finally {
       setSalvando(false);
     }
   }
 
+  function handleAbrirPapeis() {
+    navigate(`/quadros/${quadro.id}/papeis`);
+  }
+
+  function handleAbrirMembros() {
+    navigate(`/quadros/${quadro.id}/membros`);
+  }
+
+  function handleAbrirQuadro() {
+    navigate(`/quadros/${quadro.id}`);
+  }
+
   return (
     <AppLayout
       title="Configurações do quadro"
-      subtitle="Ajuste nome, visibilidade, permissões e comportamento operacional"
-      currentPath="/quadros"
-      sidebarItems={sidebarItems}
-      sidebarGroups={sidebarGroups}
+      subtitle="Ajuste dados básicos e estado operacional do quadro"
       breadcrumbItems={[
         { label: "Início", href: "/home" },
         { label: "Quadros", href: "/quadros" },
@@ -149,22 +103,41 @@ export default function QuadroConfiguracoesPage() {
       user={{
         name: "Usuário",
       }}
-      notificationCount={0}
+      topbarActions={
+        <Button
+          type="submit"
+          form="quadro-configuracoes-form"
+          variant="primary"
+          leftIcon={<Save size={16} />}
+          loading={salvando}
+        >
+          Salvar alterações
+        </Button>
+      }
     >
       <div className="quadro-configuracoes-page">
         <PageHeader
           title="Configurações do quadro"
-          description="Centralize aqui os ajustes estruturais e operacionais do quadro. Evite mudanças sem contrato claro com permissões, listas e fluxo."
+          description="Centralize aqui os ajustes estruturais do quadro. Permissões, membros e regras de fluxo devem ser administrados em seus módulos próprios."
           actions={
-            <Button
-              type="submit"
-              form="quadro-configuracoes-form"
-              variant="primary"
-              leftIcon={<Save size={16} />}
-              loading={salvando}
-            >
-              Salvar alterações
-            </Button>
+            <>
+              <Button
+                variant="secondary"
+                onClick={handleAbrirQuadro}
+              >
+                Ver quadro
+              </Button>
+
+              <Button
+                type="submit"
+                form="quadro-configuracoes-form"
+                variant="primary"
+                leftIcon={<Save size={16} />}
+                loading={salvando}
+              >
+                Salvar alterações
+              </Button>
+            </>
           }
         />
 
@@ -175,20 +148,22 @@ export default function QuadroConfiguracoesPage() {
           <div className="quadro-configuracoes-page__hero-content">
             <div className="quadro-configuracoes-page__hero-badge">
               <Settings size={14} aria-hidden="true" />
-              <span>Ajustes do quadro</span>
+              <span>Ajustes estruturais do quadro</span>
             </div>
 
             <h2
               id="quadro-config-hero-title"
               className="quadro-configuracoes-page__hero-title"
             >
-              Configure o comportamento e o escopo do quadro.
+              Configure apenas o que pertence ao quadro.
             </h2>
 
             <p className="quadro-configuracoes-page__hero-description">
-              As definições abaixo afetam visibilidade, colaboração, comentários,
-              transições e o ciclo operacional do quadro dentro da organização{" "}
-              <strong>{quadro.organizacao.nome}</strong>.
+              O quadro faz parte da organização{" "}
+              <strong>{quadro.organizacao.nome}</strong>. Nesta área, o foco
+              está em identidade, descrição e estado do quadro. Papéis, membros
+              e regras mais específicas devem permanecer nos seus domínios
+              próprios para evitar acoplamento indevido.
             </p>
           </div>
         </section>
@@ -205,7 +180,7 @@ export default function QuadroConfiguracoesPage() {
                 <span>Informações básicas</span>
               </h3>
               <p className="quadro-configuracoes-page__section-description">
-                Defina identidade, contexto e descrição funcional do quadro.
+                Defina a identidade textual e o contexto funcional do quadro.
               </p>
             </div>
 
@@ -249,161 +224,12 @@ export default function QuadroConfiguracoesPage() {
           <section className="quadro-configuracoes-page__section">
             <div className="quadro-configuracoes-page__section-header">
               <h3 className="quadro-configuracoes-page__section-title">
-                <ShieldCheck size={18} aria-hidden="true" />
-                <span>Visibilidade e acesso</span>
-              </h3>
-              <p className="quadro-configuracoes-page__section-description">
-                Controle quem vê o quadro e como o ingresso de membros pode ocorrer.
-              </p>
-            </div>
-
-            <div className="quadro-configuracoes-page__card">
-              <div className="quadro-configuracoes-page__field">
-                <label
-                  htmlFor="quadro-visibilidade"
-                  className="quadro-configuracoes-page__label"
-                >
-                  Visibilidade
-                </label>
-
-                <div className="quadro-configuracoes-page__select-wrap">
-                  <span
-                    className="quadro-configuracoes-page__select-icon"
-                    aria-hidden="true"
-                  >
-                    {formData.visibilidade === "publico" ? (
-                      <Globe size={16} />
-                    ) : (
-                      <Lock size={16} />
-                    )}
-                  </span>
-
-                  <select
-                    id="quadro-visibilidade"
-                    name="visibilidade"
-                    value={formData.visibilidade}
-                    onChange={handleChange}
-                  >
-                    <option value="privado">Privado</option>
-                    <option value="publico">Público</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="quadro-configuracoes-page__switch-list">
-                <label className="quadro-configuracoes-page__switch-item">
-                  <div className="quadro-configuracoes-page__switch-text">
-                    <strong>Permitir convites de membros</strong>
-                    <span>
-                      Usuários autorizados poderão convidar novos participantes
-                      para o quadro.
-                    </span>
-                  </div>
-
-                  <input
-                    name="permitirConvites"
-                    type="checkbox"
-                    checked={formData.permitirConvites}
-                    onChange={handleChange}
-                  />
-                </label>
-              </div>
-            </div>
-          </section>
-
-          <section className="quadro-configuracoes-page__section">
-            <div className="quadro-configuracoes-page__section-header">
-              <h3 className="quadro-configuracoes-page__section-title">
-                <Users size={18} aria-hidden="true" />
-                <span>Colaboração</span>
-              </h3>
-              <p className="quadro-configuracoes-page__section-description">
-                Estabeleça regras para comentários e interação dos membros.
-              </p>
-            </div>
-
-            <div className="quadro-configuracoes-page__card">
-              <div className="quadro-configuracoes-page__switch-list">
-                <label className="quadro-configuracoes-page__switch-item">
-                  <div className="quadro-configuracoes-page__switch-text">
-                    <strong>Permitir comentários nos cartões</strong>
-                    <span>
-                      Habilita a colaboração textual nas tarefas e no histórico
-                      operacional.
-                    </span>
-                  </div>
-
-                  <input
-                    name="permitirComentarios"
-                    type="checkbox"
-                    checked={formData.permitirComentarios}
-                    onChange={handleChange}
-                  />
-                </label>
-              </div>
-            </div>
-          </section>
-
-          <section className="quadro-configuracoes-page__section">
-            <div className="quadro-configuracoes-page__section-header">
-              <h3 className="quadro-configuracoes-page__section-title">
-                <ArrowLeftRight size={18} aria-hidden="true" />
-                <span>Fluxo e transições</span>
-              </h3>
-              <p className="quadro-configuracoes-page__section-description">
-                Determine se a movimentação entre listas será livre ou regida por
-                regras mais estritas.
-              </p>
-            </div>
-
-            <div className="quadro-configuracoes-page__card">
-              <div className="quadro-configuracoes-page__switch-list">
-                <label className="quadro-configuracoes-page__switch-item">
-                  <div className="quadro-configuracoes-page__switch-text">
-                    <strong>Exigir permissão para mover cartões</strong>
-                    <span>
-                      Restringe movimentações a usuários com verbo de permissão
-                      apropriado.
-                    </span>
-                  </div>
-
-                  <input
-                    name="exigirPermissaoMoverCartoes"
-                    type="checkbox"
-                    checked={formData.exigirPermissaoMoverCartoes}
-                    onChange={handleChange}
-                  />
-                </label>
-
-                <label className="quadro-configuracoes-page__switch-item">
-                  <div className="quadro-configuracoes-page__switch-text">
-                    <strong>Permitir transições livres entre listas</strong>
-                    <span>
-                      Quando desativado, o quadro pode ser configurado com regras
-                      formais de transição.
-                    </span>
-                  </div>
-
-                  <input
-                    name="permitirTransicoesLivres"
-                    type="checkbox"
-                    checked={formData.permitirTransicoesLivres}
-                    onChange={handleChange}
-                  />
-                </label>
-              </div>
-            </div>
-          </section>
-
-          <section className="quadro-configuracoes-page__section">
-            <div className="quadro-configuracoes-page__section-header">
-              <h3 className="quadro-configuracoes-page__section-title">
                 <Archive size={18} aria-hidden="true" />
                 <span>Estado do quadro</span>
               </h3>
               <p className="quadro-configuracoes-page__section-description">
-                Defina se o quadro permanece ativo no fluxo principal ou deve ser
-                mantido apenas para consulta.
+                Determine se o quadro permanece no fluxo principal ou se deve ser
+                mantido apenas para consulta e histórico.
               </p>
             </div>
 
@@ -413,8 +239,8 @@ export default function QuadroConfiguracoesPage() {
                   <div className="quadro-configuracoes-page__switch-text">
                     <strong>Arquivar quadro</strong>
                     <span>
-                      Remove o quadro do fluxo operacional principal, preservando
-                      seu histórico e seus dados.
+                      Quando ativado, o quadro sai do fluxo operacional
+                      principal, mas mantém seus dados e histórico.
                     </span>
                   </div>
 
@@ -425,6 +251,79 @@ export default function QuadroConfiguracoesPage() {
                     onChange={handleChange}
                   />
                 </label>
+
+                <div className="quadro-configuracoes-page__status-preview">
+                  <span className="quadro-configuracoes-page__status-preview-icon">
+                    {formData.arquivado ? (
+                      <Archive size={16} aria-hidden="true" />
+                    ) : (
+                      <FolderOpen size={16} aria-hidden="true" />
+                    )}
+                  </span>
+                  <span className="quadro-configuracoes-page__status-preview-text">
+                    Estado atual após salvamento:{" "}
+                    <strong>{formData.arquivado ? "Arquivado" : "Ativo"}</strong>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="quadro-configuracoes-page__section">
+            <div className="quadro-configuracoes-page__section-header">
+              <h3 className="quadro-configuracoes-page__section-title">
+                <ShieldCheck size={18} aria-hidden="true" />
+                <span>Domínios relacionados</span>
+              </h3>
+              <p className="quadro-configuracoes-page__section-description">
+                Alguns controles não pertencem ao registro principal do quadro e
+                devem ser administrados em módulos próprios.
+              </p>
+            </div>
+
+            <div className="quadro-configuracoes-page__card quadro-configuracoes-page__card--related">
+              <div className="quadro-configuracoes-page__related-list">
+                <div className="quadro-configuracoes-page__related-item">
+                  <div className="quadro-configuracoes-page__related-text">
+                    <strong>Papéis e permissões</strong>
+                    <span>
+                      Controle quem pode gerenciar quadro, listas, automações,
+                      campos, convites e criação de cartões.
+                    </span>
+                  </div>
+
+                  <Button variant="secondary" onClick={handleAbrirPapeis}>
+                    Abrir papéis
+                  </Button>
+                </div>
+
+                <div className="quadro-configuracoes-page__related-item">
+                  <div className="quadro-configuracoes-page__related-text">
+                    <strong>Membros do quadro</strong>
+                    <span>
+                      Gerencie vínculos de usuários, status do membro e
+                      associação com papéis do quadro.
+                    </span>
+                  </div>
+
+                  <Button variant="secondary" onClick={handleAbrirMembros}>
+                    Abrir membros
+                  </Button>
+                </div>
+
+                <div className="quadro-configuracoes-page__related-item">
+                  <div className="quadro-configuracoes-page__related-text">
+                    <strong>Fluxo e transições</strong>
+                    <span>
+                      Regras de movimentação entre listas devem ser tratadas no
+                      domínio de listas, permissões e transições.
+                    </span>
+                  </div>
+
+                  <Button variant="ghost" disabled leftIcon={<ArrowRightLeft size={16} />}>
+                    Em evolução
+                  </Button>
+                </div>
               </div>
             </div>
           </section>
