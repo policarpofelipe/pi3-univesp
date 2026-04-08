@@ -1,8 +1,8 @@
-import { Router } from "express";
-import authMiddleware from "../middlewares/authMiddleware.js";
-import * as quadroPapelController from "../controllers/quadroPapelController.js";
+const express = require("express");
+const authMiddleware = require("../middlewares/authMiddleware");
+const quadroPapelController = require("../controllers/quadroPapelController");
 
-const router = Router();
+const router = express.Router();
 
 /*
   Base sugerida de montagem:
@@ -31,4 +31,4 @@ router.patch(
 
 router.delete("/:quadroId/papeis/:papelId", quadroPapelController.remover);
 
-export default router;
+module.exports = router;
