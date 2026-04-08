@@ -383,11 +383,11 @@ docs/
 
 4.4. Quadros
 
-pages/quadros/QuadrosPage.jsx
-pages/quadros/QuadroDetalhePage.jsx
-pages/quadros/QuadroConfiguracoesPage.jsx
-pages/quadros/QuadroMembrosPage.jsx
-pages/quadros/QuadroPapeisPage.jsx
+✅pages/quadros/QuadrosPage.jsx
+✅pages/quadros/QuadroDetalhePage.jsx
+✅pages/quadros/QuadroConfiguracoesPage.jsx
+✅pages/quadros/QuadroMembrosPage.jsx
+✅pages/quadros/QuadroPapeisPage.jsx
 
 components/quadros/QuadroCard.jsx
 components/quadros/QuadroForm.jsx
