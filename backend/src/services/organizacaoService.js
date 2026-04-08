@@ -24,23 +24,15 @@ class OrganizacaoService {
   async listar(filtros = {}) {
     const { usuarioId, busca = "", ativo } = filtros;
 
-    const organizacoes = await organizacaoRepository.listar({
+    return await organizacaoRepository.listar({
       usuarioId,
       busca,
       ativo,
     });
-
-    return organizacoes;
   }
 
   async obterPorId(organizacaoId) {
-    const organizacao = await organizacaoRepository.obterPorId(organizacaoId);
-
-    if (!organizacao) {
-      return null;
-    }
-
-    return organizacao;
+    return await organizacaoRepository.obterPorId(organizacaoId);
   }
 
   async criar(dados) {
@@ -63,6 +55,12 @@ class OrganizacaoService {
       const error = new Error(
         "Não foi possível identificar o usuário criador da organização."
       );
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (!slug || String(slug).trim() === "") {
+      const error = new Error("O slug da organização é obrigatório.");
       error.statusCode = 400;
       throw error;
     }
@@ -96,7 +94,7 @@ class OrganizacaoService {
     await organizacaoRepository.adicionarMembro({
       organizacaoId: organizacao.id,
       usuarioId: criadoPorUsuarioId,
-      papel: "proprietario",
+      papel: "dono",
       status: "ativo",
     });
 
@@ -125,6 +123,12 @@ class OrganizacaoService {
     }
 
     if (dados.slug !== undefined) {
+      if (!dados.slug || String(dados.slug).trim() === "") {
+        const error = new Error("O slug da organização não pode ficar vazio.");
+        error.statusCode = 400;
+        throw error;
+      }
+
       const slugNormalizado = normalizarSlug(dados.slug);
 
       if (!validarSlug(slugNormalizado)) {
@@ -154,12 +158,7 @@ class OrganizacaoService {
       payload.ativo = Boolean(dados.ativo);
     }
 
-    const organizacaoAtualizada = await organizacaoRepository.atualizar(
-      organizacaoId,
-      payload
-    );
-
-    return organizacaoAtualizada;
+    return await organizacaoRepository.atualizar(organizacaoId, payload);
   }
 
   async remover(organizacaoId) {
