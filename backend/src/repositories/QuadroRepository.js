@@ -3,10 +3,29 @@ const connectionModule = require("../database/connection");
 const db = connectionModule.pool || connectionModule.db || connectionModule;
 
 class QuadroRepository {
+  mapRowToEntity(row) {
+    if (!row) return null;
+
+    return {
+      id: row.id,
+      organizacaoId: row.organizacaoId,
+      nome: row.nome,
+      descricao: row.descricao,
+      criadoPorUsuarioId: row.criadoPorUsuarioId,
+      arquivadoEm: row.arquivadoEm,
+      arquivado: Boolean(row.arquivadoEm),
+      criadoEm: row.criadoEm,
+      atualizadoEm: row.atualizadoEm,
+      totalMembros: row.totalMembros !== undefined ? Number(row.totalMembros) : undefined,
+      totalPapeis: row.totalPapeis !== undefined ? Number(row.totalPapeis) : undefined,
+      totalListas: row.totalListas !== undefined ? Number(row.totalListas) : undefined,
+    };
+  }
+
   async listar(filtros = {}) {
     const {
       organizacaoId,
-      visibilidade,
+      criadoPorUsuarioId,
       arquivado,
       busca,
       limit,
@@ -21,14 +40,13 @@ class QuadroRepository {
       params.push(organizacaoId);
     }
 
-    if (visibilidade) {
-      where.push("q.visibilidade = ?");
-      params.push(visibilidade);
+    if (criadoPorUsuarioId) {
+      where.push("q.criado_por_usuario_id = ?");
+      params.push(criadoPorUsuarioId);
     }
 
     if (typeof arquivado === "boolean") {
-      where.push("q.arquivado = ?");
-      params.push(arquivado ? 1 : 0);
+      where.push(arquivado ? "q.arquivado_em IS NOT NULL" : "q.arquivado_em IS NULL");
     }
 
     if (busca) {
@@ -42,19 +60,34 @@ class QuadroRepository {
         q.organizacao_id AS organizacaoId,
         q.nome,
         q.descricao,
-        q.visibilidade,
-        q.arquivado,
-        q.criado_por AS criadoPor,
+        q.criado_por_usuario_id AS criadoPorUsuarioId,
+        q.arquivado_em AS arquivadoEm,
         q.criado_em AS criadoEm,
-        q.atualizado_em AS atualizadoEm
+        q.atualizado_em AS atualizadoEm,
+        COUNT(DISTINCT qm.id) AS totalMembros,
+        COUNT(DISTINCT qp.id) AS totalPapeis,
+        COUNT(DISTINCT l.id) AS totalListas
       FROM quadros q
+      LEFT JOIN quadro_membros qm
+        ON qm.quadro_id = q.id
+       AND qm.status = 'ativo'
+      LEFT JOIN quadro_papeis qp
+        ON qp.quadro_id = q.id
+       AND qp.ativo = 1
+      LEFT JOIN listas l
+        ON l.quadro_id = q.id
+      ${where.length > 0 ? `WHERE ${where.join(" AND ")}` : ""}
+      GROUP BY
+        q.id,
+        q.organizacao_id,
+        q.nome,
+        q.descricao,
+        q.criado_por_usuario_id,
+        q.arquivado_em,
+        q.criado_em,
+        q.atualizado_em
+      ORDER BY q.atualizado_em DESC
     `;
-
-    if (where.length > 0) {
-      sql += ` WHERE ${where.join(" AND ")}`;
-    }
-
-    sql += " ORDER BY q.atualizado_em DESC";
 
     if (Number.isInteger(limit) && limit > 0) {
       sql += " LIMIT ?";
@@ -67,7 +100,7 @@ class QuadroRepository {
     }
 
     const [rows] = await db.query(sql, params);
-    return rows;
+    return rows.map((row) => this.mapRowToEntity(row));
   }
 
   async obterPorId(quadroId) {
@@ -77,18 +110,37 @@ class QuadroRepository {
         q.organizacao_id AS organizacaoId,
         q.nome,
         q.descricao,
-        q.visibilidade,
-        q.arquivado,
-        q.criado_por AS criadoPor,
+        q.criado_por_usuario_id AS criadoPorUsuarioId,
+        q.arquivado_em AS arquivadoEm,
         q.criado_em AS criadoEm,
-        q.atualizado_em AS atualizadoEm
+        q.atualizado_em AS atualizadoEm,
+        COUNT(DISTINCT qm.id) AS totalMembros,
+        COUNT(DISTINCT qp.id) AS totalPapeis,
+        COUNT(DISTINCT l.id) AS totalListas
       FROM quadros q
+      LEFT JOIN quadro_membros qm
+        ON qm.quadro_id = q.id
+       AND qm.status = 'ativo'
+      LEFT JOIN quadro_papeis qp
+        ON qp.quadro_id = q.id
+       AND qp.ativo = 1
+      LEFT JOIN listas l
+        ON l.quadro_id = q.id
       WHERE q.id = ?
+      GROUP BY
+        q.id,
+        q.organizacao_id,
+        q.nome,
+        q.descricao,
+        q.criado_por_usuario_id,
+        q.arquivado_em,
+        q.criado_em,
+        q.atualizado_em
       LIMIT 1
     `;
 
     const [rows] = await db.query(sql, [quadroId]);
-    return rows[0] || null;
+    return this.mapRowToEntity(rows[0] || null);
   }
 
   async criar(dados) {
@@ -96,8 +148,7 @@ class QuadroRepository {
       organizacaoId,
       nome,
       descricao = null,
-      visibilidade = "privado",
-      criadoPor = null,
+      criadoPorUsuarioId = null,
     } = dados;
 
     const sql = `
@@ -105,21 +156,19 @@ class QuadroRepository {
         organizacao_id,
         nome,
         descricao,
-        visibilidade,
-        arquivado,
-        criado_por,
+        criado_por_usuario_id,
+        arquivado_em,
         criado_em,
         atualizado_em
       )
-      VALUES (?, ?, ?, ?, 0, ?, NOW(), NOW())
+      VALUES (?, ?, ?, ?, NULL, NOW(), NOW())
     `;
 
     const [result] = await db.query(sql, [
       organizacaoId,
       nome,
       descricao,
-      visibilidade,
-      criadoPor,
+      criadoPorUsuarioId,
     ]);
 
     return this.obterPorId(result.insertId);
@@ -139,14 +188,9 @@ class QuadroRepository {
       params.push(dados.descricao);
     }
 
-    if (dados.visibilidade !== undefined) {
-      campos.push("visibilidade = ?");
-      params.push(dados.visibilidade);
-    }
-
-    if (dados.arquivado !== undefined) {
-      campos.push("arquivado = ?");
-      params.push(dados.arquivado ? 1 : 0);
+    if (dados.criadoPorUsuarioId !== undefined) {
+      campos.push("criado_por_usuario_id = ?");
+      params.push(dados.criadoPorUsuarioId);
     }
 
     if (campos.length === 0) {
@@ -167,80 +211,19 @@ class QuadroRepository {
   }
 
   async remover(quadroId) {
-    const sql = "DELETE FROM quadros WHERE id = ?";
+    const sql = `
+      DELETE FROM quadros
+      WHERE id = ?
+    `;
+
     const [result] = await db.query(sql, [quadroId]);
     return result.affectedRows > 0;
-  }
-
-  async obterConfiguracoes(quadroId) {
-    const sql = `
-      SELECT
-        qc.quadro_id AS quadroId,
-        qc.permitir_convites AS permitirConvites,
-        qc.permitir_comentarios AS permitirComentarios,
-        qc.exigir_permissao_mover_cartoes AS exigirPermissaoMoverCartoes,
-        qc.permitir_transicoes_livres AS permitirTransicoesLivres,
-        qc.atualizado_em AS atualizadoEm
-      FROM quadro_configuracoes qc
-      WHERE qc.quadro_id = ?
-      LIMIT 1
-    `;
-
-    const [rows] = await db.query(sql, [quadroId]);
-    return rows[0] || null;
-  }
-
-  async criarConfiguracoesPadrao(quadroId) {
-    const sql = `
-      INSERT INTO quadro_configuracoes (
-        quadro_id,
-        permitir_convites,
-        permitir_comentarios,
-        exigir_permissao_mover_cartoes,
-        permitir_transicoes_livres,
-        atualizado_em
-      )
-      VALUES (?, 1, 1, 0, 1, NOW())
-    `;
-
-    await db.query(sql, [quadroId]);
-    return this.obterConfiguracoes(quadroId);
-  }
-
-  async atualizarConfiguracoes(quadroId, dados) {
-    const sql = `
-      INSERT INTO quadro_configuracoes (
-        quadro_id,
-        permitir_convites,
-        permitir_comentarios,
-        exigir_permissao_mover_cartoes,
-        permitir_transicoes_livres,
-        atualizado_em
-      )
-      VALUES (?, ?, ?, ?, ?, NOW())
-      ON DUPLICATE KEY UPDATE
-        permitir_convites = VALUES(permitir_convites),
-        permitir_comentarios = VALUES(permitir_comentarios),
-        exigir_permissao_mover_cartoes = VALUES(exigir_permissao_mover_cartoes),
-        permitir_transicoes_livres = VALUES(permitir_transicoes_livres),
-        atualizado_em = NOW()
-    `;
-
-    await db.query(sql, [
-      quadroId,
-      dados.permitirConvites ? 1 : 0,
-      dados.permitirComentarios ? 1 : 0,
-      dados.exigirPermissaoMoverCartoes ? 1 : 0,
-      dados.permitirTransicoesLivres ? 1 : 0,
-    ]);
-
-    return this.obterConfiguracoes(quadroId);
   }
 
   async arquivar(quadroId) {
     const sql = `
       UPDATE quadros
-      SET arquivado = 1,
+      SET arquivado_em = NOW(),
           atualizado_em = NOW()
       WHERE id = ?
     `;
@@ -252,13 +235,62 @@ class QuadroRepository {
   async desarquivar(quadroId) {
     const sql = `
       UPDATE quadros
-      SET arquivado = 0,
+      SET arquivado_em = NULL,
           atualizado_em = NOW()
       WHERE id = ?
     `;
 
     await db.query(sql, [quadroId]);
     return this.obterPorId(quadroId);
+  }
+
+  async obterPreferenciasUsuario(quadroId, usuarioId) {
+    const sql = `
+      SELECT
+        qpu.id,
+        qpu.quadro_id AS quadroId,
+        qpu.usuario_id AS usuarioId,
+        qpu.tema,
+        qpu.cor_fundo AS corFundo,
+        qpu.compacto,
+        qpu.atualizado_em AS atualizadoEm
+      FROM quadro_preferencias_usuario qpu
+      WHERE qpu.quadro_id = ?
+        AND qpu.usuario_id = ?
+      LIMIT 1
+    `;
+
+    const [rows] = await db.query(sql, [quadroId, usuarioId]);
+    return rows[0] || null;
+  }
+
+  async atualizarPreferenciasUsuario(quadroId, usuarioId, dados = {}) {
+    const sql = `
+      INSERT INTO quadro_preferencias_usuario (
+        quadro_id,
+        usuario_id,
+        tema,
+        cor_fundo,
+        compacto,
+        atualizado_em
+      )
+      VALUES (?, ?, ?, ?, ?, NOW())
+      ON DUPLICATE KEY UPDATE
+        tema = VALUES(tema),
+        cor_fundo = VALUES(cor_fundo),
+        compacto = VALUES(compacto),
+        atualizado_em = NOW()
+    `;
+
+    await db.query(sql, [
+      quadroId,
+      usuarioId,
+      dados.tema || "sistema",
+      dados.corFundo || null,
+      dados.compacto ? 1 : 0,
+    ]);
+
+    return this.obterPreferenciasUsuario(quadroId, usuarioId);
   }
 }
 
