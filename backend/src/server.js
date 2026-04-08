@@ -1,4 +1,4 @@
-o server acho que não precisa de ajuste, verifique require("dotenv").config();  
+require("dotenv").config();  
   
 const app = require("./app");  
 const env = require("./config/env");  
