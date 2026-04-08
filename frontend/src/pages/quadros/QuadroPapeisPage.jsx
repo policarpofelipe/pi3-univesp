@@ -1,128 +1,84 @@
 import { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
 import AppLayout from "../../components/layout/AppLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import EmptyState from "../../components/ui/EmptyState";
 import Button from "../../components/ui/Button";
+
 import {
-  LayoutDashboard,
-  Building2,
-  KanbanSquare,
-  ListTodo,
-  CheckSquare,
   ShieldCheck,
   Plus,
   Search,
   Crown,
   UserCog,
-  Eye,
-  Pencil,
-  Trash2,
-  ArrowRightLeft,
+  EyeOff,
   Users,
   KeyRound,
+  KanbanSquare,
+  ListTodo,
+  Sparkles,
+  Columns3,
+  UserPlus,
+  CheckSquare,
 } from "lucide-react";
 
 import "../../styles/pages/quadro-papeis.css";
 
-const sidebarItems = [
-  { key: "home", label: "Início", href: "/home", icon: LayoutDashboard },
-];
-
-const sidebarGroups = [
-  {
-    key: "estrutura",
-    label: "Estrutura",
-    sectionLabel: "Workspace",
-    icon: Building2,
-    items: [
-      {
-        key: "organizacoes",
-        label: "Organizações",
-        href: "/organizacoes",
-        icon: Building2,
-      },
-      {
-        key: "quadros",
-        label: "Quadros",
-        href: "/quadros",
-        icon: KanbanSquare,
-      },
-    ],
-  },
-  {
-    key: "gestao",
-    label: "Gestão",
-    sectionLabel: "Operacional",
-    icon: ListTodo,
-    items: [
-      {
-        key: "listas",
-        label: "Listas",
-        href: "/listas",
-        icon: ListTodo,
-      },
-      {
-        key: "cartoes",
-        label: "Cartões",
-        href: "/cartoes",
-        icon: CheckSquare,
-      },
-    ],
-  },
-];
-
 const quadroMock = {
-  id: "qdr-001",
+  id: 1,
   nome: "Produto e Backlog",
   organizacao: {
-    id: "org-001",
+    id: 1,
     nome: "Projeto Integrador III",
   },
   papeis: [
     {
-      id: "pap-001",
+      id: 1,
       nome: "Administrador",
       descricao:
-        "Papel com controle amplo sobre estrutura, membros, configurações e fluxo do quadro.",
+        "Papel com controle amplo sobre estrutura, papéis, membros e comportamento geral do quadro.",
+      ativo: true,
       membros: 1,
       permissoes: {
-        visualizarQuadro: true,
-        editarQuadro: true,
-        excluirQuadro: true,
-        gerenciarMembros: true,
-        moverCartoes: true,
-        editarListas: true,
+        podeGerenciarQuadro: true,
+        podeGerenciarListas: true,
+        podeGerenciarAutomacoes: true,
+        podeGerenciarCampos: true,
+        podeConvidarMembros: true,
+        podeCriarCartao: true,
       },
     },
     {
-      id: "pap-002",
+      id: 2,
       nome: "Colaborador",
       descricao:
-        "Papel operacional voltado para execução diária, edição de conteúdo e movimentação entre listas.",
+        "Papel operacional para uso cotidiano do quadro, com foco em execução e criação de conteúdo.",
+      ativo: true,
       membros: 4,
       permissoes: {
-        visualizarQuadro: true,
-        editarQuadro: false,
-        excluirQuadro: false,
-        gerenciarMembros: false,
-        moverCartoes: true,
-        editarListas: true,
+        podeGerenciarQuadro: false,
+        podeGerenciarListas: true,
+        podeGerenciarAutomacoes: false,
+        podeGerenciarCampos: false,
+        podeConvidarMembros: false,
+        podeCriarCartao: true,
       },
     },
     {
-      id: "pap-003",
+      id: 3,
       nome: "Leitor",
       descricao:
-        "Papel restrito à consulta do quadro, sem capacidade de alteração estrutural ou operacional.",
+        "Papel restrito para acompanhamento do quadro, sem capacidade de administração estrutural.",
+      ativo: false,
       membros: 2,
       permissoes: {
-        visualizarQuadro: true,
-        editarQuadro: false,
-        excluirQuadro: false,
-        gerenciarMembros: false,
-        moverCartoes: false,
-        editarListas: false,
+        podeGerenciarQuadro: false,
+        podeGerenciarListas: false,
+        podeGerenciarAutomacoes: false,
+        podeGerenciarCampos: false,
+        podeConvidarMembros: false,
+        podeCriarCartao: false,
       },
     },
   ],
@@ -130,34 +86,34 @@ const quadroMock = {
 
 const permissoesRotulo = [
   {
-    key: "visualizarQuadro",
-    label: "Visualizar quadro",
-    icon: Eye,
+    key: "podeGerenciarQuadro",
+    label: "Gerenciar quadro",
+    icon: KanbanSquare,
   },
   {
-    key: "editarQuadro",
-    label: "Editar quadro",
-    icon: Pencil,
-  },
-  {
-    key: "excluirQuadro",
-    label: "Excluir quadro",
-    icon: Trash2,
-  },
-  {
-    key: "gerenciarMembros",
-    label: "Gerenciar membros",
-    icon: Users,
-  },
-  {
-    key: "moverCartoes",
-    label: "Mover cartões",
-    icon: ArrowRightLeft,
-  },
-  {
-    key: "editarListas",
-    label: "Editar listas",
+    key: "podeGerenciarListas",
+    label: "Gerenciar listas",
     icon: ListTodo,
+  },
+  {
+    key: "podeGerenciarAutomacoes",
+    label: "Gerenciar automações",
+    icon: Sparkles,
+  },
+  {
+    key: "podeGerenciarCampos",
+    label: "Gerenciar campos",
+    icon: Columns3,
+  },
+  {
+    key: "podeConvidarMembros",
+    label: "Convidar membros",
+    icon: UserPlus,
+  },
+  {
+    key: "podeCriarCartao",
+    label: "Criar cartão",
+    icon: CheckSquare,
   },
 ];
 
@@ -168,11 +124,12 @@ function obterIconePapel(nomePapel) {
 }
 
 export default function QuadroPapeisPage() {
+  const navigate = useNavigate();
   const { quadroId } = useParams();
   const [busca, setBusca] = useState("");
 
   const quadro = useMemo(() => {
-    if (!quadroId || quadroId === quadroMock.id) {
+    if (!quadroId || String(quadroId) === String(quadroMock.id)) {
       return quadroMock;
     }
 
@@ -190,13 +147,17 @@ export default function QuadroPapeisPage() {
 
       return (
         papel.nome.toLowerCase().includes(termo) ||
-        papel.descricao.toLowerCase().includes(termo)
+        (papel.descricao || "").toLowerCase().includes(termo)
       );
     });
   }, [busca, quadro.papeis]);
 
   const totalMembrosVinculados = useMemo(() => {
-    return quadro.papeis.reduce((acc, papel) => acc + papel.membros, 0);
+    return quadro.papeis.reduce((acc, papel) => acc + (papel.membros || 0), 0);
+  }, [quadro.papeis]);
+
+  const totalPapeisAtivos = useMemo(() => {
+    return quadro.papeis.filter((papel) => papel.ativo).length;
   }, [quadro.papeis]);
 
   function handleNovoPapel() {
@@ -207,13 +168,14 @@ export default function QuadroPapeisPage() {
     console.log("Editar papel:", papelId);
   }
 
+  function handleAbrirQuadro() {
+    navigate(`/quadros/${quadro.id}`);
+  }
+
   return (
     <AppLayout
       title="Papéis do quadro"
       subtitle="Defina responsabilidades e permissões por papel"
-      currentPath="/quadros"
-      sidebarItems={sidebarItems}
-      sidebarGroups={sidebarGroups}
       breadcrumbItems={[
         { label: "Início", href: "/home" },
         { label: "Quadros", href: "/quadros" },
@@ -223,20 +185,37 @@ export default function QuadroPapeisPage() {
       user={{
         name: "Usuário",
       }}
-      notificationCount={0}
+      topbarActions={
+        <Button
+          variant="primary"
+          leftIcon={<Plus size={16} />}
+          onClick={handleNovoPapel}
+        >
+          Novo papel
+        </Button>
+      }
     >
       <div className="quadro-papeis-page">
         <PageHeader
           title="Papéis do quadro"
           description={`Estruture os papéis do quadro "${quadro.nome}" com foco em permissões claras, menor ambiguidade operacional e menor acoplamento entre responsabilidades.`}
           actions={
-            <Button
-              variant="primary"
-              leftIcon={<Plus size={16} />}
-              onClick={handleNovoPapel}
-            >
-              Novo papel
-            </Button>
+            <>
+              <Button
+                variant="secondary"
+                onClick={handleAbrirQuadro}
+              >
+                Ver quadro
+              </Button>
+
+              <Button
+                variant="primary"
+                leftIcon={<Plus size={16} />}
+                onClick={handleNovoPapel}
+              >
+                Novo papel
+              </Button>
+            </>
           }
         />
 
@@ -258,9 +237,9 @@ export default function QuadroPapeisPage() {
             </h2>
 
             <p className="quadro-papeis-page__hero-description">
-              Neste quadro, os papéis servem como contrato operacional. Eles
-              determinam quem pode visualizar, editar, mover cartões, alterar
-              listas e administrar a participação de membros.
+              Neste quadro, os papéis funcionam como contrato operacional. Eles
+              determinam quem administra o quadro, listas, automações, campos,
+              convites e criação de cartões.
             </p>
           </div>
         </section>
@@ -275,7 +254,10 @@ export default function QuadroPapeisPage() {
             </label>
 
             <div className="quadro-papeis-page__search">
-              <span className="quadro-papeis-page__search-icon" aria-hidden="true">
+              <span
+                className="quadro-papeis-page__search-icon"
+                aria-hidden="true"
+              >
                 <Search size={16} />
               </span>
 
@@ -303,7 +285,16 @@ export default function QuadroPapeisPage() {
           </article>
 
           <article className="quadro-papeis-page__summary-card">
-            <p className="quadro-papeis-page__summary-label">Membros vinculados</p>
+            <p className="quadro-papeis-page__summary-label">Papéis ativos</p>
+            <strong className="quadro-papeis-page__summary-value">
+              {totalPapeisAtivos}
+            </strong>
+          </article>
+
+          <article className="quadro-papeis-page__summary-card">
+            <p className="quadro-papeis-page__summary-label">
+              Membros vinculados
+            </p>
             <strong className="quadro-papeis-page__summary-value">
               {totalMembrosVinculados}
             </strong>
@@ -343,7 +334,10 @@ export default function QuadroPapeisPage() {
                 >
                   <div className="quadro-papeis-page__card-header">
                     <div className="quadro-papeis-page__card-title-block">
-                      <div className="quadro-papeis-page__card-icon" aria-hidden="true">
+                      <div
+                        className="quadro-papeis-page__card-icon"
+                        aria-hidden="true"
+                      >
                         <IconePapel size={18} />
                       </div>
 
@@ -360,22 +354,34 @@ export default function QuadroPapeisPage() {
                       </div>
                     </div>
 
-                    <Button
-                      variant="secondary"
-                      onClick={() => handleEditarPapel(papel.id)}
-                    >
-                      Editar
-                    </Button>
+                    <div className="quadro-papeis-page__card-actions">
+                      <span
+                        className={`quadro-papeis-page__card-status ${
+                          papel.ativo
+                            ? "quadro-papeis-page__card-status--active"
+                            : "quadro-papeis-page__card-status--inactive"
+                        }`}
+                      >
+                        {papel.ativo ? "Ativo" : "Inativo"}
+                      </span>
+
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleEditarPapel(papel.id)}
+                      >
+                        Editar
+                      </Button>
+                    </div>
                   </div>
 
                   <p className="quadro-papeis-page__card-description">
-                    {papel.descricao}
+                    {papel.descricao || "Sem descrição cadastrada."}
                   </p>
 
                   <div className="quadro-papeis-page__permissions">
                     {permissoesRotulo.map((permissao) => {
                       const IconePermissao = permissao.icon;
-                      const ativa = papel.permissoes[permissao.key];
+                      const ativa = Boolean(papel.permissoes?.[permissao.key]);
 
                       return (
                         <div
@@ -390,9 +396,16 @@ export default function QuadroPapeisPage() {
                           >
                             <IconePermissao size={14} />
                           </span>
+
                           <span className="quadro-papeis-page__permission-label">
                             {permissao.label}
                           </span>
+
+                          {!ativa ? (
+                            <span className="quadro-papeis-page__permission-state">
+                              <EyeOff size={12} aria-hidden="true" />
+                            </span>
+                          ) : null}
                         </div>
                       );
                     })}
