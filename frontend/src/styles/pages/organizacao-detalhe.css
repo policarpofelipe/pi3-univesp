@@ -1,0 +1,115 @@
+.organizacao-detalhe-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+}
+
+.organizacao-detalhe-page__stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+.organizacao-detalhe-page__stat-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.organizacao-detalhe-page__stat-label {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-soft);
+}
+
+.organizacao-detalhe-page__stat-value {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.organizacao-detalhe-page__content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+.organizacao-detalhe-page__panel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.organizacao-detalhe-page__panel-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.organizacao-detalhe-page__details {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.organizacao-detalhe-page__detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.organizacao-detalhe-page__detail-item--full {
+  grid-column: 1 / -1;
+}
+
+.organizacao-detalhe-page__detail-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-soft);
+}
+
+.organizacao-detalhe-page__detail-value {
+  margin: 0;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+}
+
+.organizacao-detalhe-page__detail-value--muted {
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.organizacao-detalhe-page__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .organizacao-detalhe-page__stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .organizacao-detalhe-page__details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .organizacao-detalhe-page__content-grid {
+    grid-template-columns: minmax(0, 2fr) minmax(18rem, 1fr);
+  }
+}
