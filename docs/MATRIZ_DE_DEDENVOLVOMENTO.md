@@ -354,7 +354,7 @@ docs/
 ✅components/ui/EmptyState.jsx
 ✅components/ui/LoadingState.jsx
 ✅components/ui/ErrorState.jsx
-✅pages/HomePage.jsx
+✅pages/home/HomePage.jsx
 ✅pages/SelecaoOrganizacaoPage.jsx
 ✅pages/SelecaoQuadroPage.jsx
 ✅context/AccessibilityContext.jsx
