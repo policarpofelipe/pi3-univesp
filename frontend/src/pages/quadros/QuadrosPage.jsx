@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
 import AppLayout from "../../components/layout/AppLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import EmptyState from "../../components/ui/EmptyState";
 import Button from "../../components/ui/Button";
+
 import {
-  LayoutDashboard,
   Building2,
   KanbanSquare,
   ListTodo,
@@ -14,158 +16,153 @@ import {
   Filter,
   Users,
   CalendarDays,
-  Lock,
-  Globe,
+  Archive,
+  FolderOpen,
 } from "lucide-react";
 
-const sidebarItems = [
-  { key: "home", label: "Início", href: "/home", icon: LayoutDashboard },
-];
-
-const sidebarGroups = [
-  {
-    key: "estrutura",
-    label: "Estrutura",
-    sectionLabel: "Workspace",
-    icon: Building2,
-    items: [
-      {
-        key: "organizacoes",
-        label: "Organizações",
-        href: "/organizacoes",
-        icon: Building2,
-      },
-      {
-        key: "quadros",
-        label: "Quadros",
-        href: "/quadros",
-        icon: KanbanSquare,
-      },
-    ],
-  },
-  {
-    key: "gestao",
-    label: "Gestão",
-    sectionLabel: "Operacional",
-    icon: ListTodo,
-    items: [
-      {
-        key: "listas",
-        label: "Listas",
-        href: "/listas",
-        icon: ListTodo,
-      },
-      {
-        key: "cartoes",
-        label: "Cartões",
-        href: "/cartoes",
-        icon: CheckSquare,
-      },
-    ],
-  },
-];
+import "../../styles/pages/quadros.css";
 
 const quadrosMock = [
   {
-    id: "qdr-001",
+    id: 1,
+    organizacaoId: 1,
     nome: "Produto e Backlog",
     descricao:
-      "Quadro principal para planejamento, priorização e acompanhamento das entregas do produto.",
-    organizacao: "Projeto Integrador III",
-    visibilidade: "privado",
-    membros: 5,
-    listas: 4,
-    cartoes: 18,
-    atualizadoEm: "2026-04-04",
+      "Quadro principal para planejamento, priorização e acompanhamento das entregas do sistema.",
+    criadoPorUsuarioId: 1,
+    arquivadoEm: null,
+    criadoEm: "2026-04-01 09:00:00",
+    atualizadoEm: "2026-04-04 14:30:00",
+    totalMembros: 5,
+    totalListas: 4,
+    totalCartoes: 18,
+    organizacaoNome: "Projeto Integrador III",
   },
   {
-    id: "qdr-002",
+    id: 2,
+    organizacaoId: 1,
     nome: "Operação Acadêmica",
     descricao:
-      "Acompanhamento das entregas documentais, relatórios, apresentações e alinhamentos do grupo.",
-    organizacao: "Projeto Integrador III",
-    visibilidade: "privado",
-    membros: 7,
-    listas: 3,
-    cartoes: 11,
-    atualizadoEm: "2026-04-03",
+      "Quadro voltado para relatórios, entregas parciais, apresentações e alinhamentos do grupo.",
+    criadoPorUsuarioId: 1,
+    arquivadoEm: null,
+    criadoEm: "2026-04-02 10:15:00",
+    atualizadoEm: "2026-04-05 08:20:00",
+    totalMembros: 7,
+    totalListas: 3,
+    totalCartoes: 11,
+    organizacaoNome: "Projeto Integrador III",
   },
   {
-    id: "qdr-003",
+    id: 3,
+    organizacaoId: 2,
     nome: "Testes e Qualidade",
     descricao:
-      "Quadro voltado para testes funcionais, correções e validações de integração entre frontend, backend e banco.",
-    organizacao: "Laboratório PI3",
-    visibilidade: "publico",
-    membros: 4,
-    listas: 5,
-    cartoes: 9,
-    atualizadoEm: "2026-04-01",
+      "Quadro destinado a correções, validações de integração e acompanhamento de testes.",
+    criadoPorUsuarioId: 2,
+    arquivadoEm: "2026-04-03 18:00:00",
+    criadoEm: "2026-03-28 13:40:00",
+    atualizadoEm: "2026-04-03 18:00:00",
+    totalMembros: 4,
+    totalListas: 5,
+    totalCartoes: 9,
+    organizacaoNome: "Laboratório PI3",
   },
 ];
 
-function formatarVisibilidade(visibilidade) {
-  return visibilidade === "publico" ? "Público" : "Privado";
-}
+const currentUser = {
+  name: "Usuário",
+};
 
-function formatarData(dataIso) {
+function formatarData(data) {
+  if (!data) return "Não informado";
+
   try {
     return new Intl.DateTimeFormat("pt-BR", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
-    }).format(new Date(`${dataIso}T00:00:00`));
+    }).format(new Date(data));
   } catch {
-    return dataIso;
+    return data;
   }
 }
 
+function obterStatusQuadro(quadro) {
+  return quadro.arquivadoEm ? "arquivado" : "ativo";
+}
+
+function formatarStatusQuadro(quadro) {
+  return quadro.arquivadoEm ? "Arquivado" : "Ativo";
+}
+
 export default function QuadrosPage() {
+  const navigate = useNavigate();
+  const { organizacaoId } = useParams();
+
   const [busca, setBusca] = useState("");
-  const [filtroVisibilidade, setFiltroVisibilidade] = useState("todos");
+  const [filtroStatus, setFiltroStatus] = useState("todos");
 
   const quadrosFiltrados = useMemo(() => {
     return quadrosMock.filter((quadro) => {
       const termo = busca.trim().toLowerCase();
 
+      const correspondeOrganizacao =
+        !organizacaoId || String(quadro.organizacaoId) === String(organizacaoId);
+
       const correspondeBusca =
         !termo ||
         quadro.nome.toLowerCase().includes(termo) ||
-        quadro.descricao.toLowerCase().includes(termo) ||
-        quadro.organizacao.toLowerCase().includes(termo);
+        (quadro.descricao || "").toLowerCase().includes(termo) ||
+        (quadro.organizacaoNome || "").toLowerCase().includes(termo);
 
-      const correspondeVisibilidade =
-        filtroVisibilidade === "todos" ||
-        quadro.visibilidade === filtroVisibilidade;
+      const statusQuadro = obterStatusQuadro(quadro);
+      const correspondeStatus =
+        filtroStatus === "todos" || statusQuadro === filtroStatus;
 
-      return correspondeBusca && correspondeVisibilidade;
+      return correspondeOrganizacao && correspondeBusca && correspondeStatus;
     });
-  }, [busca, filtroVisibilidade]);
+  }, [busca, filtroStatus, organizacaoId]);
 
   function handleCriarQuadro() {
     console.log("Criar quadro");
   }
 
   function handleAbrirQuadro(id) {
-    console.log("Abrir quadro:", id);
+    navigate(`/quadros/${id}`);
   }
+
+  const breadcrumbItems = [
+    { label: "Início", href: "/home" },
+    ...(organizacaoId
+      ? [{ label: "Organizações", href: "/organizacoes" }]
+      : []),
+    { label: "Quadros" },
+  ];
+
+  const totalAtivos = quadrosFiltrados.filter(
+    (quadro) => !quadro.arquivadoEm
+  ).length;
+
+  const totalArquivados = quadrosFiltrados.filter(
+    (quadro) => Boolean(quadro.arquivadoEm)
+  ).length;
 
   return (
     <AppLayout
       title="Quadros"
       subtitle="Gerencie os quadros disponíveis no sistema"
-      currentPath="/quadros"
-      sidebarItems={sidebarItems}
-      sidebarGroups={sidebarGroups}
-      breadcrumbItems={[
-        { label: "Início", href: "/home" },
-        { label: "Quadros" },
-      ]}
-      user={{
-        name: "Usuário",
-        email: "usuario@email.com",
-      }}
-      notificationCount={0}
+      breadcrumbItems={breadcrumbItems}
+      user={currentUser}
+      topbarActions={
+        <Button
+          variant="primary"
+          leftIcon={<Plus size={16} />}
+          onClick={handleCriarQuadro}
+        >
+          Novo quadro
+        </Button>
+      }
     >
       <div className="quadros-page">
         <PageHeader
@@ -208,8 +205,8 @@ export default function QuadrosPage() {
           </div>
 
           <div className="quadros-page__toolbar-group">
-            <label htmlFor="quadros-visibilidade" className="sr-only">
-              Filtrar por visibilidade
+            <label htmlFor="quadros-status" className="sr-only">
+              Filtrar por status
             </label>
 
             <div className="quadros-page__filter">
@@ -218,14 +215,14 @@ export default function QuadrosPage() {
               </span>
 
               <select
-                id="quadros-visibilidade"
-                value={filtroVisibilidade}
-                onChange={(event) => setFiltroVisibilidade(event.target.value)}
+                id="quadros-status"
+                value={filtroStatus}
+                onChange={(event) => setFiltroStatus(event.target.value)}
                 className="quadros-page__filter-select"
               >
                 <option value="todos">Todos os quadros</option>
-                <option value="privado">Somente privados</option>
-                <option value="publico">Somente públicos</option>
+                <option value="ativo">Somente ativos</option>
+                <option value="arquivado">Somente arquivados</option>
               </select>
             </div>
           </div>
@@ -243,22 +240,14 @@ export default function QuadrosPage() {
           </article>
 
           <article className="quadros-page__summary-card">
-            <p className="quadros-page__summary-label">Privados</p>
-            <strong className="quadros-page__summary-value">
-              {
-                quadrosFiltrados.filter((quadro) => quadro.visibilidade === "privado")
-                  .length
-              }
-            </strong>
+            <p className="quadros-page__summary-label">Ativos</p>
+            <strong className="quadros-page__summary-value">{totalAtivos}</strong>
           </article>
 
           <article className="quadros-page__summary-card">
-            <p className="quadros-page__summary-label">Públicos</p>
+            <p className="quadros-page__summary-label">Arquivados</p>
             <strong className="quadros-page__summary-value">
-              {
-                quadrosFiltrados.filter((quadro) => quadro.visibilidade === "publico")
-                  .length
-              }
+              {totalArquivados}
             </strong>
           </article>
         </section>
@@ -286,8 +275,7 @@ export default function QuadrosPage() {
             aria-label="Lista de quadros disponíveis"
           >
             {quadrosFiltrados.map((quadro) => {
-              const IconeVisibilidade =
-                quadro.visibilidade === "publico" ? Globe : Lock;
+              const IconeStatus = quadro.arquivadoEm ? Archive : FolderOpen;
 
               return (
                 <article
@@ -306,23 +294,21 @@ export default function QuadrosPage() {
 
                       <p className="quadros-page__card-org">
                         <Building2 size={14} aria-hidden="true" />
-                        <span>{quadro.organizacao}</span>
+                        <span>{quadro.organizacaoNome}</span>
                       </p>
                     </div>
 
                     <span
                       className="quadros-page__card-badge"
-                      aria-label={`Quadro ${formatarVisibilidade(
-                        quadro.visibilidade
-                      ).toLowerCase()}`}
+                      aria-label={`Quadro ${formatarStatusQuadro(quadro).toLowerCase()}`}
                     >
-                      <IconeVisibilidade size={14} aria-hidden="true" />
-                      <span>{formatarVisibilidade(quadro.visibilidade)}</span>
+                      <IconeStatus size={14} aria-hidden="true" />
+                      <span>{formatarStatusQuadro(quadro)}</span>
                     </span>
                   </div>
 
                   <p className="quadros-page__card-description">
-                    {quadro.descricao}
+                    {quadro.descricao || "Sem descrição cadastrada."}
                   </p>
 
                   <dl className="quadros-page__card-metrics">
@@ -331,7 +317,7 @@ export default function QuadrosPage() {
                         <Users size={14} aria-hidden="true" />
                         <span>Membros</span>
                       </dt>
-                      <dd>{quadro.membros}</dd>
+                      <dd>{quadro.totalMembros ?? 0}</dd>
                     </div>
 
                     <div className="quadros-page__card-metric">
@@ -339,7 +325,7 @@ export default function QuadrosPage() {
                         <ListTodo size={14} aria-hidden="true" />
                         <span>Listas</span>
                       </dt>
-                      <dd>{quadro.listas}</dd>
+                      <dd>{quadro.totalListas ?? 0}</dd>
                     </div>
 
                     <div className="quadros-page__card-metric">
@@ -347,14 +333,16 @@ export default function QuadrosPage() {
                         <CheckSquare size={14} aria-hidden="true" />
                         <span>Cartões</span>
                       </dt>
-                      <dd>{quadro.cartoes}</dd>
+                      <dd>{quadro.totalCartoes ?? 0}</dd>
                     </div>
                   </dl>
 
                   <div className="quadros-page__card-footer">
                     <p className="quadros-page__card-date">
                       <CalendarDays size={14} aria-hidden="true" />
-                      <span>Atualizado em {formatarData(quadro.atualizadoEm)}</span>
+                      <span>
+                        Atualizado em {formatarData(quadro.atualizadoEm)}
+                      </span>
                     </p>
 
                     <Button
