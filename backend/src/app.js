@@ -1,4 +1,4 @@
-reescrever o app ajustado const express = require("express");  
+const express = require("express");  
 const cors = require("cors");  
   
 const authRoutes = require("./routes/authRoutes");  
