@@ -30,59 +30,45 @@ export default function App() {
     <AccessibilityProvider>
       <AuthProvider>
         <Routes>
-
-          {/* ROOT */}
           <Route path="/" element={<Navigate to="/home" replace />} />
 
-          {/* PÚBLICO */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/cadastro" element={<CadastroPage />} />
           <Route path="/esqueci-senha" element={<EsqueciSenhaPage />} />
           <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
 
-          {/* PRIVADO */}
           <Route element={<PrivateRoute />}>
-
-            {/* HOME */}
             <Route path="/home" element={<HomePage />} />
 
-            {/* ORGANIZAÇÕES */}
             <Route path="/organizacoes" element={<OrganizacoesPage />} />
-
             <Route
               path="/organizacoes/:organizacaoId"
               element={<OrganizacaoDetalhePage />}
             />
 
-            {/* QUADROS POR ORGANIZAÇÃO */}
+            <Route path="/quadros" element={<QuadrosPage />} />
+
             <Route
               path="/organizacoes/:organizacaoId/quadros"
               element={<QuadrosPage />}
             />
 
-            {/* QUADRO DIRETO */}
             <Route path="/quadros/:quadroId" element={<QuadroDetalhePage />} />
-
             <Route
               path="/quadros/:quadroId/configuracoes"
               element={<QuadroConfiguracoesPage />}
             />
-
             <Route
               path="/quadros/:quadroId/membros"
               element={<QuadroMembrosPage />}
             />
-
             <Route
               path="/quadros/:quadroId/papeis"
               element={<QuadroPapeisPage />}
             />
-
           </Route>
 
-          {/* FALLBACK */}
           <Route path="*" element={<Navigate to="/home" replace />} />
-
         </Routes>
       </AuthProvider>
     </AccessibilityProvider>
