@@ -258,6 +258,7 @@ frontend/
 │   │   └── ui/
 │   ├── pages/
 │   │   ├── auth/
+│   │   ├── home/
 │   │   ├── organizacoes/
 │   │   ├── quadros/
 │   │   ├── listas/
@@ -396,9 +397,9 @@ components/quadros/QuadroPreferenciasForm.jsx
 components/quadros/QuadroMembrosTable.jsx
 components/quadros/QuadroPapelForm.jsx
 
-services/quadroService.js
-services/quadroMembroService.js
-services/quadroPapelService.js
+✅services/quadroService.js
+✅services/quadroMembroService.js
+✅services/quadroPapelService.js
 
 --------------------------------------------------
 
@@ -586,9 +587,9 @@ src/routes/automacaoRoutes.js
 ✅ src/controllers/AuthController.js - Felipe Policarpo 09/03/2026
 src/controllers/UsuarioController.js
 src/controllers/OrganizacaoController.js
-src/controllers/QuadroController.js
-src/controllers/QuadroMembroController.js
-src/controllers/QuadroPapelController.js
+✅src/controllers/QuadroController.js
+✅src/controllers/QuadroMembroController.js
+✅src/controllers/QuadroPapelController.js
 src/controllers/ListaController.js
 src/controllers/ListaPermissaoController.js
 src/controllers/ListaTransicaoController.js
@@ -610,9 +611,9 @@ src/controllers/AutomacaoController.js
 ✅src/services/AuthService.js - Felipe Policarpo 09/03/2026
 src/services/UsuarioService.js
 src/services/OrganizacaoService.js
-src/services/QuadroService.js
-src/services/QuadroMembroService.js
-src/services/QuadroPapelService.js
+✅src/services/QuadroService.js
+✅src/services/QuadroMembroService.js
+✅src/services/QuadroPapelService.js
 src/services/ListaService.js
 src/services/ListaPermissaoService.js
 src/services/ListaTransicaoService.js
