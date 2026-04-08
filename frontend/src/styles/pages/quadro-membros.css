@@ -1,0 +1,285 @@
+.quadro-membros-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  animation: fade-in-up 0.4s ease-out;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.quadro-membros-page__hero {
+  padding: var(--space-6);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  box-shadow: var(--shadow-sm);
+}
+
+.quadro-membros-page__hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.quadro-membros-page__hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.quadro-membros-page__hero-title {
+  font-size: var(--font-size-heading-2);
+}
+
+.quadro-membros-page__hero-description {
+  color: var(--color-text-muted);
+  max-width: 48rem;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   TOOLBAR
+   ========================================================= */
+
+.quadro-membros-page__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.quadro-membros-page__toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.quadro-membros-page__search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  border-radius: var(--radius-lg);
+  padding: 0 var(--space-3);
+  min-height: var(--input-height-md);
+}
+
+.quadro-membros-page__search:focus-within {
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--color-focus-ring);
+}
+
+.quadro-membros-page__search-icon {
+  color: var(--color-text-muted);
+}
+
+.quadro-membros-page__search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 220px;
+}
+
+.quadro-membros-page__filter-select {
+  min-height: var(--input-height-md);
+}
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
+.quadro-membros-page__summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+.quadro-membros-page__summary-card {
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.quadro-membros-page__summary-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.quadro-membros-page__summary-value {
+  font-size: var(--font-size-heading-2);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* =========================================================
+   LIST
+   ========================================================= */
+
+.quadro-membros-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.quadro-membros-page__card {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.quadro-membros-page__card:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+/* =========================================================
+   CARD CONTENT
+   ========================================================= */
+
+.quadro-membros-page__card-main {
+  display: flex;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.quadro-membros-page__avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-semibold);
+}
+
+.quadro-membros-page__card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.quadro-membros-page__card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.quadro-membros-page__card-title {
+  font-size: var(--font-size-md);
+}
+
+.quadro-membros-page__card-email {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.quadro-membros-page__status {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.quadro-membros-page__status--ativo {
+  background: var(--color-success-surface);
+  color: var(--color-success-text);
+}
+
+.quadro-membros-page__status--pendente {
+  background: var(--color-warning-surface);
+  color: var(--color-warning-text);
+}
+
+/* =========================================================
+   META
+   ========================================================= */
+
+.quadro-membros-page__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.quadro-membros-page__meta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.quadro-membros-page__card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  justify-content: center;
+}
+
+/* =========================================================
+   EMPTY
+   ========================================================= */
+
+.quadro-membros-page__empty {
+  display: flex;
+  justify-content: center;
+}
+
+/* =========================================================
+   RESPONSIVO
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .quadro-membros-page__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .quadro-membros-page__card {
+    flex-direction: column;
+  }
+
+  .quadro-membros-page__card-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
