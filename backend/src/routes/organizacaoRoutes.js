@@ -1,9 +1,8 @@
-import { Router } from "express";
-import authMiddleware from "../middlewares/authMiddleware.js";
-import * as organizacaoController from "../controllers/organizacaoController.js";
+const express = require("express");
+const authMiddleware = require("../middlewares/authMiddleware");
+const organizacaoController = require("../controllers/organizacaoController");
 
-const router = Router();
-
+const router = express.Router();
 
 router.use(authMiddleware);
 
@@ -11,35 +10,53 @@ router.use(authMiddleware);
    CRUD DE ORGANIZAÇÃO
 ========================= */
 
-// listar organizações do usuário
 router.get("/", organizacaoController.listar);
-
-// obter organização específica
 router.get("/:organizacaoId", organizacaoController.obterPorId);
-
-// criar organização
 router.post("/", organizacaoController.criar);
-
-// atualizar organização
 router.put("/:organizacaoId", organizacaoController.atualizar);
-
-// remover organização
 router.delete("/:organizacaoId", organizacaoController.remover);
 
 /* =========================
    CONFIGURAÇÕES
 ========================= */
 
-// obter configurações
 router.get(
   "/:organizacaoId/configuracoes",
   organizacaoController.obterConfiguracoes
 );
 
-// atualizar configurações
 router.put(
   "/:organizacaoId/configuracoes",
   organizacaoController.atualizarConfiguracoes
 );
 
-export default router;
+/* =========================
+   MEMBROS DA ORGANIZAÇÃO
+========================= */
+
+router.get(
+  "/:organizacaoId/membros",
+  organizacaoController.listarMembros
+);
+
+router.get(
+  "/:organizacaoId/membros/:membroId",
+  organizacaoController.obterMembroPorId
+);
+
+router.post(
+  "/:organizacaoId/membros",
+  organizacaoController.convidarMembro
+);
+
+router.put(
+  "/:organizacaoId/membros/:membroId",
+  organizacaoController.atualizarMembro
+);
+
+router.delete(
+  "/:organizacaoId/membros/:membroId",
+  organizacaoController.removerMembro
+);
+
+module.exports = router;
