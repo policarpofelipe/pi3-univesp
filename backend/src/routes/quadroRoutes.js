@@ -1,8 +1,8 @@
-import { Router } from "express";
-import authMiddleware from "../middlewares/authMiddleware.js";
-import * as quadroController from "../controllers/quadroController.js";
+const express = require("express");
+const authMiddleware = require("../middlewares/authMiddleware");
+const quadroController = require("../controllers/quadroController");
 
-const router = Router();
+const router = express.Router();
 
 /*
   Base sugerida de montagem:
@@ -35,4 +35,4 @@ router.put("/:quadroId/configuracoes", quadroController.atualizarConfiguracoes);
 router.patch("/:quadroId/arquivar", quadroController.arquivar);
 router.patch("/:quadroId/desarquivar", quadroController.desarquivar);
 
-export default router;
+module.exports = router;
