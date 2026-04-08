@@ -1,8 +1,16 @@
 import React, { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import clsx from "clsx";
+
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import Breadcrumb from "./Breadcrumb";
+
+import {
+  sidebarItems as defaultSidebarItems,
+  sidebarGroups as defaultSidebarGroups,
+} from "../../constants/navigation";
+
 import "../../styles/components/app-layout.css";
 
 export default function AppLayout({
@@ -10,22 +18,36 @@ export default function AppLayout({
   title = "",
   subtitle = "",
   breadcrumbItems = [],
-  sidebarItems = [],
-  sidebarGroups = [],
+  sidebarItems,
+  sidebarGroups,
   currentPath = "",
   user = null,
   topbarActions = null,
   searchValue = "",
   onSearchChange,
   notificationCount = 0,
-  sidebarBrand = "PI.3",
+  sidebarBrand = "Projeto Integrador 3 UNIVESP 2026",
   sidebarFooter = null,
   defaultSidebarCollapsed = false,
   mainClassName = "",
   contentClassName = "",
 }) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(defaultSidebarCollapsed);
+  const location = useLocation();
+
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    defaultSidebarCollapsed
+  );
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  const resolvedSidebarItems = Array.isArray(sidebarItems)
+    ? sidebarItems
+    : defaultSidebarItems;
+
+  const resolvedSidebarGroups = Array.isArray(sidebarGroups)
+    ? sidebarGroups
+    : defaultSidebarGroups;
+
+  const resolvedCurrentPath = currentPath || location.pathname;
 
   const hasBreadcrumb =
     Array.isArray(breadcrumbItems) && breadcrumbItems.length > 0;
@@ -55,11 +77,11 @@ export default function AppLayout({
 
       <div className="app-layout__shell">
         <Sidebar
-          items={sidebarItems}
-          groups={sidebarGroups}
+          items={resolvedSidebarItems}
+          groups={resolvedSidebarGroups}
           collapsed={sidebarCollapsed}
           mobileOpen={mobileSidebarOpen}
-          currentPath={currentPath}
+          currentPath={resolvedCurrentPath}
           brand={sidebarBrand}
           footer={sidebarFooter}
           onCloseMobile={handleCloseMobileSidebar}
