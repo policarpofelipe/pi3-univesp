@@ -1,6 +1,30 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, LogIn, ShieldCheck } from "lucide-react";
+
 import useAuth from "../../hooks/useAuth";
+import Button from "../../components/ui/Button";
+import IconButton from "../../components/ui/IconButton";
+
+import "../../styles/pages/login.css";
+
+function validateLoginForm({ email, senha }) {
+  const errors = {};
+
+  if (!email.trim()) {
+    errors.email = "O e-mail é obrigatório.";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    errors.email = "Informe um e-mail válido.";
+  }
+
+  if (!senha) {
+    errors.senha = "A senha é obrigatória.";
+  } else if (senha.length < 6) {
+    errors.senha = "A senha deve ter pelo menos 6 caracteres.";
+  }
+
+  return errors;
+}
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -11,18 +35,50 @@ export default function LoginPage() {
     email: "",
     senha: "",
   });
-
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [touched, setTouched] = useState({});
+  const [fieldErrors, setFieldErrors] = useState({});
 
-  const from = location.state?.from?.pathname || "/";
+  const from = useMemo(() => {
+    return location.state?.from?.pathname || "/home";
+  }, [location.state]);
 
   function handleChange(event) {
     const { name, value } = event.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+
+    if (erro) {
+      setErro("");
+    }
+
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
+  }
+
+  function handleBlur(event) {
+    const { name } = event.target;
+
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+
+    const nextData = {
+      ...formData,
+      [name]: event.target.value,
+    };
+
+    setFieldErrors(validateLoginForm(nextData));
   }
 
   async function handleSubmit(event) {
@@ -32,200 +88,179 @@ export default function LoginPage() {
     const email = formData.email.trim();
     const senha = formData.senha;
 
-    if (!email || !senha) {
-      setErro("Preencha e-mail e senha.");
+    const errors = validateLoginForm({ email, senha });
+
+    setFieldErrors(errors);
+    setTouched({
+      email: true,
+      senha: true,
+    });
+
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
     try {
       setCarregando(true);
-
-      // Esperado: login(email, senha) salvar token/usuário no contexto
       await login(email, senha);
-
       navigate(from, { replace: true });
-    } catch (error) {
-      const mensagem =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Não foi possível entrar. Verifique suas credenciais.";
-
-      setErro(mensagem);
+    } catch (err) {
+      setErro(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Erro ao autenticar. Verifique suas credenciais."
+      );
     } finally {
       setCarregando(false);
     }
   }
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>Entrar no sistema</h1>
-          <p style={styles.subtitle}>
-            Faça login para acessar suas organizações e quadros.
-          </p>
-        </div>
+    <div className="login">
+      <a href="#login-formulario" className="skip-link">
+        Ir para o formulário de login
+      </a>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.field}>
-            <label htmlFor="email" style={styles.label}>
-              E-mail
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="seuemail@exemplo.com"
-              value={formData.email}
-              onChange={handleChange}
-              autoComplete="email"
-              disabled={carregando}
-              style={styles.input}
-            />
-          </div>
-
-          <div style={styles.field}>
-            <div style={styles.labelRow}>
-              <label htmlFor="senha" style={styles.label}>
-                Senha
-              </label>
-
-              <Link to="/esqueci-senha" style={styles.linkSmall}>
-                Esqueci minha senha
-              </Link>
+      <main className="login__container">
+        <section
+          className="login__hero"
+          aria-label="Apresentação do sistema"
+        >
+          <div className="login__hero-content">
+            <div className="login__brand">
+              <ShieldCheck size={28} aria-hidden="true" />
+              <div>
+                <h1>Projeto Integrador 3</h1>
+                <span>UNIVESP 2026</span>
+              </div>
             </div>
 
-            <input
-              id="senha"
-              name="senha"
-              type="password"
-              placeholder="Digite sua senha"
-              value={formData.senha}
-              onChange={handleChange}
-              autoComplete="current-password"
-              disabled={carregando}
-              style={styles.input}
-            />
+            <div className="login__hero-text">
+              <h2>
+                Gestão de tarefas
+                <br />
+                com estrutura e clareza
+              </h2>
+              <p>
+                Organize quadros, listas e cartões com controle de acesso,
+                consistência visual e arquitetura preparada para evolução.
+              </p>
+            </div>
           </div>
+        </section>
 
-          {erro ? <div style={styles.errorBox}>{erro}</div> : null}
+        <section className="login__form">
+          <div className="login__card">
+            <header className="login__card-header">
+              <h2>Bem-vindo</h2>
+              <p>Entre com suas credenciais para continuar.</p>
+            </header>
 
-          <button type="submit" disabled={carregando} style={styles.button}>
-            {carregando ? "Entrando..." : "Entrar"}
-          </button>
-        </form>
+            <form
+              id="login-formulario"
+              onSubmit={handleSubmit}
+              noValidate
+              className="login__form-content"
+            >
+              <div className="login__field">
+                <label htmlFor="email">E-mail</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="seuemail@exemplo.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  autoComplete="email"
+                  autoFocus
+                  disabled={carregando}
+                  aria-invalid={Boolean(touched.email && fieldErrors.email)}
+                  aria-describedby={
+                    touched.email && fieldErrors.email
+                      ? "email-error"
+                      : undefined
+                  }
+                />
+                {touched.email && fieldErrors.email && (
+                  <span id="email-error" className="error" role="alert">
+                    {fieldErrors.email}
+                  </span>
+                )}
+              </div>
 
-        <div style={styles.footer}>
-          <span style={styles.footerText}>Ainda não tem conta?</span>{" "}
-          <Link to="/cadastro" style={styles.link}>
-            Criar conta
-          </Link>
-        </div>
-      </div>
+              <div className="login__field">
+                <div className="login__field-row">
+                  <label htmlFor="senha">Senha</label>
+                  <Link to="/esqueci-senha">Esqueceu a senha?</Link>
+                </div>
+
+                <div className="login__password">
+                  <input
+                    id="senha"
+                    name="senha"
+                    type={mostrarSenha ? "text" : "password"}
+                    placeholder="Digite sua senha"
+                    value={formData.senha}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    autoComplete="current-password"
+                    disabled={carregando}
+                    aria-invalid={Boolean(touched.senha && fieldErrors.senha)}
+                    aria-describedby={
+                      touched.senha && fieldErrors.senha
+                        ? "senha-error"
+                        : undefined
+                    }
+                  />
+
+                  <IconButton
+                    type="button"
+                    onClick={() => setMostrarSenha((prev) => !prev)}
+                    icon={
+                      mostrarSenha ? (
+                        <EyeOff size={18} />
+                      ) : (
+                        <Eye size={18} />
+                      )
+                    }
+                    label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                    disabled={carregando}
+                  />
+                </div>
+
+                {touched.senha && fieldErrors.senha && (
+                  <span id="senha-error" className="error" role="alert">
+                    {fieldErrors.senha}
+                  </span>
+                )}
+              </div>
+
+              {erro && (
+                <div className="login__error" role="alert" aria-live="polite">
+                  {erro}
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                fullWidth
+                loading={carregando}
+                leftIcon={!carregando ? <LogIn size={18} /> : null}
+              >
+                {carregando ? "Entrando..." : "Entrar"}
+              </Button>
+            </form>
+
+            <footer className="login__card-footer">
+              <span>
+                Ainda não tem uma conta?{" "}
+                <Link to="/cadastro">Criar conta</Link>
+              </span>
+            </footer>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
-
-const styles = {
-  page: {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "24px",
-    background:
-      "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)",
-  },
-  card: {
-    width: "100%",
-    maxWidth: "420px",
-    backgroundColor: "#ffffff",
-    borderRadius: "16px",
-    padding: "32px",
-    boxShadow: "0 20px 50px rgba(0, 0, 0, 0.20)",
-  },
-  header: {
-    marginBottom: "24px",
-  },
-  title: {
-    margin: 0,
-    fontSize: "28px",
-    fontWeight: 700,
-    color: "#0f172a",
-  },
-  subtitle: {
-    marginTop: "8px",
-    marginBottom: 0,
-    fontSize: "14px",
-    color: "#475569",
-    lineHeight: 1.5,
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "18px",
-  },
-  field: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-  },
-  labelRow: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: "12px",
-  },
-  label: {
-    fontSize: "14px",
-    fontWeight: 600,
-    color: "#1e293b",
-  },
-  input: {
-    width: "100%",
-    padding: "12px 14px",
-    fontSize: "14px",
-    border: "1px solid #cbd5e1",
-    borderRadius: "10px",
-    outline: "none",
-    boxSizing: "border-box",
-  },
-  button: {
-    marginTop: "6px",
-    padding: "12px 16px",
-    fontSize: "15px",
-    fontWeight: 600,
-    color: "#ffffff",
-    backgroundColor: "#2563eb",
-    border: "none",
-    borderRadius: "10px",
-    cursor: "pointer",
-  },
-  errorBox: {
-    padding: "12px 14px",
-    borderRadius: "10px",
-    backgroundColor: "#fee2e2",
-    color: "#991b1b",
-    fontSize: "14px",
-    border: "1px solid #fecaca",
-  },
-  footer: {
-    marginTop: "22px",
-    textAlign: "center",
-    fontSize: "14px",
-  },
-  footerText: {
-    color: "#475569",
-  },
-  link: {
-    color: "#2563eb",
-    textDecoration: "none",
-    fontWeight: 600,
-  },
-  linkSmall: {
-    color: "#2563eb",
-    textDecoration: "none",
-    fontSize: "13px",
-    fontWeight: 500,
-  },
-};

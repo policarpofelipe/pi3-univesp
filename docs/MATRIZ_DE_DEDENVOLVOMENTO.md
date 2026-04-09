@@ -342,31 +342,42 @@ docs/
 --------------------------------------------------
 
 4.2. Layout e navegação
-
-components/layout/AppLayout.jsx
-components/layout/Sidebar.jsx
-components/layout/Topbar.jsx
-components/layout/Breadcrumb.jsx
-
-pages/HomePage.jsx
-pages/SelecaoOrganizacaoPage.jsx
-pages/SelecaoQuadroPage.jsx
-
+✅components/layout/AppLayout.jsx
+✅components/layout/Sidebar.jsx
+✅components/layout/Topbar.jsx
+✅components/layout/Breadcrumb.jsx
+✅components/ui/Button.jsx
+✅components/ui/IconButton.jsx
+✅components/ui/ThemeToggle.jsx
+✅components/ui/FontSizeControl.jsx
+✅components/ui/PageHeader.jsx
+✅components/ui/EmptyState.jsx
+✅components/ui/LoadingState.jsx
+✅components/ui/ErrorState.jsx
+✅pages/HomePage.jsx
+✅pages/SelecaoOrganizacaoPage.jsx
+✅pages/SelecaoQuadroPage.jsx
+✅context/AccessibilityContext.jsx
+✅hooks/useAccessibility.js
+✅constants/theme.js
+✅styles/tokens.css
+✅styles/themes.css
+✅styles/globals.css
 --------------------------------------------------
 
 4.3. Organizações
 
-pages/organizacoes/OrganizacoesPage.jsx
-pages/organizacoes/OrganizacaoDetalhePage.jsx
-pages/organizacoes/OrganizacaoMembrosPage.jsx
-pages/organizacoes/OrganizacaoConfiguracoesPage.jsx
+✅pages/organizacoes/OrganizacoesPage.jsx
+✅pages/organizacoes/OrganizacaoDetalhePage.jsx
+✅pages/organizacoes/OrganizacaoMembrosPage.jsx
+✅pages/organizacoes/OrganizacaoConfiguracoesPage.jsx
 
-components/organizacoes/OrganizacaoCard.jsx
-components/organizacoes/OrganizacaoForm.jsx
-components/organizacoes/MembroOrganizacaoTable.jsx
-components/organizacoes/ConviteMembroForm.jsx
+✅components/organizacoes/OrganizacaoCard.jsx
+✅components/organizacoes/OrganizacaoForm.jsx
+✅components/organizacoes/MembroOrganizacaoTable.jsx
+✅components/organizacoes/ConviteMembroForm.jsx
 
-services/organizacaoService.js
+✅services/organizacaoService.js
 
 --------------------------------------------------
 
