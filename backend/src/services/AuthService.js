@@ -23,6 +23,12 @@ async function register({ nomeExibicao, email, senha }) {
 }
 
 async function login({ email, senha }) {
+  if (!email || !senha) {
+    const error = new Error("E-mail e senha são obrigatórios.");
+    error.statusCode = 400;
+    throw error;
+  }
+
   const usuario = await UsuarioRepository.findByEmail(email);
 
   if (!usuario) {
@@ -31,7 +37,17 @@ async function login({ email, senha }) {
     throw error;
   }
 
-  const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
+  const hashSenha = usuario.senha_hash || usuario.senhaHash;
+
+  if (!hashSenha) {
+    const error = new Error(
+      "Usuário encontrado, mas o hash de senha não está disponível."
+    );
+    error.statusCode = 500;
+    throw error;
+  }
+
+  const senhaValida = await bcrypt.compare(senha, hashSenha);
 
   if (!senhaValida) {
     const error = new Error("E-mail ou senha inválidos.");
@@ -51,7 +67,7 @@ async function login({ email, senha }) {
     usuario: {
       id: usuario.id,
       email: usuario.email,
-      nomeExibicao: usuario.nome_exibicao,
+      nomeExibicao: usuario.nome_exibicao || usuario.nomeExibicao,
       ativo: usuario.ativo,
     },
   };
@@ -69,10 +85,10 @@ async function me(usuarioId) {
   return {
     id: usuario.id,
     email: usuario.email,
-    nomeExibicao: usuario.nome_exibicao,
+    nomeExibicao: usuario.nome_exibicao || usuario.nomeExibicao,
     ativo: usuario.ativo,
-    criadoEm: usuario.criado_em,
-    atualizadoEm: usuario.atualizado_em,
+    criadoEm: usuario.criado_em || usuario.criadoEm,
+    atualizadoEm: usuario.atualizado_em || usuario.atualizadoEm,
   };
 }
 

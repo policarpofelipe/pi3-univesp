@@ -1,5 +1,3 @@
-MATRIZ DE DESENVOLVIMENTO E ESTRUTURA DE CÓDIGO
-
 ==================================================
 1. MATRIZ DE DIVISÃO DO DESENVOLVIMENTO
 ==================================================
@@ -150,77 +148,9 @@ Entregas:
 Status sugerido:
 - iniciar depois do núcleo funcional
 
-==================================================
-2. MATRIZ DE TAREFAS COM RESPONSÁVEL E DEPENDÊNCIAS
-==================================================
-
-[Tarefa] Autenticação
-Responsável: Frente A
-Depende de: nada
-Entregável: login, cadastro, sessão, proteção de rotas
-
-[Tarefa] Layout base e navegação
-Responsável: Frente A
-Depende de: autenticação
-Entregável: sidebar, topbar, rotas principais
-
-[Tarefa] Organizações
-Responsável: Frente B
-Depende de: autenticação
-Entregável: CRUD de organização e membros
-
-[Tarefa] Quadros
-Responsável: Frente B
-Depende de: organizações
-Entregável: CRUD de quadro, membros e papéis
-
-[Tarefa] Listas
-Responsável: Frente C
-Depende de: quadros
-Entregável: CRUD, ordenação, preferências por usuário
-
-[Tarefa] Permissões por lista
-Responsável: Frente C
-Depende de: papéis do quadro e listas
-Entregável: ver, editar, enviar_para
-
-[Tarefa] Regras de transição
-Responsável: Frente C
-Depende de: listas e papéis
-Entregável: restrições opcionais de fluxo
-
-[Tarefa] Cartões
-Responsável: Frente D
-Depende de: listas
-Entregável: CRUD de cartões e movimentação
-
-[Tarefa] Recursos do cartão
-Responsável: Frente D
-Depende de: cartões
-Entregável: comentários, checklists, anexos, tags, histórico
-
-[Tarefa] Visões
-Responsável: Frente E
-Depende de: cartões, listas e permissões
-Entregável: minhas demandas, atrasados, sem atribuição etc.
-
-[Tarefa] Campos personalizados
-Responsável: Frente E
-Depende de: quadros e cartões
-Entregável: definição de campos e valores por cartão
-
-[Tarefa] Automações
-Responsável: Frente E
-Depende de: cartões, listas, quadros
-Entregável: gatilhos, ações, execuções, handoff
-
-[Tarefa] Relações entre cartões
-Responsável: Frente E
-Depende de: cartões
-Entregável: ligação origem-destino e dependências
 
 ==================================================
-3. ESTRUTURA SUGERIDA DE DIRETÓRIOS
+2. ESTRUTURA DE DIRETÓRIOS
 ==================================================
 
 Sugestão geral do repositório:
@@ -234,7 +164,7 @@ Sugestão geral do repositório:
 ├── README.md
 
 --------------------------------------------------
-3.1. FRONTEND
+2.1. FRONTEND
 --------------------------------------------------
 
 frontend/
@@ -258,6 +188,7 @@ frontend/
 │   │   └── ui/
 │   ├── pages/
 │   │   ├── auth/
+│   │   ├── home/
 │   │   ├── organizacoes/
 │   │   ├── quadros/
 │   │   ├── listas/
@@ -278,7 +209,7 @@ frontend/
 └── vite.config.js
 
 --------------------------------------------------
-3.2. BACKEND
+2.2. BACKEND
 --------------------------------------------------
 
 backend/
@@ -303,7 +234,7 @@ backend/
 └── .env.example
 
 --------------------------------------------------
-3.3. DATABASE / DOCUMENTAÇÃO
+2.3. DATABASE / DOCUMENTAÇÃO
 --------------------------------------------------
 
 database/
@@ -320,10 +251,10 @@ docs/
 └── PADRAO_DE_PASTAS_E_ARQUIVOS.md
 
 ==================================================
-4. NOMES DE ARQUIVOS — FRONTEND
+3. NOMES DE ARQUIVOS — FRONTEND
 ==================================================
 
-4.1. Autenticação
+3.1. Autenticação
 
 ✅pages/auth/LoginPage.jsx - Felipe Policarpo 09/03/2026
 ✅pages/auth/CadastroPage.jsx - Felipe Policarpo 09/03/2026
@@ -341,7 +272,7 @@ docs/
 
 --------------------------------------------------
 
-4.2. Layout e navegação
+3.2. Layout e navegação
 ✅components/layout/AppLayout.jsx
 ✅components/layout/Sidebar.jsx
 ✅components/layout/Topbar.jsx
@@ -354,7 +285,7 @@ docs/
 ✅components/ui/EmptyState.jsx
 ✅components/ui/LoadingState.jsx
 ✅components/ui/ErrorState.jsx
-✅pages/HomePage.jsx
+✅pages/home/HomePage.jsx
 ✅pages/SelecaoOrganizacaoPage.jsx
 ✅pages/SelecaoQuadroPage.jsx
 ✅context/AccessibilityContext.jsx
@@ -365,7 +296,7 @@ docs/
 ✅styles/globals.css
 --------------------------------------------------
 
-4.3. Organizações
+3.3. Organizações
 
 ✅pages/organizacoes/OrganizacoesPage.jsx
 ✅pages/organizacoes/OrganizacaoDetalhePage.jsx
@@ -381,13 +312,13 @@ docs/
 
 --------------------------------------------------
 
-4.4. Quadros
+3.4. Quadros
 
-pages/quadros/QuadrosPage.jsx
-pages/quadros/QuadroDetalhePage.jsx
-pages/quadros/QuadroConfiguracoesPage.jsx
-pages/quadros/QuadroMembrosPage.jsx
-pages/quadros/QuadroPapeisPage.jsx
+✅pages/quadros/QuadrosPage.jsx
+✅pages/quadros/QuadroDetalhePage.jsx
+✅pages/quadros/QuadroConfiguracoesPage.jsx
+✅pages/quadros/QuadroMembrosPage.jsx
+✅pages/quadros/QuadroPapeisPage.jsx
 
 components/quadros/QuadroCard.jsx
 components/quadros/QuadroForm.jsx
@@ -396,13 +327,13 @@ components/quadros/QuadroPreferenciasForm.jsx
 components/quadros/QuadroMembrosTable.jsx
 components/quadros/QuadroPapelForm.jsx
 
-services/quadroService.js
-services/quadroMembroService.js
-services/quadroPapelService.js
+✅services/quadroService.js
+✅services/quadroMembroService.js
+✅services/quadroPapelService.js
 
 --------------------------------------------------
 
-4.5. Listas
+3.5. Listas
 
 components/listas/ListaColumn.jsx
 components/listas/ListaHeader.jsx
@@ -421,7 +352,7 @@ services/listaTransicaoService.js
 
 --------------------------------------------------
 
-4.6. Cartões
+3.6. Cartões
 
 pages/cartoes/CartaoDetalhePage.jsx
 
@@ -453,7 +384,7 @@ services/cartaoRelacaoService.js
 
 --------------------------------------------------
 
-4.7. Visões
+3.7. Visões
 
 pages/visoes/VisoesPage.jsx
 pages/visoes/VisaoFormPage.jsx
@@ -467,7 +398,7 @@ services/visaoService.js
 
 --------------------------------------------------
 
-4.8. Tags
+3.8. Tags
 
 components/cartoes/TagBadge.jsx
 components/cartoes/TagSelector.jsx
@@ -478,7 +409,7 @@ services/tagService.js
 
 --------------------------------------------------
 
-4.9. Campos personalizados
+3.9. Campos personalizados
 
 pages/configuracoes/CamposPersonalizadosPage.jsx
 
@@ -497,7 +428,7 @@ services/campoPersonalizadoService.js
 
 --------------------------------------------------
 
-4.10. Automações
+3.10. Automações
 
 pages/automacoes/AutomacoesPage.jsx
 pages/automacoes/AutomacaoFormPage.jsx
@@ -514,7 +445,7 @@ services/automacaoService.js
 
 --------------------------------------------------
 
-4.11. Utilitários
+3.11. Utilitários
 
 components/common/ConfirmDialog.jsx
 components/common/LoadingSpinner.jsx
@@ -544,10 +475,10 @@ constants/tiposCampo.js
 constants/tiposEvento.js
 
 ==================================================
-5. NOMES DE ARQUIVOS — BACKEND
+4. NOMES DE ARQUIVOS — BACKEND
 ==================================================
 
-5.1. Configuração e bootstrap
+4.1. Configuração e bootstrap
 
 ✅src/app.js - Felipe Policarpo 09/03/2026
 ✅src/server.js - Felipe Policarpo 09/03/2026
@@ -557,14 +488,14 @@ constants/tiposEvento.js
 
 --------------------------------------------------
 
-5.2. Rotas
+4.2. Rotas
 
 ✅src/routes/authRoutes.js - Felipe Policarpo 09/03/2026
 ✅src/routes/usuarioRoutes.js - Felipe Policarpo 09/03/2026
-src/routes/organizacaoRoutes.js
-src/routes/quadroRoutes.js
-src/routes/quadroMembroRoutes.js
-src/routes/quadroPapelRoutes.js
+✅src/routes/organizacaoRoutes.js
+✅src/routes/quadroRoutes.js
+✅src/routes/quadroMembroRoutes.js
+✅src/routes/quadroPapelRoutes.js
 src/routes/listaRoutes.js
 src/routes/listaPermissaoRoutes.js
 src/routes/listaTransicaoRoutes.js
@@ -581,14 +512,14 @@ src/routes/automacaoRoutes.js
 
 --------------------------------------------------
 
-5.3. Controllers
+4.3. Controllers
 
 ✅ src/controllers/AuthController.js - Felipe Policarpo 09/03/2026
 src/controllers/UsuarioController.js
 src/controllers/OrganizacaoController.js
-src/controllers/QuadroController.js
-src/controllers/QuadroMembroController.js
-src/controllers/QuadroPapelController.js
+✅src/controllers/QuadroController.js
+✅src/controllers/QuadroMembroController.js
+✅src/controllers/QuadroPapelController.js
 src/controllers/ListaController.js
 src/controllers/ListaPermissaoController.js
 src/controllers/ListaTransicaoController.js
@@ -605,14 +536,14 @@ src/controllers/AutomacaoController.js
 
 --------------------------------------------------
 
-5.4. Services
+4.4. Services
 
 ✅src/services/AuthService.js - Felipe Policarpo 09/03/2026
 src/services/UsuarioService.js
 src/services/OrganizacaoService.js
-src/services/QuadroService.js
-src/services/QuadroMembroService.js
-src/services/QuadroPapelService.js
+✅src/services/QuadroService.js
+✅src/services/QuadroMembroService.js
+✅src/services/QuadroPapelService.js
 src/services/ListaService.js
 src/services/ListaPermissaoService.js
 src/services/ListaTransicaoService.js
@@ -637,13 +568,13 @@ src/services/BuscaService.js
 
 --------------------------------------------------
 
-5.5. Repositories
+4.5. Repositories
 
 ✅src/repositories/UsuarioRepository.js - Felipe Policarpo 09/03/2026
 src/repositories/OrganizacaoRepository.js
-src/repositories/QuadroRepository.js
-src/repositories/QuadroMembroRepository.js
-src/repositories/QuadroPapelRepository.js
+✅src/repositories/QuadroRepository.js
+✅src/repositories/QuadroMembroRepository.js
+✅src/repositories/QuadroPapelRepository.js
 src/repositories/ListaRepository.js
 src/repositories/ListaPermissaoRepository.js
 src/repositories/ListaTransicaoRepository.js
@@ -666,7 +597,7 @@ src/repositories/AutomacaoExecucaoRepository.js
 
 --------------------------------------------------
 
-5.6. Middlewares
+4.6. Middlewares
 
 ✅src/middlewares/authMiddleware.js - Felipe Policarpo 09/03/2026
 ✅ src/middlewares/errorMiddleware.js - Felipe Policarpo 09/03/2026
@@ -676,7 +607,7 @@ src/middlewares/uploadMiddleware.js
 
 --------------------------------------------------
 
-5.7. Validators
+4.7. Validators
 
 src/validators/authValidator.js
 src/validators/organizacaoValidator.js
@@ -688,7 +619,7 @@ src/validators/automacaoValidator.js
 
 --------------------------------------------------
 
-5.8. Jobs e eventos internos
+4.8. Jobs e eventos internos
 
 src/jobs/automacaoJob.js
 src/jobs/prazoJob.js
@@ -699,7 +630,7 @@ src/events/prazoVencidoEvent.js
 
 --------------------------------------------------
 
-5.9. Utilitários
+4.9. Utilitários
 
 src/utils/dateUtils.js
 src/utils/jsonFilterParser.js
@@ -709,7 +640,7 @@ src/utils/fileUtils.js
 src/utils/paginationUtils.js
 
 ==================================================
-6. BANCO / MIGRAÇÕES / SEEDS
+5. BANCO / MIGRAÇÕES / SEEDS
 ==================================================
 
 backend/src/database/
@@ -755,75 +686,7 @@ backend/src/database/
     └── 006_seed_listas_exemplo.sql
 
 ==================================================
-7. SUGESTÃO DE DISTRIBUIÇÃO REAL ENTRE 4 OU 5 PESSOAS
-==================================================
-
-Se forem 4 pessoas:
-
-Pessoa 1
-- autenticação
-- layout
-- organizações
-- quadros
-
-Pessoa 2
-- membros do quadro
-- papéis
-- listas
-- permissões
-- transições
-
-Pessoa 3
-- cartões
-- comentários
-- checklists
-- anexos
-- tags
-- histórico
-
-Pessoa 4
-- visões
-- campos personalizados
-- automações
-- relações entre cartões
-- handoff entre quadros
-
-Se forem 5 pessoas:
-
-Pessoa 1
-- autenticação
-- layout
-- rotas privadas
-
-Pessoa 2
-- organizações
-- quadros
-- membros do quadro
-- papéis
-
-Pessoa 3
-- listas
-- preferências de listas
-- permissões
-- regras de transição
-
-Pessoa 4
-- cartões
-- comentários
-- checklists
-- anexos
-- tags
-- histórico
-
-Pessoa 5
-- visões
-- campos personalizados
-- automações
-- relações entre cartões
-- integrações avançadas
-
-==================================================
-8. ORDEM PRÁTICA DE DESENVOLVIMENTO
+5. ORDEM PRÁTICA DE DESENVOLVIMENTO
 ==================================================
 
 Sprint 1
@@ -855,19 +718,3 @@ Sprint 5
 - relações entre cartões
 - handoff entre quadros
 - refinamentos
-
-==================================================
-9. OBSERVAÇÃO CRÍTICA
-==================================================
-
-O maior risco do projeto não é técnico; é de acoplamento desorganizado.
-Se cada integrante “for fazendo sua parte” sem contrato claro de API, nomes de arquivos, padrão de pastas e modelo de dados congelado, vocês vão perder tempo integrando.
-
-Então, antes de começar a codar, vale definir:
-- padrão de nomes
-- rotas principais da API
-- formato de resposta JSON
-- estratégia de autenticação
-- convenção de componentes
-- convenção de commits
-- ordem de entrega por dependência

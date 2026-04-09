@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import AppLayout from "../../components/layout/AppLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import EmptyState from "../../components/ui/EmptyState";
 import Button from "../../components/ui/Button";
+
 import {
-  LayoutDashboard,
   Plus,
   Building2,
   KanbanSquare,
@@ -15,53 +17,6 @@ import {
 } from "lucide-react";
 
 import "../../styles/pages/home.css";
-
-const sidebarItems = [
-  { key: "home", label: "Início", href: "/home", icon: LayoutDashboard },
-];
-
-const sidebarGroups = [
-  {
-    key: "estrutura",
-    label: "Estrutura",
-    sectionLabel: "Workspace",
-    icon: Building2,
-    items: [
-      {
-        key: "organizacoes",
-        label: "Organizações",
-        href: "/organizacoes",
-        icon: Building2,
-      },
-      {
-        key: "quadros",
-        label: "Quadros",
-        href: "/quadros",
-        icon: KanbanSquare,
-      },
-    ],
-  },
-  {
-    key: "gestao",
-    label: "Gestão",
-    sectionLabel: "Operacional",
-    icon: ListTodo,
-    items: [
-      {
-        key: "listas",
-        label: "Listas",
-        href: "/listas",
-        icon: ListTodo,
-      },
-      {
-        key: "cartoes",
-        label: "Cartões",
-        href: "/cartoes",
-        icon: CheckSquare,
-      },
-    ],
-  },
-];
 
 const stats = [
   {
@@ -100,10 +55,10 @@ const stats = [
 
 const currentUser = {
   name: "Usuário",
-  email: "usuario@email.com",
 };
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -115,15 +70,15 @@ export default function HomePage() {
   }, []);
 
   function handleCreateOrganization() {
-    console.log("Criar organização");
+    navigate("/organizacoes");
   }
 
   function handleCreateBoard() {
-    console.log("Criar quadro");
+    navigate("/quadros");
   }
 
   function handleViewOrganizations() {
-    console.log("Ver organizações");
+    navigate("/organizacoes");
   }
 
   if (isLoading) {
@@ -131,9 +86,6 @@ export default function HomePage() {
       <AppLayout
         title="Início"
         subtitle="Carregando..."
-        currentPath="/home"
-        sidebarItems={sidebarItems}
-        sidebarGroups={sidebarGroups}
         breadcrumbItems={[{ label: "Início" }]}
         user={currentUser}
         notificationCount={0}
@@ -166,9 +118,6 @@ export default function HomePage() {
     <AppLayout
       title="Início"
       subtitle="Visão geral do sistema"
-      currentPath="/home"
-      sidebarItems={sidebarItems}
-      sidebarGroups={sidebarGroups}
       breadcrumbItems={[{ label: "Início" }]}
       user={currentUser}
       notificationCount={0}
@@ -283,7 +232,10 @@ export default function HomePage() {
           </div>
 
           <aside className="home-page__panel home-page__panel--side">
-            <section className="home-page__section" aria-labelledby="home-steps-title">
+            <section
+              className="home-page__section"
+              aria-labelledby="home-steps-title"
+            >
               <h3 id="home-steps-title" className="home-page__section-title">
                 Próximos passos
               </h3>
@@ -341,7 +293,10 @@ export default function HomePage() {
               </ol>
             </section>
 
-            <section className="home-page__section" aria-labelledby="home-tip-title">
+            <section
+              className="home-page__section"
+              aria-labelledby="home-tip-title"
+            >
               <h3 id="home-tip-title" className="home-page__section-title">
                 Dica rápida
               </h3>

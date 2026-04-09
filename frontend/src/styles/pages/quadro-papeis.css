@@ -1,0 +1,253 @@
+/* =========================================================
+   QUADRO PAPÉIS PAGE
+   ========================================================= */
+
+.quadro-papeis-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.quadro-papeis-page__hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-radius: var(--radius-2xl);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+}
+
+.quadro-papeis-page__hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+}
+
+.quadro-papeis-page__hero-title {
+  font-size: var(--font-size-heading-2);
+  line-height: var(--line-height-tight);
+}
+
+.quadro-papeis-page__hero-description {
+  max-width: 52rem;
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+/* =========================================================
+   TOOLBAR
+   ========================================================= */
+
+.quadro-papeis-page__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.quadro-papeis-page__search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 24rem;
+
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+}
+
+.quadro-papeis-page__search-icon {
+  color: var(--color-text-soft);
+}
+
+.quadro-papeis-page__search-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  height: var(--input-height-md);
+  font-size: var(--font-size-sm);
+  color: var(--input-text);
+}
+
+.quadro-papeis-page__search-input:focus {
+  outline: none;
+}
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
+.quadro-papeis-page__summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.quadro-papeis-page__summary-card {
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.quadro-papeis-page__summary-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.quadro-papeis-page__summary-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* =========================================================
+   GRID
+   ========================================================= */
+
+.quadro-papeis-page__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
+.quadro-papeis-page__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  padding: var(--space-5);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.quadro-papeis-page__card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* HEADER */
+
+.quadro-papeis-page__card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.quadro-papeis-page__card-title-block {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.quadro-papeis-page__card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-alt);
+  color: var(--color-primary);
+}
+
+.quadro-papeis-page__card-title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+.quadro-papeis-page__card-members {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* DESCRIPTION */
+
+.quadro-papeis-page__card-description {
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  color: var(--color-text-soft);
+}
+
+/* =========================================================
+   PERMISSIONS
+   ========================================================= */
+
+.quadro-papeis-page__permissions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.quadro-papeis-page__permission {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--radius-pill);
+
+  font-size: var(--font-size-xs);
+  border: 1px solid transparent;
+}
+
+/* estados */
+
+.quadro-papeis-page__permission--enabled {
+  background: var(--color-success-surface);
+  color: var(--color-success-text);
+  border-color: var(--color-success-border);
+}
+
+.quadro-papeis-page__permission--disabled {
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+
+/* =========================================================
+   EMPTY
+   ========================================================= */
+
+.quadro-papeis-page__empty {
+  padding: var(--space-6) 0;
+}
+
+/* =========================================================
+   RESPONSIVO
+   ========================================================= */
+
+@media (min-width: 768px) {
+  .quadro-papeis-page__summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quadro-papeis-page__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .quadro-papeis-page__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

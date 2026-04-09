@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Building2, Pencil, Settings, Users } from "lucide-react";
 
 import AppLayout from "../../components/layout/AppLayout";
@@ -9,6 +10,8 @@ import EmptyState from "../../components/ui/EmptyState";
 import Button from "../../components/ui/Button";
 import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 
+import "../../styles/pages/organizacao-detalhe.css";
+
 /*
 Premissa:
 - esta página mostra o detalhe institucional da organização
@@ -17,53 +20,24 @@ Premissa:
   - dados gerais
   - membros
   - configurações
-
-Observação:
-- aqui estou assumindo uso com react-router via window.location.pathname
-- quando a camada de roteamento estiver consolidada, substitua a obtenção do id
-  por useParams()
 */
 
-const sidebarItems = [];
-
-const sidebarGroups = [
-  {
-    key: "estrutura",
-    label: "Estrutura",
-    sectionLabel: "Workspace",
-    items: [
-      {
-        key: "organizacoes",
-        label: "Organizações",
-        href: "/organizacoes",
-        icon: Building2,
-      },
-    ],
-  },
-];
-
-function extrairOrganizacaoIdDaUrl() {
-  const partes = window.location.pathname.split("/").filter(Boolean);
-  const indice = partes.findIndex((parte) => parte === "organizacoes");
-  const valor = indice >= 0 ? partes[indice + 1] : null;
-  return valor || null;
-}
+const currentUser = {
+  name: "Usuário",
+};
 
 function StatCard({ label, value }) {
   return (
-    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-      <p className="text-[var(--font-size-xs)] uppercase tracking-wide text-[var(--color-text-soft)]">
-        {label}
-      </p>
-      <p className="mt-2 text-[var(--font-size-xl)] font-semibold text-[var(--color-text)]">
-        {value}
-      </p>
+    <div className="organizacao-detalhe-page__stat-card">
+      <p className="organizacao-detalhe-page__stat-label">{label}</p>
+      <p className="organizacao-detalhe-page__stat-value">{value}</p>
     </div>
   );
 }
 
 export default function OrganizacaoDetalhePage() {
-  const organizacaoId = extrairOrganizacaoIdDaUrl();
+  const navigate = useNavigate();
+  const { organizacaoId } = useParams();
 
   const [organizacao, setOrganizacao] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -95,7 +69,9 @@ export default function OrganizacaoDetalhePage() {
 
       setOrganizacao(data || null);
     } catch (error) {
-      setErro(error?.message || "Não foi possível carregar os dados da organização.");
+      setErro(
+        error?.message || "Não foi possível carregar os dados da organização."
+      );
       setOrganizacao(null);
     } finally {
       setLoading(false);
@@ -105,6 +81,38 @@ export default function OrganizacaoDetalhePage() {
   useEffect(() => {
     carregarOrganizacao();
   }, [carregarOrganizacao]);
+
+  function handleVoltar() {
+    navigate(-1);
+  }
+
+  function handleVoltarParaOrganizacoes() {
+    navigate("/organizacoes");
+  }
+
+  function handleAbrirMembros() {
+    if (!organizacao?.id) return;
+    navigate(`/organizacoes/${organizacao.id}/membros`);
+  }
+
+  function handleAbrirConfiguracoes() {
+    if (!organizacao?.id) return;
+    navigate(`/organizacoes/${organizacao.id}/configuracoes`);
+  }
+
+  function handleAbrirQuadros() {
+    if (!organizacao?.id) {
+      navigate("/quadros");
+      return;
+    }
+
+    navigate(`/organizacoes/${organizacao.id}/quadros`);
+  }
+
+  function handleEditarOrganizacao() {
+    if (!organizacao?.id) return;
+    console.log("Abrir edição da organização:", organizacao.id);
+  }
 
   const breadcrumbItems = [
     { label: "Início", href: "/home" },
@@ -116,207 +124,201 @@ export default function OrganizacaoDetalhePage() {
     <AppLayout
       title="Detalhe da organização"
       subtitle="Informações gerais e acesso rápido às áreas relacionadas"
-      currentPath="/organizacoes"
-      sidebarItems={sidebarItems}
-      sidebarGroups={sidebarGroups}
       breadcrumbItems={breadcrumbItems}
-      user={{
-        name: "Usuário",
-        email: "usuario@email.com",
-      }}
+      user={currentUser}
     >
-      {loading ? (
-        <LoadingState
-          title="Carregando organização"
-          description="Buscando detalhes da organização selecionada."
-          fullHeight
-        />
-      ) : erro ? (
-        <ErrorState
-          title="Falha ao carregar organização"
-          description={erro}
-          action={
-            <Button variant="danger" onClick={carregarOrganizacao}>
-              Tentar novamente
-            </Button>
-          }
-          secondaryAction={
-            <Button variant="ghost" onClick={() => window.history.back()}>
-              Voltar
-            </Button>
-          }
-        />
-      ) : !organizacao ? (
-        <EmptyState
-          icon={<Building2 className="h-8 w-8" />}
-          title="Organização não encontrada"
-          description="Não foi possível localizar os dados da organização solicitada."
-          action={
-            <Button variant="ghost" onClick={() => (window.location.href = "/organizacoes")}>
-              Voltar para organizações
-            </Button>
-          }
-        />
-      ) : (
-        <>
-          <PageHeader
-            title={organizacao.nome}
-            subtitle={organizacao.slug ? `Slug: ${organizacao.slug}` : "Organização ativa"}
-            description={
-              organizacao.descricao ||
-              "Visualize os dados principais da organização e acesse as áreas de gestão relacionadas."
+      <div className="organizacao-detalhe-page">
+        {loading ? (
+          <LoadingState
+            title="Carregando organização"
+            description="Buscando detalhes da organização selecionada."
+            fullHeight
+          />
+        ) : erro ? (
+          <ErrorState
+            title="Falha ao carregar organização"
+            description={erro}
+            action={
+              <Button variant="danger" onClick={carregarOrganizacao}>
+                Tentar novamente
+              </Button>
             }
-            actions={
-              <>
-                <Button
-                  variant="secondary"
-                  leftIcon={<Users className="h-4 w-4" />}
-                  onClick={() =>
-                    (window.location.href = `/organizacoes/${organizacao.id}/membros`)
-                  }
-                >
-                  Membros
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  leftIcon={<Settings className="h-4 w-4" />}
-                  onClick={() =>
-                    (window.location.href = `/organizacoes/${organizacao.id}/configuracoes`)
-                  }
-                >
-                  Configurações
-                </Button>
-
-                <Button
-                  variant="primary"
-                  leftIcon={<Pencil className="h-4 w-4" />}
-                  onClick={() => {
-                    console.log("Abrir edição da organização:", organizacao.id);
-                  }}
-                >
-                  Editar organização
-                </Button>
-              </>
+            secondaryAction={
+              <Button variant="ghost" onClick={handleVoltar}>
+                Voltar
+              </Button>
             }
           />
+        ) : !organizacao ? (
+          <EmptyState
+            icon={<Building2 size={32} />}
+            title="Organização não encontrada"
+            description="Não foi possível localizar os dados da organização solicitada."
+            action={
+              <Button variant="ghost" onClick={handleVoltarParaOrganizacoes}>
+                Voltar para organizações
+              </Button>
+            }
+          />
+        ) : (
+          <>
+            <PageHeader
+              title={organizacao.nome}
+              subtitle={
+                organizacao.slug
+                  ? `Slug: ${organizacao.slug}`
+                  : "Organização ativa"
+              }
+              description={
+                organizacao.descricao ||
+                "Visualize os dados principais da organização e acesse as áreas de gestão relacionadas."
+              }
+              actions={
+                <>
+                  <Button
+                    variant="secondary"
+                    leftIcon={<Users size={16} />}
+                    onClick={handleAbrirMembros}
+                  >
+                    Membros
+                  </Button>
 
-          <section
-            aria-label="Resumo da organização"
-            className="grid grid-cols-1 gap-4 md:grid-cols-3"
-          >
-            <StatCard
-              label="Status"
-              value={organizacao.ativo ? "Ativa" : "Inativa"}
+                  <Button
+                    variant="ghost"
+                    leftIcon={<Settings size={16} />}
+                    onClick={handleAbrirConfiguracoes}
+                  >
+                    Configurações
+                  </Button>
+
+                  <Button
+                    variant="primary"
+                    leftIcon={<Pencil size={16} />}
+                    onClick={handleEditarOrganizacao}
+                  >
+                    Editar organização
+                  </Button>
+                </>
+              }
             />
-            <StatCard
-              label="Membros"
-              value={organizacao.membrosCount ?? 0}
-            />
-            <StatCard
-              label="Quadros"
-              value={organizacao.quadrosCount ?? 0}
-            />
-          </section>
 
-          <section
-            aria-label="Informações principais"
-            className="grid grid-cols-1 gap-4 xl:grid-cols-3"
-          >
-            <div className="xl:col-span-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-              <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text)]">
-                Dados gerais
-              </h2>
+            <section
+              aria-label="Resumo da organização"
+              className="organizacao-detalhe-page__stats"
+            >
+              <StatCard
+                label="Status"
+                value={organizacao.ativo ? "Ativa" : "Inativa"}
+              />
+              <StatCard
+                label="Membros"
+                value={organizacao.membrosCount ?? 0}
+              />
+              <StatCard
+                label="Quadros"
+                value={organizacao.quadrosCount ?? 0}
+              />
+            </section>
 
-              <dl className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  <dt className="text-[var(--font-size-xs)] uppercase tracking-wide text-[var(--color-text-soft)]">
-                    Nome
-                  </dt>
-                  <dd className="mt-1 text-[var(--font-size-md)] text-[var(--color-text)]">
-                    {organizacao.nome}
-                  </dd>
-                </div>
+            <section
+              aria-label="Informações principais"
+              className="organizacao-detalhe-page__content-grid"
+            >
+              <div className="organizacao-detalhe-page__panel organizacao-detalhe-page__panel--main">
+                <h2 className="organizacao-detalhe-page__panel-title">
+                  Dados gerais
+                </h2>
 
-                <div>
-                  <dt className="text-[var(--font-size-xs)] uppercase tracking-wide text-[var(--color-text-soft)]">
-                    Slug
-                  </dt>
-                  <dd className="mt-1 text-[var(--font-size-md)] text-[var(--color-text)]">
-                    {organizacao.slug || "Não informado"}
-                  </dd>
-                </div>
+                <dl className="organizacao-detalhe-page__details">
+                  <div className="organizacao-detalhe-page__detail-item">
+                    <dt className="organizacao-detalhe-page__detail-label">
+                      Nome
+                    </dt>
+                    <dd className="organizacao-detalhe-page__detail-value">
+                      {organizacao.nome}
+                    </dd>
+                  </div>
 
-                <div className="md:col-span-2">
-                  <dt className="text-[var(--font-size-xs)] uppercase tracking-wide text-[var(--color-text-soft)]">
-                    Descrição
-                  </dt>
-                  <dd className="mt-1 text-[var(--font-size-md)] leading-6 text-[var(--color-text-muted)]">
-                    {organizacao.descricao || "Sem descrição cadastrada."}
-                  </dd>
-                </div>
+                  <div className="organizacao-detalhe-page__detail-item">
+                    <dt className="organizacao-detalhe-page__detail-label">
+                      Slug
+                    </dt>
+                    <dd className="organizacao-detalhe-page__detail-value">
+                      {organizacao.slug || "Não informado"}
+                    </dd>
+                  </div>
 
-                <div>
-                  <dt className="text-[var(--font-size-xs)] uppercase tracking-wide text-[var(--color-text-soft)]">
-                    Criada em
-                  </dt>
-                  <dd className="mt-1 text-[var(--font-size-md)] text-[var(--color-text)]">
-                    {organizacao.criado_em || organizacao.criadoEm || "Não informado"}
-                  </dd>
-                </div>
+                  <div className="organizacao-detalhe-page__detail-item organizacao-detalhe-page__detail-item--full">
+                    <dt className="organizacao-detalhe-page__detail-label">
+                      Descrição
+                    </dt>
+                    <dd className="organizacao-detalhe-page__detail-value organizacao-detalhe-page__detail-value--muted">
+                      {organizacao.descricao || "Sem descrição cadastrada."}
+                    </dd>
+                  </div>
 
-                <div>
-                  <dt className="text-[var(--font-size-xs)] uppercase tracking-wide text-[var(--color-text-soft)]">
-                    Atualizada em
-                  </dt>
-                  <dd className="mt-1 text-[var(--font-size-md)] text-[var(--color-text)]">
-                    {organizacao.atualizado_em || organizacao.atualizadoEm || "Não informado"}
-                  </dd>
-                </div>
-              </dl>
-            </div>
+                  <div className="organizacao-detalhe-page__detail-item">
+                    <dt className="organizacao-detalhe-page__detail-label">
+                      Criada em
+                    </dt>
+                    <dd className="organizacao-detalhe-page__detail-value">
+                      {organizacao.criado_em ||
+                        organizacao.criadoEm ||
+                        "Não informado"}
+                    </dd>
+                  </div>
 
-            <aside className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-              <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text)]">
-                Ações rápidas
-              </h2>
-
-              <div className="mt-4 flex flex-col gap-3">
-                <Button
-                  variant="secondary"
-                  fullWidth
-                  leftIcon={<Users className="h-4 w-4" />}
-                  onClick={() =>
-                    (window.location.href = `/organizacoes/${organizacao.id}/membros`)
-                  }
-                >
-                  Gerenciar membros
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  fullWidth
-                  leftIcon={<Settings className="h-4 w-4" />}
-                  onClick={() =>
-                    (window.location.href = `/organizacoes/${organizacao.id}/configuracoes`)
-                  }
-                >
-                  Abrir configurações
-                </Button>
-
-                <Button
-                  variant="primary"
-                  fullWidth
-                  leftIcon={<Building2 className="h-4 w-4" />}
-                  onClick={() => (window.location.href = "/quadros")}
-                >
-                  Ver quadros
-                </Button>
+                  <div className="organizacao-detalhe-page__detail-item">
+                    <dt className="organizacao-detalhe-page__detail-label">
+                      Atualizada em
+                    </dt>
+                    <dd className="organizacao-detalhe-page__detail-value">
+                      {organizacao.atualizado_em ||
+                        organizacao.atualizadoEm ||
+                        "Não informado"}
+                    </dd>
+                  </div>
+                </dl>
               </div>
-            </aside>
-          </section>
-        </>
-      )}
+
+              <aside className="organizacao-detalhe-page__panel organizacao-detalhe-page__panel--side">
+                <h2 className="organizacao-detalhe-page__panel-title">
+                  Ações rápidas
+                </h2>
+
+                <div className="organizacao-detalhe-page__actions">
+                  <Button
+                    variant="secondary"
+                    fullWidth
+                    leftIcon={<Users size={16} />}
+                    onClick={handleAbrirMembros}
+                  >
+                    Gerenciar membros
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    fullWidth
+                    leftIcon={<Settings size={16} />}
+                    onClick={handleAbrirConfiguracoes}
+                  >
+                    Abrir configurações
+                  </Button>
+
+                  <Button
+                    variant="primary"
+                    fullWidth
+                    leftIcon={<Building2 size={16} />}
+                    onClick={handleAbrirQuadros}
+                  >
+                    Ver quadros
+                  </Button>
+                </div>
+              </aside>
+            </section>
+          </>
+        )}
+      </div>
     </AppLayout>
   );
 }
