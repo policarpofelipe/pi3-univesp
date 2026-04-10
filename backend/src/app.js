@@ -6,6 +6,7 @@ const organizacaoRoutes = require("./routes/organizacaoRoutes");
 const quadroRoutes = require("./routes/quadroRoutes");
 const quadroMembroRoutes = require("./routes/quadroMembroRoutes");
 const quadroPapelRoutes = require("./routes/quadroPapelRoutes");
+const listaRoutes = require("./routes/listaRoutes");
 const errorMiddleware = require("./middlewares/errorMiddleware");
 
 const app = express();
@@ -33,6 +34,7 @@ app.use("/api/organizacoes", organizacaoRoutes);
 app.use("/api/quadros", quadroRoutes);
 app.use("/api/quadros", quadroMembroRoutes);
 app.use("/api/quadros", quadroPapelRoutes);
+app.use("/api/quadros", listaRoutes);
 
 app.use((req, res) => {
   return res.status(404).json({

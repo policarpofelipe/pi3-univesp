@@ -11,7 +11,11 @@ import QuadroHeader from "../../components/quadros/QuadroHeader";
 
 import quadroService from "../../services/quadroService";
 import quadroMembroService from "../../services/quadroMembroService";
+import listaService from "../../services/listaService";
 import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
+import ListaForm from "../../components/listas/ListaForm";
+import ListaHeader from "../../components/listas/ListaHeader";
+import ReordenacaoListas from "../../components/listas/ReordenacaoListas";
 import { extractList, extractObject } from "../../utils/apiData";
 import useAuth from "../../hooks/useAuth";
 
@@ -20,7 +24,6 @@ import {
   ListTodo,
   CheckSquare,
   Plus,
-  Tag,
   ArrowRight,
   Clock3,
   Users,
@@ -66,8 +69,11 @@ export default function QuadroDetalhePage() {
 
   const [quadro, setQuadro] = useState(null);
   const [membros, setMembros] = useState([]);
+  const [listas, setListas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  const [listaModal, setListaModal] = useState(null);
+  const [listaSalvando, setListaSalvando] = useState(false);
 
   const carregar = useCallback(async () => {
     if (!quadroId) return;
@@ -76,9 +82,10 @@ export default function QuadroDetalhePage() {
     setErro("");
 
     try {
-      const [resQuadro, resMembros] = await Promise.all([
+      const [resQuadro, resMembros, resListas] = await Promise.all([
         quadroService.obterPorId(quadroId),
         quadroMembroService.listar(quadroId).catch(() => ({ data: [] })),
+        listaService.listar(quadroId).catch(() => ({ data: [] })),
       ]);
 
       let data = extractObject(resQuadro) || resQuadro;
@@ -104,6 +111,11 @@ export default function QuadroDetalhePage() {
 
       const listaMembros = extractList(resMembros);
       setMembros(listaMembros.map(normalizarMembro));
+
+      const rawListas = extractList(resListas);
+      setListas(
+        rawListas.sort((a, b) => (a.posicao ?? 0) - (b.posicao ?? 0))
+      );
     } catch (error) {
       setErro(
         error?.response?.data?.message ||
@@ -112,6 +124,7 @@ export default function QuadroDetalhePage() {
       );
       setQuadro(null);
       setMembros([]);
+      setListas([]);
     } finally {
       setLoading(false);
     }
@@ -121,7 +134,6 @@ export default function QuadroDetalhePage() {
     carregar();
   }, [carregar]);
 
-  const listas = quadro?.listas && Array.isArray(quadro.listas) ? quadro.listas : [];
   const atividades = quadro?.atividades && Array.isArray(quadro.atividades)
     ? quadro.atividades
     : [];
@@ -135,7 +147,71 @@ export default function QuadroDetalhePage() {
   }
 
   function handleNovaLista() {
-    /* módulo de listas */
+    setListaModal({ mode: "criar", lista: null });
+  }
+
+  const carregarListas = useCallback(async () => {
+    if (!quadroId) return;
+    try {
+      const res = await listaService.listar(quadroId);
+      const raw = extractList(res);
+      setListas(raw.sort((a, b) => (a.posicao ?? 0) - (b.posicao ?? 0)));
+    } catch {
+      setListas([]);
+    }
+  }, [quadroId]);
+
+  async function aplicarOrdem(novaOrdem) {
+    const ids = novaOrdem.map((l) => l.id);
+    try {
+      const res = await listaService.reordenar(quadroId, ids);
+      const atualizadas = extractList(res);
+      if (atualizadas.length) {
+        setListas(
+          atualizadas.sort((a, b) => (a.posicao ?? 0) - (b.posicao ?? 0))
+        );
+      } else {
+        await carregarListas();
+      }
+    } catch {
+      await carregarListas();
+    }
+  }
+
+  function moverLista(index, delta) {
+    const next = [...listas];
+    const to = index + delta;
+    if (to < 0 || to >= next.length) return;
+    const [item] = next.splice(index, 1);
+    next.splice(to, 0, item);
+    aplicarOrdem(next);
+  }
+
+  async function handleSalvarLista(payload) {
+    setListaSalvando(true);
+    try {
+      if (listaModal?.mode === "criar") {
+        await listaService.criar(quadroId, payload);
+      } else if (listaModal?.lista?.id) {
+        await listaService.atualizar(quadroId, listaModal.lista.id, payload);
+      }
+      setListaModal(null);
+      await carregarListas();
+    } catch (err) {
+      throw err;
+    } finally {
+      setListaSalvando(false);
+    }
+  }
+
+  async function handleExcluirLista(lista) {
+    if (!window.confirm(`Excluir a lista "${lista.nome}"?`)) return;
+    try {
+      await listaService.remover(quadroId, lista.id);
+      await carregarListas();
+    } catch {
+      /* silencioso: backend pode retornar erro */
+    }
   }
 
   function handleConfigurarQuadro() {
@@ -320,7 +396,7 @@ export default function QuadroDetalhePage() {
               <EmptyState
                 icon={<ListTodo size={36} />}
                 title="Nenhuma lista criada"
-                description="Quando o módulo de listas estiver ativo, você poderá criar e gerenciar colunas aqui."
+                description="Crie colunas para organizar o fluxo de cartões neste quadro."
                 action={
                   <Button
                     variant="primary"
@@ -333,34 +409,55 @@ export default function QuadroDetalhePage() {
               />
             ) : (
               <div className="quadro-detalhe-page__listas">
-                {listas.map((lista) => (
+                {listas.map((lista, index) => (
                   <article
                     key={lista.id}
                     className="quadro-detalhe-page__lista-card"
                   >
-                    <div className="quadro-detalhe-page__lista-header">
-                      <h4 className="quadro-detalhe-page__lista-title">
-                        {lista.nome}
-                      </h4>
+                    <ListaHeader
+                      nome={lista.nome}
+                      totalCartoes={lista.totalCartoes}
+                      limiteWip={lista.limiteWip}
+                      actions={
+                        <>
+                          <ReordenacaoListas
+                            index={index}
+                            total={listas.length}
+                            onMoveUp={() => moverLista(index, -1)}
+                            onMoveDown={() => moverLista(index, 1)}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              setListaModal({ mode: "editar", lista })
+                            }
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleExcluirLista(lista)}
+                          >
+                            Excluir
+                          </Button>
+                        </>
+                      }
+                    />
 
-                      <span className="quadro-detalhe-page__lista-total">
-                        {lista.totalCartoes ?? 0} cartões
-                      </span>
-                    </div>
-
-                    <div className="quadro-detalhe-page__lista-meta">
-                      <span className="quadro-detalhe-page__lista-meta-item">
-                        <Tag size={14} aria-hidden="true" />
-                        <span>
-                          {lista.limiteWip
-                            ? `Limite WIP: ${lista.limiteWip}`
-                            : "Sem limite WIP"}
-                        </span>
-                      </span>
-                    </div>
+                    {lista.descricao ? (
+                      <p className="mb-3 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+                        {lista.descricao}
+                      </p>
+                    ) : null}
 
                     <div className="quadro-detalhe-page__lista-footer">
-                      <Button variant="ghost">Ver detalhes</Button>
+                      <span className="text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
+                        Cartões nesta lista: módulo em evolução
+                      </span>
                     </div>
                   </article>
                 ))}
@@ -471,6 +568,46 @@ export default function QuadroDetalhePage() {
           </aside>
         </section>
       </div>
+
+      {listaModal ? (
+        <div
+          className="fixed inset-0 z-[1300] flex items-center justify-center bg-[var(--color-scrim)] p-4"
+          role="presentation"
+          onClick={() => !listaSalvando && setListaModal(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="lista-modal-titulo"
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-lg)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2
+              id="lista-modal-titulo"
+              className="text-[var(--font-size-heading-3)] font-semibold text-[var(--color-text)]"
+            >
+              {listaModal.mode === "criar" ? "Nova lista" : "Editar lista"}
+            </h2>
+            <div className="mt-4">
+              <ListaForm
+                modo={listaModal.mode === "criar" ? "criar" : "editar"}
+                initialValues={
+                  listaModal.lista
+                    ? {
+                        nome: listaModal.lista.nome,
+                        descricao: listaModal.lista.descricao,
+                        limiteWip: listaModal.lista.limiteWip,
+                      }
+                    : {}
+                }
+                loading={listaSalvando}
+                onCancel={() => !listaSalvando && setListaModal(null)}
+                onSubmit={handleSalvarLista}
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </AppLayout>
   );
 }

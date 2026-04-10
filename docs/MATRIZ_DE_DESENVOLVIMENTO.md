@@ -343,18 +343,18 @@ docs/
 
 3.5. Listas
 
-components/listas/ListaColumn.jsx
-components/listas/ListaHeader.jsx
-components/listas/ListaForm.jsx
+✅components/listas/ListaColumn.jsx
+✅components/listas/ListaHeader.jsx
+✅components/listas/ListaForm.jsx
 components/listas/ListaPermissoesForm.jsx
 components/listas/ListaTransicoesForm.jsx
-components/listas/ReordenacaoListas.jsx
+✅components/listas/ReordenacaoListas.jsx
 
 pages/listas/ListaConfiguracoesPage.jsx
 pages/listas/ListaPermissoesPage.jsx
 pages/listas/ListaTransicoesPage.jsx
 
-services/listaService.js
+✅services/listaService.js
 services/listaPermissaoService.js
 services/listaTransicaoService.js
 
@@ -504,7 +504,7 @@ constants/tiposEvento.js
 ✅src/routes/quadroRoutes.js
 ✅src/routes/quadroMembroRoutes.js
 ✅src/routes/quadroPapelRoutes.js
-src/routes/listaRoutes.js
+✅src/routes/listaRoutes.js
 src/routes/listaPermissaoRoutes.js
 src/routes/listaTransicaoRoutes.js
 src/routes/visaoRoutes.js
@@ -528,7 +528,7 @@ src/controllers/OrganizacaoController.js
 ✅src/controllers/QuadroController.js
 ✅src/controllers/QuadroMembroController.js
 ✅src/controllers/QuadroPapelController.js
-src/controllers/ListaController.js
+✅src/controllers/listaController.js
 src/controllers/ListaPermissaoController.js
 src/controllers/ListaTransicaoController.js
 src/controllers/VisaoController.js
