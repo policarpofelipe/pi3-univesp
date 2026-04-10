@@ -36,7 +36,9 @@ export default function ErrorState({
           <div
             className={clsx(
               "mb-4 flex items-center justify-center rounded-full border border-[var(--color-danger-border)] bg-[var(--color-danger-surface-alt)] text-[var(--color-danger-text)] font-bold",
-              compact ? "h-12 w-12 text-lg" : "h-16 w-16 text-2xl"
+              compact
+                ? "h-12 w-12 text-[var(--font-size-lg)]"
+                : "h-16 w-16 text-[var(--font-size-2xl)]"
             )}
             aria-hidden="true"
           >

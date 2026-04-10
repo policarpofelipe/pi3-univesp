@@ -1,93 +1,171 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import AppLayout from "../../components/layout/AppLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/Button";
+import LoadingState from "../../components/ui/LoadingState";
+import ErrorState from "../../components/ui/ErrorState";
+import QuadroForm from "../../components/quadros/QuadroForm";
+import QuadroPreferenciasForm from "../../components/quadros/QuadroPreferenciasForm";
 
-import {
-  KanbanSquare,
-  Save,
-  Settings,
-  Archive,
-  FolderOpen,
-  ShieldCheck,
-  Users,
-  ArrowRightLeft,
-} from "lucide-react";
+import quadroService from "../../services/quadroService";
+import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
+import { extractObject } from "../../utils/apiData";
+import useAuth from "../../hooks/useAuth";
+
+import { Save, Settings, KanbanSquare, Archive, ShieldCheck, Users, ArrowRightLeft } from "lucide-react";
 
 import "../../styles/pages/quadro-configuracoes.css";
-
-const quadroMock = {
-  id: 1,
-  nome: "Produto e Backlog",
-  descricao:
-    "Quadro principal para planejamento, priorização e acompanhamento das entregas do sistema.",
-  organizacao: {
-    id: 1,
-    nome: "Projeto Integrador III",
-  },
-  organizacaoId: 1,
-  criadoPorUsuarioId: 1,
-  arquivadoEm: null,
-  criadoEm: "2026-04-01 09:00:00",
-  atualizadoEm: "2026-04-05 14:20:00",
-};
 
 export default function QuadroConfiguracoesPage() {
   const navigate = useNavigate();
   const { quadroId } = useParams();
+  const { usuario } = useAuth();
 
-  const quadro = useMemo(() => {
-    if (!quadroId || String(quadroId) === String(quadroMock.id)) {
-      return quadroMock;
-    }
+  const usuarioId = usuario?.id ?? usuario?.usuarioId ?? "";
 
-    return {
-      ...quadroMock,
-      id: quadroId,
-    };
-  }, [quadroId]);
-
-  const [formData, setFormData] = useState({
-    nome: quadro.nome,
-    descricao: quadro.descricao || "",
-    arquivado: Boolean(quadro.arquivadoEm),
-  });
-
+  const [quadro, setQuadro] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
+  const [arquivadoInicial, setArquivadoInicial] = useState(false);
 
-  function handleChange(event) {
-    const { name, value, type, checked } = event.target;
+  const carregarQuadro = useCallback(async () => {
+    if (!quadroId) return;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    setSalvando(true);
+    setLoading(true);
+    setErro("");
 
     try {
-      console.log("Salvar configurações reais do quadro:", quadro.id, formData);
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const response = await quadroService.obterPorId(quadroId);
+      const data = extractObject(response) || response;
+      let enriched = { ...data };
+
+      if (data?.organizacaoId && !data.organizacao?.nome) {
+        try {
+          const orgRes = await buscarOrganizacaoPorId(data.organizacaoId);
+          const org = extractObject(orgRes) || orgRes;
+          enriched = {
+            ...enriched,
+            organizacao: { id: data.organizacaoId, nome: org?.nome || "" },
+            organizacaoNome: org?.nome,
+          };
+        } catch {
+          enriched.organizacao = {
+            id: data.organizacaoId,
+            nome: "Organização",
+          };
+        }
+      }
+
+      setQuadro(enriched);
+      setArquivadoInicial(
+        Boolean(enriched.arquivadoEm ?? enriched.arquivado)
+      );
+    } catch (error) {
+      setErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível carregar o quadro."
+      );
+      setQuadro(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [quadroId]);
+
+  useEffect(() => {
+    carregarQuadro();
+  }, [carregarQuadro]);
+
+  const initialFormValues = useMemo(() => {
+    if (!quadro) return {};
+    return {
+      nome: quadro.nome || "",
+      descricao: quadro.descricao || "",
+      visibilidade: quadro.visibilidade || "privado",
+      arquivado: Boolean(quadro.arquivadoEm ?? quadro.arquivado),
+    };
+  }, [quadro]);
+
+  async function handleSubmitForm(payload) {
+    if (!quadroId) return;
+
+    setSalvando(true);
+    try {
+      await quadroService.atualizar(quadroId, {
+        nome: payload.nome,
+        descricao: payload.descricao,
+        visibilidade: payload.visibilidade,
+      });
+
+      if (payload.arquivado !== arquivadoInicial) {
+        if (payload.arquivado) {
+          await quadroService.arquivar(quadroId);
+        } else {
+          await quadroService.desarquivar(quadroId);
+        }
+        setArquivadoInicial(payload.arquivado);
+      }
+
+      await carregarQuadro();
     } finally {
       setSalvando(false);
     }
   }
 
   function handleAbrirPapeis() {
-    navigate(`/quadros/${quadro.id}/papeis`);
+    navigate(`/quadros/${quadroId}/papeis`);
   }
 
   function handleAbrirMembros() {
-    navigate(`/quadros/${quadro.id}/membros`);
+    navigate(`/quadros/${quadroId}/membros`);
   }
 
   function handleAbrirQuadro() {
-    navigate(`/quadros/${quadro.id}`);
+    navigate(`/quadros/${quadroId}`);
+  }
+
+  if (loading && !quadro) {
+    return (
+      <AppLayout
+        title="Configurações do quadro"
+        subtitle="Carregando…"
+        breadcrumbItems={[
+          { label: "Início", href: "/home" },
+          { label: "Quadros", href: "/quadros" },
+          { label: "…" },
+        ]}
+        user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
+      >
+        <LoadingState title="Carregando quadro" />
+      </AppLayout>
+    );
+  }
+
+  if (erro || !quadro) {
+    return (
+      <AppLayout
+        title="Configurações do quadro"
+        subtitle="Erro ao carregar"
+        breadcrumbItems={[
+          { label: "Início", href: "/home" },
+          { label: "Quadros", href: "/quadros" },
+        ]}
+        user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
+      >
+        <ErrorState
+          title="Quadro não encontrado"
+          description={erro || "Não foi possível exibir este quadro."}
+          action={
+            <Button variant="primary" onClick={() => navigate("/quadros")}>
+              Voltar aos quadros
+            </Button>
+          }
+        />
+      </AppLayout>
+    );
   }
 
   return (
@@ -100,9 +178,7 @@ export default function QuadroConfiguracoesPage() {
         { label: quadro.nome, href: `/quadros/${quadro.id}` },
         { label: "Configurações" },
       ]}
-      user={{
-        name: "Usuário",
-      }}
+      user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
       topbarActions={
         <Button
           type="submit"
@@ -121,10 +197,7 @@ export default function QuadroConfiguracoesPage() {
           description="Centralize aqui os ajustes estruturais do quadro. Permissões, membros e regras de fluxo devem ser administrados em seus módulos próprios."
           actions={
             <>
-              <Button
-                variant="secondary"
-                onClick={handleAbrirQuadro}
-              >
+              <Button variant="secondary" onClick={handleAbrirQuadro}>
                 Ver quadro
               </Button>
 
@@ -160,19 +233,16 @@ export default function QuadroConfiguracoesPage() {
 
             <p className="quadro-configuracoes-page__hero-description">
               O quadro faz parte da organização{" "}
-              <strong>{quadro.organizacao.nome}</strong>. Nesta área, o foco
-              está em identidade, descrição e estado do quadro. Papéis, membros
-              e regras mais específicas devem permanecer nos seus domínios
-              próprios para evitar acoplamento indevido.
+              <strong>
+                {quadro.organizacao?.nome || quadro.organizacaoNome || "—"}
+              </strong>
+              . Nesta área, o foco está em identidade, descrição e estado do
+              quadro.
             </p>
           </div>
         </section>
 
-        <form
-          id="quadro-configuracoes-form"
-          className="quadro-configuracoes-page__form"
-          onSubmit={handleSubmit}
-        >
+        <div className="quadro-configuracoes-page__form">
           <section className="quadro-configuracoes-page__section">
             <div className="quadro-configuracoes-page__section-header">
               <h3 className="quadro-configuracoes-page__section-title">
@@ -185,39 +255,15 @@ export default function QuadroConfiguracoesPage() {
             </div>
 
             <div className="quadro-configuracoes-page__card">
-              <div className="quadro-configuracoes-page__field">
-                <label
-                  htmlFor="quadro-nome"
-                  className="quadro-configuracoes-page__label"
-                >
-                  Nome do quadro
-                </label>
-                <input
-                  id="quadro-nome"
-                  name="nome"
-                  type="text"
-                  value={formData.nome}
-                  onChange={handleChange}
-                  placeholder="Informe o nome do quadro"
-                />
-              </div>
-
-              <div className="quadro-configuracoes-page__field">
-                <label
-                  htmlFor="quadro-descricao"
-                  className="quadro-configuracoes-page__label"
-                >
-                  Descrição
-                </label>
-                <textarea
-                  id="quadro-descricao"
-                  name="descricao"
-                  rows="5"
-                  value={formData.descricao}
-                  onChange={handleChange}
-                  placeholder="Descreva a finalidade do quadro"
-                />
-              </div>
+              <QuadroForm
+                modo="editar"
+                formId="quadro-configuracoes-form"
+                initialValues={initialFormValues}
+                loading={salvando}
+                showArquivado
+                submitLabel="Salvar alterações"
+                onSubmit={handleSubmitForm}
+              />
             </div>
           </section>
 
@@ -225,48 +271,14 @@ export default function QuadroConfiguracoesPage() {
             <div className="quadro-configuracoes-page__section-header">
               <h3 className="quadro-configuracoes-page__section-title">
                 <Archive size={18} aria-hidden="true" />
-                <span>Estado do quadro</span>
+                <span>Preferências pessoais</span>
               </h3>
               <p className="quadro-configuracoes-page__section-description">
-                Determine se o quadro permanece no fluxo principal ou se deve ser
-                mantido apenas para consulta e histórico.
+                Opções de exibição aplicadas só ao seu usuário neste quadro.
               </p>
             </div>
 
-            <div className="quadro-configuracoes-page__card">
-              <div className="quadro-configuracoes-page__switch-list">
-                <label className="quadro-configuracoes-page__switch-item">
-                  <div className="quadro-configuracoes-page__switch-text">
-                    <strong>Arquivar quadro</strong>
-                    <span>
-                      Quando ativado, o quadro sai do fluxo operacional
-                      principal, mas mantém seus dados e histórico.
-                    </span>
-                  </div>
-
-                  <input
-                    name="arquivado"
-                    type="checkbox"
-                    checked={formData.arquivado}
-                    onChange={handleChange}
-                  />
-                </label>
-
-                <div className="quadro-configuracoes-page__status-preview">
-                  <span className="quadro-configuracoes-page__status-preview-icon">
-                    {formData.arquivado ? (
-                      <Archive size={16} aria-hidden="true" />
-                    ) : (
-                      <FolderOpen size={16} aria-hidden="true" />
-                    )}
-                  </span>
-                  <span className="quadro-configuracoes-page__status-preview-text">
-                    Estado atual após salvamento:{" "}
-                    <strong>{formData.arquivado ? "Arquivado" : "Ativo"}</strong>
-                  </span>
-                </div>
-              </div>
-            </div>
+            <QuadroPreferenciasForm quadroId={quadroId} usuarioId={usuarioId} />
           </section>
 
           <section className="quadro-configuracoes-page__section">
@@ -276,8 +288,7 @@ export default function QuadroConfiguracoesPage() {
                 <span>Domínios relacionados</span>
               </h3>
               <p className="quadro-configuracoes-page__section-description">
-                Alguns controles não pertencem ao registro principal do quadro e
-                devem ser administrados em módulos próprios.
+                Controles que ficam em módulos próprios.
               </p>
             </div>
 
@@ -287,8 +298,7 @@ export default function QuadroConfiguracoesPage() {
                   <div className="quadro-configuracoes-page__related-text">
                     <strong>Papéis e permissões</strong>
                     <span>
-                      Controle quem pode gerenciar quadro, listas, automações,
-                      campos, convites e criação de cartões.
+                      Controle responsabilidades e permissões por papel.
                     </span>
                   </div>
 
@@ -301,8 +311,7 @@ export default function QuadroConfiguracoesPage() {
                   <div className="quadro-configuracoes-page__related-text">
                     <strong>Membros do quadro</strong>
                     <span>
-                      Gerencie vínculos de usuários, status do membro e
-                      associação com papéis do quadro.
+                      Gerencie vínculos de usuários e associação com papéis.
                     </span>
                   </div>
 
@@ -315,19 +324,22 @@ export default function QuadroConfiguracoesPage() {
                   <div className="quadro-configuracoes-page__related-text">
                     <strong>Fluxo e transições</strong>
                     <span>
-                      Regras de movimentação entre listas devem ser tratadas no
-                      domínio de listas, permissões e transições.
+                      Regras entre listas serão tratadas no módulo de listas.
                     </span>
                   </div>
 
-                  <Button variant="ghost" disabled leftIcon={<ArrowRightLeft size={16} />}>
+                  <Button
+                    variant="ghost"
+                    disabled
+                    leftIcon={<ArrowRightLeft size={16} />}
+                  >
                     Em evolução
                   </Button>
                 </div>
               </div>
             </div>
           </section>
-        </form>
+        </div>
       </div>
     </AppLayout>
   );

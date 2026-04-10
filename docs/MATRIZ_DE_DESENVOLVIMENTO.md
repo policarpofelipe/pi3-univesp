@@ -1,4 +1,12 @@
 ==================================================
+0. NOTAS DE USO (UI E CHECKLIST)
+==================================================
+
+Padrão de UI (frontend): novas telas e componentes devem usar os tokens em frontend/src/styles/tokens.css e as sobrescritas de tema em frontend/src/styles/themes.css (variáveis semânticas como --color-text, --font-size-md, etc.). Evitar cores em hex soltas e tamanhos fixos do Tailwind (por exemplo text-sm) onde o usuário controla escala de fonte ou tema; preferir var(--font-size-*) e utilitários que referenciem esses tokens.
+
+Checklist (✅): marcar um item com ✅ somente depois que o arquivo existir no repositório principal (merge na branch acordada pelo time). Antes de criar um arquivo novo, conferir no repositório se já não há implementação equivalente com outro nome ou em outra pasta, para evitar duplicação.
+
+==================================================
 1. MATRIZ DE DIVISÃO DO DESENVOLVIMENTO
 ==================================================
 
@@ -320,12 +328,12 @@ docs/
 ✅pages/quadros/QuadroMembrosPage.jsx
 ✅pages/quadros/QuadroPapeisPage.jsx
 
-components/quadros/QuadroCard.jsx
-components/quadros/QuadroForm.jsx
-components/quadros/QuadroHeader.jsx
-components/quadros/QuadroPreferenciasForm.jsx
-components/quadros/QuadroMembrosTable.jsx
-components/quadros/QuadroPapelForm.jsx
+✅components/quadros/QuadroCard.jsx
+✅components/quadros/QuadroForm.jsx
+✅components/quadros/QuadroHeader.jsx
+✅components/quadros/QuadroPreferenciasForm.jsx
+✅components/quadros/QuadroMembrosTable.jsx
+✅components/quadros/QuadroPapelForm.jsx
 
 ✅services/quadroService.js
 ✅services/quadroMembroService.js
@@ -335,18 +343,18 @@ components/quadros/QuadroPapelForm.jsx
 
 3.5. Listas
 
-components/listas/ListaColumn.jsx
-components/listas/ListaHeader.jsx
-components/listas/ListaForm.jsx
+✅components/listas/ListaColumn.jsx
+✅components/listas/ListaHeader.jsx
+✅components/listas/ListaForm.jsx
 components/listas/ListaPermissoesForm.jsx
 components/listas/ListaTransicoesForm.jsx
-components/listas/ReordenacaoListas.jsx
+✅components/listas/ReordenacaoListas.jsx
 
 pages/listas/ListaConfiguracoesPage.jsx
 pages/listas/ListaPermissoesPage.jsx
 pages/listas/ListaTransicoesPage.jsx
 
-services/listaService.js
+✅services/listaService.js
 services/listaPermissaoService.js
 services/listaTransicaoService.js
 
@@ -496,7 +504,7 @@ constants/tiposEvento.js
 ✅src/routes/quadroRoutes.js
 ✅src/routes/quadroMembroRoutes.js
 ✅src/routes/quadroPapelRoutes.js
-src/routes/listaRoutes.js
+✅src/routes/listaRoutes.js
 src/routes/listaPermissaoRoutes.js
 src/routes/listaTransicaoRoutes.js
 src/routes/visaoRoutes.js
@@ -520,7 +528,7 @@ src/controllers/OrganizacaoController.js
 ✅src/controllers/QuadroController.js
 ✅src/controllers/QuadroMembroController.js
 ✅src/controllers/QuadroPapelController.js
-src/controllers/ListaController.js
+✅src/controllers/listaController.js
 src/controllers/ListaPermissaoController.js
 src/controllers/ListaTransicaoController.js
 src/controllers/VisaoController.js

@@ -1,10 +1,21 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import AppLayout from "../../components/layout/AppLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import EmptyState from "../../components/ui/EmptyState";
 import Button from "../../components/ui/Button";
+import LoadingState from "../../components/ui/LoadingState";
+import ErrorState from "../../components/ui/ErrorState";
+import QuadroPapelForm, {
+  PERMISSOES_QUADRO_PADRAO,
+} from "../../components/quadros/QuadroPapelForm";
+
+import quadroService from "../../services/quadroService";
+import quadroPapelService from "../../services/quadroPapelService";
+import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
+import { extractList, extractObject } from "../../utils/apiData";
+import useAuth from "../../hooks/useAuth";
 
 import {
   ShieldCheck,
@@ -13,109 +24,26 @@ import {
   Crown,
   UserCog,
   EyeOff,
-  Users,
   KeyRound,
   KanbanSquare,
   ListTodo,
-  Sparkles,
-  Columns3,
-  UserPlus,
   CheckSquare,
+  Settings,
+  Trash2,
+  Users,
+  MoveRight,
 } from "lucide-react";
 
 import "../../styles/pages/quadro-papeis.css";
 
-const quadroMock = {
-  id: 1,
-  nome: "Produto e Backlog",
-  organizacao: {
-    id: 1,
-    nome: "Projeto Integrador III",
-  },
-  papeis: [
-    {
-      id: 1,
-      nome: "Administrador",
-      descricao:
-        "Papel com controle amplo sobre estrutura, papéis, membros e comportamento geral do quadro.",
-      ativo: true,
-      membros: 1,
-      permissoes: {
-        podeGerenciarQuadro: true,
-        podeGerenciarListas: true,
-        podeGerenciarAutomacoes: true,
-        podeGerenciarCampos: true,
-        podeConvidarMembros: true,
-        podeCriarCartao: true,
-      },
-    },
-    {
-      id: 2,
-      nome: "Colaborador",
-      descricao:
-        "Papel operacional para uso cotidiano do quadro, com foco em execução e criação de conteúdo.",
-      ativo: true,
-      membros: 4,
-      permissoes: {
-        podeGerenciarQuadro: false,
-        podeGerenciarListas: true,
-        podeGerenciarAutomacoes: false,
-        podeGerenciarCampos: false,
-        podeConvidarMembros: false,
-        podeCriarCartao: true,
-      },
-    },
-    {
-      id: 3,
-      nome: "Leitor",
-      descricao:
-        "Papel restrito para acompanhamento do quadro, sem capacidade de administração estrutural.",
-      ativo: false,
-      membros: 2,
-      permissoes: {
-        podeGerenciarQuadro: false,
-        podeGerenciarListas: false,
-        podeGerenciarAutomacoes: false,
-        podeGerenciarCampos: false,
-        podeConvidarMembros: false,
-        podeCriarCartao: false,
-      },
-    },
-  ],
+const PERM_ICONS = {
+  visualizarQuadro: KanbanSquare,
+  editarQuadro: Settings,
+  excluirQuadro: Trash2,
+  gerenciarMembros: Users,
+  moverCartoes: MoveRight,
+  editarListas: ListTodo,
 };
-
-const permissoesRotulo = [
-  {
-    key: "podeGerenciarQuadro",
-    label: "Gerenciar quadro",
-    icon: KanbanSquare,
-  },
-  {
-    key: "podeGerenciarListas",
-    label: "Gerenciar listas",
-    icon: ListTodo,
-  },
-  {
-    key: "podeGerenciarAutomacoes",
-    label: "Gerenciar automações",
-    icon: Sparkles,
-  },
-  {
-    key: "podeGerenciarCampos",
-    label: "Gerenciar campos",
-    icon: Columns3,
-  },
-  {
-    key: "podeConvidarMembros",
-    label: "Convidar membros",
-    icon: UserPlus,
-  },
-  {
-    key: "podeCriarCartao",
-    label: "Criar cartão",
-    icon: CheckSquare,
-  },
-];
 
 function obterIconePapel(nomePapel) {
   if (nomePapel === "Administrador") return Crown;
@@ -126,50 +54,190 @@ function obterIconePapel(nomePapel) {
 export default function QuadroPapeisPage() {
   const navigate = useNavigate();
   const { quadroId } = useParams();
+  const { usuario } = useAuth();
+
+  const [quadro, setQuadro] = useState(null);
+  const [papeis, setPapeis] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState("");
   const [busca, setBusca] = useState("");
+  const [modal, setModal] = useState(null);
+  const [salvandoPapel, setSalvandoPapel] = useState(false);
+  const [acaoErro, setAcaoErro] = useState("");
 
-  const quadro = useMemo(() => {
-    if (!quadroId || String(quadroId) === String(quadroMock.id)) {
-      return quadroMock;
+  const carregar = useCallback(async () => {
+    if (!quadroId) return;
+
+    setLoading(true);
+    setErro("");
+
+    try {
+      const [resQuadro, resPapeis] = await Promise.all([
+        quadroService.obterPorId(quadroId),
+        quadroPapelService.listar(quadroId),
+      ]);
+
+      let data = extractObject(resQuadro) || resQuadro;
+
+      if (data?.organizacaoId && !data.organizacao?.nome) {
+        try {
+          const orgRes = await buscarOrganizacaoPorId(data.organizacaoId);
+          const org = extractObject(orgRes) || orgRes;
+          data = {
+            ...data,
+            organizacao: { id: data.organizacaoId, nome: org?.nome || "" },
+          };
+        } catch {
+          data = {
+            ...data,
+            organizacao: { id: data.organizacaoId, nome: "Organização" },
+          };
+        }
+      }
+
+      setQuadro(data);
+      const lista = extractList(resPapeis).map((p) => ({
+        ...p,
+        ativo: p.ativo !== false,
+        membros: p.membros ?? 0,
+        permissoes: p.permissoes || {},
+      }));
+      setPapeis(lista);
+    } catch (error) {
+      setErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível carregar os papéis."
+      );
+      setQuadro(null);
+      setPapeis([]);
+    } finally {
+      setLoading(false);
     }
-
-    return {
-      ...quadroMock,
-      id: quadroId,
-    };
   }, [quadroId]);
+
+  useEffect(() => {
+    carregar();
+  }, [carregar]);
 
   const papeisFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
 
-    return quadro.papeis.filter((papel) => {
+    return papeis.filter((papel) => {
       if (!termo) return true;
 
       return (
-        papel.nome.toLowerCase().includes(termo) ||
-        (papel.descricao || "").toLowerCase().includes(termo)
+        String(papel.nome || "")
+          .toLowerCase()
+          .includes(termo) ||
+        String(papel.descricao || "")
+          .toLowerCase()
+          .includes(termo)
       );
     });
-  }, [busca, quadro.papeis]);
+  }, [busca, papeis]);
 
   const totalMembrosVinculados = useMemo(() => {
-    return quadro.papeis.reduce((acc, papel) => acc + (papel.membros || 0), 0);
-  }, [quadro.papeis]);
+    return papeis.reduce((acc, papel) => acc + (papel.membros || 0), 0);
+  }, [papeis]);
 
   const totalPapeisAtivos = useMemo(() => {
-    return quadro.papeis.filter((papel) => papel.ativo).length;
-  }, [quadro.papeis]);
-
-  function handleNovoPapel() {
-    console.log("Criar novo papel no quadro:", quadro.id);
-  }
-
-  function handleEditarPapel(papelId) {
-    console.log("Editar papel:", papelId);
-  }
+    return papeis.filter((p) => p.ativo).length;
+  }, [papeis]);
 
   function handleAbrirQuadro() {
-    navigate(`/quadros/${quadro.id}`);
+    navigate(`/quadros/${quadroId}`);
+  }
+
+  async function handleSalvarPapel(payload) {
+    setSalvandoPapel(true);
+    setAcaoErro("");
+    try {
+      if (modal?.mode === "criar") {
+        await quadroPapelService.criar(quadroId, {
+          nome: payload.nome,
+          descricao: payload.descricao,
+          permissoes: payload.permissoes,
+        });
+      } else if (modal?.mode === "editar" && modal.papel?.id) {
+        const id = modal.papel.id;
+        await quadroPapelService.atualizar(quadroId, id, {
+          nome: payload.nome,
+          descricao: payload.descricao,
+        });
+        await quadroPapelService.atualizarPermissoes(
+          quadroId,
+          id,
+          payload.permissoes
+        );
+      }
+      setModal(null);
+      await carregar();
+    } catch (e) {
+      setAcaoErro(
+        e?.response?.data?.message ||
+          e?.message ||
+          "Não foi possível salvar o papel."
+      );
+      throw e;
+    } finally {
+      setSalvandoPapel(false);
+    }
+  }
+
+  async function handleRemoverPapel(papelId) {
+    if (!window.confirm("Remover este papel do quadro?")) return;
+    setAcaoErro("");
+    try {
+      await quadroPapelService.remover(quadroId, papelId);
+      await carregar();
+    } catch (e) {
+      setAcaoErro(
+        e?.response?.data?.message ||
+          e?.message ||
+          "Não foi possível remover o papel."
+      );
+    }
+  }
+
+  if (loading && !quadro) {
+    return (
+      <AppLayout
+        title="Papéis do quadro"
+        subtitle="Carregando…"
+        breadcrumbItems={[
+          { label: "Início", href: "/home" },
+          { label: "Quadros", href: "/quadros" },
+        ]}
+        user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
+      >
+        <LoadingState title="Carregando papéis" />
+      </AppLayout>
+    );
+  }
+
+  if (erro || !quadro) {
+    return (
+      <AppLayout
+        title="Papéis do quadro"
+        subtitle="Erro"
+        breadcrumbItems={[
+          { label: "Início", href: "/home" },
+          { label: "Quadros", href: "/quadros" },
+        ]}
+        user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
+      >
+        <ErrorState
+          title="Não foi possível carregar"
+          description={erro || "Quadro indisponível."}
+          action={
+            <Button variant="primary" onClick={() => navigate("/quadros")}>
+              Voltar
+            </Button>
+          }
+        />
+      </AppLayout>
+    );
   }
 
   return (
@@ -182,14 +250,12 @@ export default function QuadroPapeisPage() {
         { label: quadro.nome, href: `/quadros/${quadro.id}` },
         { label: "Papéis" },
       ]}
-      user={{
-        name: "Usuário",
-      }}
+      user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
       topbarActions={
         <Button
           variant="primary"
           leftIcon={<Plus size={16} />}
-          onClick={handleNovoPapel}
+          onClick={() => setModal({ mode: "criar", papel: null })}
         >
           Novo papel
         </Button>
@@ -198,26 +264,32 @@ export default function QuadroPapeisPage() {
       <div className="quadro-papeis-page">
         <PageHeader
           title="Papéis do quadro"
-          description={`Estruture os papéis do quadro "${quadro.nome}" com foco em permissões claras, menor ambiguidade operacional e menor acoplamento entre responsabilidades.`}
+          description={`Estruture os papéis do quadro "${quadro.nome}".`}
           actions={
             <>
-              <Button
-                variant="secondary"
-                onClick={handleAbrirQuadro}
-              >
+              <Button variant="secondary" onClick={handleAbrirQuadro}>
                 Ver quadro
               </Button>
 
               <Button
                 variant="primary"
                 leftIcon={<Plus size={16} />}
-                onClick={handleNovoPapel}
+                onClick={() => setModal({ mode: "criar", papel: null })}
               >
                 Novo papel
               </Button>
             </>
           }
         />
+
+        {acaoErro ? (
+          <p
+            className="mb-4 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+            role="alert"
+          >
+            {acaoErro}
+          </p>
+        ) : null}
 
         <section
           className="quadro-papeis-page__hero"
@@ -237,9 +309,8 @@ export default function QuadroPapeisPage() {
             </h2>
 
             <p className="quadro-papeis-page__hero-description">
-              Neste quadro, os papéis funcionam como contrato operacional. Eles
-              determinam quem administra o quadro, listas, automações, campos,
-              convites e criação de cartões.
+              Organização:{" "}
+              <strong>{quadro.organizacao?.nome || "—"}</strong>.
             </p>
           </div>
         </section>
@@ -306,12 +377,12 @@ export default function QuadroPapeisPage() {
             <EmptyState
               icon={<ShieldCheck size={40} />}
               title="Nenhum papel encontrado"
-              description="Não há papéis compatíveis com a busca atual. Revise o filtro ou crie um novo papel para o quadro."
+              description="Revise a busca ou crie um novo papel."
               action={
                 <Button
                   variant="primary"
                   leftIcon={<Plus size={16} />}
-                  onClick={handleNovoPapel}
+                  onClick={() => setModal({ mode: "criar", papel: null })}
                 >
                   Criar papel
                 </Button>
@@ -367,9 +438,17 @@ export default function QuadroPapeisPage() {
 
                       <Button
                         variant="secondary"
-                        onClick={() => handleEditarPapel(papel.id)}
+                        onClick={() =>
+                          setModal({ mode: "editar", papel })
+                        }
                       >
                         Editar
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleRemoverPapel(papel.id)}
+                      >
+                        Excluir
                       </Button>
                     </div>
                   </div>
@@ -379,13 +458,14 @@ export default function QuadroPapeisPage() {
                   </p>
 
                   <div className="quadro-papeis-page__permissions">
-                    {permissoesRotulo.map((permissao) => {
-                      const IconePermissao = permissao.icon;
-                      const ativa = Boolean(papel.permissoes?.[permissao.key]);
+                    {PERMISSOES_QUADRO_PADRAO.map((meta) => {
+                      const IconePermissao =
+                        PERM_ICONS[meta.key] || CheckSquare;
+                      const ativa = Boolean(papel.permissoes?.[meta.key]);
 
                       return (
                         <div
-                          key={permissao.key}
+                          key={meta.key}
                           className={`quadro-papeis-page__permission quadro-papeis-page__permission--${
                             ativa ? "enabled" : "disabled"
                           }`}
@@ -398,7 +478,7 @@ export default function QuadroPapeisPage() {
                           </span>
 
                           <span className="quadro-papeis-page__permission-label">
-                            {permissao.label}
+                            {meta.label}
                           </span>
 
                           {!ativa ? (
@@ -416,6 +496,46 @@ export default function QuadroPapeisPage() {
           </section>
         )}
       </div>
+
+      {modal ? (
+        <div
+          className="fixed inset-0 z-[1300] flex items-center justify-center bg-[var(--color-scrim)] p-4"
+          role="presentation"
+          onClick={() => !salvandoPapel && setModal(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="papel-modal-titulo"
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-lg)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2
+              id="papel-modal-titulo"
+              className="text-[var(--font-size-heading-3)] font-semibold text-[var(--color-text)]"
+            >
+              {modal.mode === "criar" ? "Novo papel" : "Editar papel"}
+            </h2>
+            <div className="mt-4">
+              <QuadroPapelForm
+                modo={modal.mode === "criar" ? "criar" : "editar"}
+                initialValues={
+                  modal.papel
+                    ? {
+                        nome: modal.papel.nome,
+                        descricao: modal.papel.descricao,
+                        permissoes: modal.papel.permissoes,
+                      }
+                    : {}
+                }
+                loading={salvandoPapel}
+                onCancel={() => !salvandoPapel && setModal(null)}
+                onSubmit={handleSalvarPapel}
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </AppLayout>
   );
 }

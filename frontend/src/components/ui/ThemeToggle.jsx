@@ -1,5 +1,5 @@
 import React from "react";
-import { Moon, Sun } from "lucide-react";
+import { Contrast } from "lucide-react";
 import IconButton from "./IconButton";
 import useAccessibility from "../../hooks/useAccessibility";
 
@@ -16,19 +16,13 @@ export default function ThemeToggle({
   }
 
   const nextThemeLabel = isHighContrast
-    ? "Ativar tema padrão"
-    : "Ativar tema de alto contraste";
+    ? "Voltar ao tema de cores padrão"
+    : "Ativar alto contraste";
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <IconButton
-        icon={
-          isHighContrast ? (
-            <Sun className="h-5 w-5" />
-          ) : (
-            <Moon className="h-5 w-5" />
-          )
-        }
+        icon={<Contrast className="h-5 w-5" strokeWidth={isHighContrast ? 2.5 : 2} />}
         label={nextThemeLabel}
         variant="ghost"
         onClick={handleToggle}
@@ -38,10 +32,10 @@ export default function ThemeToggle({
 
       {showLabel && (
         <span
-          className="text-sm text-[var(--color-text)]"
+          className="text-[var(--font-size-sm)] text-[var(--color-text)]"
           aria-live="polite"
         >
-          {isHighContrast ? "Alto contraste" : "Tema padrão"}
+          {isHighContrast ? "Alto contraste ativo" : "Contraste padrão"}
         </span>
       )}
     </div>
