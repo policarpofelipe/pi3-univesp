@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+#Arquivos sensiveis
+.env
+#Pasta de testes locais
+backend/Teste_http/
