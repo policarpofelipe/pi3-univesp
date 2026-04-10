@@ -1,4 +1,12 @@
 ==================================================
+0. NOTAS DE USO (UI E CHECKLIST)
+==================================================
+
+Padrão de UI (frontend): novas telas e componentes devem usar os tokens em frontend/src/styles/tokens.css e as sobrescritas de tema em frontend/src/styles/themes.css (variáveis semânticas como --color-text, --font-size-md, etc.). Evitar cores em hex soltas e tamanhos fixos do Tailwind (por exemplo text-sm) onde o usuário controla escala de fonte ou tema; preferir var(--font-size-*) e utilitários que referenciem esses tokens.
+
+Checklist (✅): marcar um item com ✅ somente depois que o arquivo existir no repositório principal (merge na branch acordada pelo time). Antes de criar um arquivo novo, conferir no repositório se já não há implementação equivalente com outro nome ou em outra pasta, para evitar duplicação.
+
+==================================================
 1. MATRIZ DE DIVISÃO DO DESENVOLVIMENTO
 ==================================================
 
