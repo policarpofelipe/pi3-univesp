@@ -10,6 +10,7 @@ import CartaoForm from "../../components/cartoes/CartaoForm";
 import CartaoPrazo from "../../components/cartoes/CartaoPrazo";
 import CartaoPrioridade from "../../components/cartoes/CartaoPrioridade";
 import CartaoChecklist from "../../components/cartoes/CartaoChecklist";
+import CartaoAnexos from "../../components/cartoes/CartaoAnexos";
 import CartaoComentarios from "../../components/cartoes/CartaoComentarios";
 import TagSelector from "../../components/cartoes/TagSelector";
 
@@ -391,6 +392,8 @@ export default function CartaoDetalhePage() {
         </section>
 
         <CartaoChecklist quadroId={quadroId} cartaoId={cartaoId} />
+
+        <CartaoAnexos quadroId={quadroId} cartaoId={cartaoId} />
 
         <CartaoComentarios
           quadroId={quadroId}

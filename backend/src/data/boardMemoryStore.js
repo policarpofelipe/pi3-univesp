@@ -15,6 +15,9 @@ const checklistsStore = new Map();
 /** @type {Map<string, Array<object>>} tags por quadro */
 const tagsStore = new Map();
 
+/** @type {Map<string, Array<object>>} anexos por cartão `${quadroId}::${cartaoId}` */
+const anexosStore = new Map();
+
 function makeListaId() {
   return `lst_${randomBytes(6).toString("hex")}`;
 }
@@ -37,6 +40,10 @@ function makeChecklistItemId() {
 
 function makeTagId() {
   return `tag_${randomBytes(6).toString("hex")}`;
+}
+
+function makeAnexoId() {
+  return `anx_${randomBytes(6).toString("hex")}`;
 }
 
 function cartaoEscopoKey(quadroId, cartaoId) {
@@ -239,6 +246,24 @@ function normalizarTagIdsParaCartao(quadroId, val) {
   return { value: out };
 }
 
+function getAnexos(quadroId, cartaoId) {
+  const k = cartaoEscopoKey(quadroId, cartaoId);
+  if (!anexosStore.has(k)) {
+    anexosStore.set(k, []);
+  }
+  return anexosStore.get(k);
+}
+
+function findAnexo(quadroId, cartaoId, anexoId) {
+  return getAnexos(quadroId, cartaoId).find(
+    (a) => String(a.id) === String(anexoId)
+  );
+}
+
+function removeAnexosDoCartao(quadroId, cartaoId) {
+  anexosStore.delete(cartaoEscopoKey(quadroId, cartaoId));
+}
+
 module.exports = {
   makeListaId,
   makeCartaoId,
@@ -266,4 +291,8 @@ module.exports = {
   findTag,
   removerTagDoQuadro,
   normalizarTagIdsParaCartao,
+  makeAnexoId,
+  getAnexos,
+  findAnexo,
+  removeAnexosDoCartao,
 };
