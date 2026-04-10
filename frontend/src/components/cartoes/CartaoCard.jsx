@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Button from "../ui/Button";
+import CartaoDescricao from "./CartaoDescricao";
 
 export default function CartaoCard({
   quadroId = "",
@@ -28,11 +29,7 @@ export default function CartaoCard({
           cartao.titulo
         )}
       </h5>
-      {cartao.descricao ? (
-        <p className="mt-1 line-clamp-3 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
-          {cartao.descricao}
-        </p>
-      ) : null}
+      <CartaoDescricao texto={cartao.descricao} variant="compact" />
 
       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         {listas.length > 1 ? (

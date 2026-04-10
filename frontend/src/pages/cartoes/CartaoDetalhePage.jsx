@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import AppLayout from "../../components/layout/AppLayout";
-import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/Button";
+import CartaoHeader from "../../components/cartoes/CartaoHeader";
 import LoadingState from "../../components/ui/LoadingState";
 import ErrorState from "../../components/ui/ErrorState";
 import CartaoForm from "../../components/cartoes/CartaoForm";
@@ -15,7 +15,7 @@ import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 import { extractList, extractObject } from "../../utils/apiData";
 import useAuth from "../../hooks/useAuth";
 
-import { ArrowLeft, KanbanSquare, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 
 export default function CartaoDetalhePage() {
   const navigate = useNavigate();
@@ -219,12 +219,12 @@ export default function CartaoDetalhePage() {
       user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
     >
       <div className="mx-auto max-w-2xl">
-        <PageHeader
-          title={cartao.titulo}
-          description={
-            listaAtual
-              ? `Lista: ${listaAtual.nome} · Quadro: ${quadro.nome}`
-              : `Quadro: ${quadro.nome}`
+        <CartaoHeader
+          titulo={cartao.titulo}
+          nomeLista={listaAtual?.nome || ""}
+          nomeQuadro={quadro.nome || ""}
+          nomeOrganizacao={
+            quadro.organizacao?.nome || quadro.organizacaoNome || ""
           }
           actions={
             <>
@@ -295,13 +295,6 @@ export default function CartaoDetalhePage() {
             submitLabel="Salvar alterações"
           />
         </section>
-
-        <p className="mt-6 flex items-center gap-2 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
-          <KanbanSquare size={14} aria-hidden="true" />
-          <span>
-            {quadro.organizacao?.nome || quadro.organizacaoNome || "Organização"}
-          </span>
-        </p>
       </div>
     </AppLayout>
   );
