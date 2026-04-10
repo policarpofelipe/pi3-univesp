@@ -1,7 +1,9 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Button from "../ui/Button";
 
 export default function CartaoCard({
+  quadroId = "",
   cartao,
   listas = [],
   onEdit,
@@ -15,7 +17,16 @@ export default function CartaoCard({
       aria-label={`Cartão ${cartao.titulo}`}
     >
       <h5 className="text-[var(--font-size-sm)] font-semibold text-[var(--color-text)]">
-        {cartao.titulo}
+        {quadroId ? (
+          <Link
+            to={`/quadros/${quadroId}/cartoes/${cartao.id}`}
+            className="text-[var(--color-text)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2"
+          >
+            {cartao.titulo}
+          </Link>
+        ) : (
+          cartao.titulo
+        )}
       </h5>
       {cartao.descricao ? (
         <p className="mt-1 line-clamp-3 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">

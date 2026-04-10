@@ -25,6 +25,9 @@ import QuadroConfiguracoesPage from "./pages/quadros/QuadroConfiguracoesPage";
 import QuadroMembrosPage from "./pages/quadros/QuadroMembrosPage";
 import QuadroPapeisPage from "./pages/quadros/QuadroPapeisPage";
 
+// Cartões
+import CartaoDetalhePage from "./pages/cartoes/CartaoDetalhePage";
+
 export default function App() {
   return (
     <AccessibilityProvider>
@@ -53,6 +56,10 @@ export default function App() {
               element={<QuadrosPage />}
             />
 
+            <Route
+              path="/quadros/:quadroId/cartoes/:cartaoId"
+              element={<CartaoDetalhePage />}
+            />
             <Route path="/quadros/:quadroId" element={<QuadroDetalhePage />} />
             <Route
               path="/quadros/:quadroId/configuracoes"

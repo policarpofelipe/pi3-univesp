@@ -580,6 +580,7 @@ export default function QuadroDetalhePage() {
                         (c) => (
                           <CartaoCard
                             key={c.id}
+                            quadroId={quadroId}
                             cartao={c}
                             listas={listas}
                             movendo={movendoCartaoId === c.id}

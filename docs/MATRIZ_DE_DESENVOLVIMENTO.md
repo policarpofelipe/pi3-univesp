@@ -362,7 +362,7 @@ services/listaTransicaoService.js
 
 3.6. Cartões
 
-pages/cartoes/CartaoDetalhePage.jsx
+✅pages/cartoes/CartaoDetalhePage.jsx
 
 ✅components/cartoes/CartaoCard.jsx
 components/cartoes/CartaoModal.jsx
