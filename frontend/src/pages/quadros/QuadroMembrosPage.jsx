@@ -1,178 +1,249 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import AppLayout from "../../components/layout/AppLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import EmptyState from "../../components/ui/EmptyState";
 import Button from "../../components/ui/Button";
+import LoadingState from "../../components/ui/LoadingState";
+import ErrorState from "../../components/ui/ErrorState";
+import QuadroMembrosTable from "../../components/quadros/QuadroMembrosTable";
+
+import quadroService from "../../services/quadroService";
+import quadroMembroService from "../../services/quadroMembroService";
+import quadroPapelService from "../../services/quadroPapelService";
+import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
+import { extractList, extractObject } from "../../utils/apiData";
+import useAuth from "../../hooks/useAuth";
 
 import {
-  Building2,
   Users,
   UserPlus,
   Search,
-  ShieldCheck,
-  Crown,
-  UserRound,
-  Mail,
-  CalendarDays,
-  MoreHorizontal,
 } from "lucide-react";
 
 import "../../styles/pages/quadro-membros.css";
 
-const quadroMock = {
-  id: 1,
-  nome: "Produto e Backlog",
-  organizacao: {
-    id: 1,
-    nome: "Projeto Integrador III",
-  },
-  membros: [
-    {
-      id: 1,
-      usuarioId: 1,
-      nome: "Felipe Policarpo",
-      email: "felipe@email.com",
-      status: "ativo",
-      criadoEm: "2026-04-01 09:00:00",
-      papeis: [
-        {
-          id: 1,
-          nome: "Administrador",
-          ativo: true,
-        },
-      ],
-    },
-    {
-      id: 2,
-      usuarioId: 2,
-      nome: "Ana Flávia",
-      email: "ana@email.com",
-      status: "ativo",
-      criadoEm: "2026-04-02 10:00:00",
-      papeis: [
-        {
-          id: 2,
-          nome: "Colaborador",
-          ativo: true,
-        },
-      ],
-    },
-    {
-      id: 3,
-      usuarioId: 3,
-      nome: "Cesar Yukio",
-      email: "cesar@email.com",
-      status: "ativo",
-      criadoEm: "2026-04-03 11:00:00",
-      papeis: [
-        {
-          id: 2,
-          nome: "Colaborador",
-          ativo: true,
-        },
-        {
-          id: 3,
-          nome: "Revisor",
-          ativo: true,
-        },
-      ],
-    },
-    {
-      id: 4,
-      usuarioId: 4,
-      nome: "Isabella Marzola",
-      email: "isabella@email.com",
-      status: "pendente",
-      criadoEm: "2026-04-04 12:00:00",
-      papeis: [],
-    },
-  ],
-};
-
-function formatarData(data) {
-  if (!data) return "Não informado";
-
-  try {
-    return new Intl.DateTimeFormat("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }).format(new Date(data));
-  } catch {
-    return data;
-  }
-}
-
-function obterIconePapel(nomePapel) {
-  if (nomePapel === "Administrador") return Crown;
-  if (nomePapel === "Colaborador") return ShieldCheck;
-  return UserRound;
-}
-
-function formatarPapeis(papeis = []) {
-  if (!Array.isArray(papeis) || papeis.length === 0) {
-    return "Sem papel vinculado";
-  }
-
-  return papeis.map((papel) => papel.nome).join(", ");
-}
-
 export default function QuadroMembrosPage() {
   const navigate = useNavigate();
   const { quadroId } = useParams();
+  const { usuario } = useAuth();
 
+  const [quadro, setQuadro] = useState(null);
+  const [membros, setMembros] = useState([]);
+  const [papeis, setPapeis] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState("");
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
+  const [modalConvite, setModalConvite] = useState(false);
+  const [emailConvite, setEmailConvite] = useState("");
+  const [papelConvite, setPapelConvite] = useState("");
+  const [convidando, setConvidando] = useState(false);
+  const [acaoErro, setAcaoErro] = useState("");
 
-  const quadro = useMemo(() => {
-    if (!quadroId || String(quadroId) === String(quadroMock.id)) {
-      return quadroMock;
+  const carregar = useCallback(async () => {
+    if (!quadroId) return;
+
+    setLoading(true);
+    setErro("");
+
+    try {
+      const [resQuadro, resMembros, resPapeis] = await Promise.all([
+        quadroService.obterPorId(quadroId),
+        quadroMembroService.listar(quadroId),
+        quadroPapelService.listar(quadroId).catch(() => ({ data: [] })),
+      ]);
+
+      let data = extractObject(resQuadro) || resQuadro;
+
+      if (data?.organizacaoId && !data.organizacao?.nome) {
+        try {
+          const orgRes = await buscarOrganizacaoPorId(data.organizacaoId);
+          const org = extractObject(orgRes) || orgRes;
+          data = {
+            ...data,
+            organizacao: { id: data.organizacaoId, nome: org?.nome || "" },
+          };
+        } catch {
+          data = {
+            ...data,
+            organizacao: { id: data.organizacaoId, nome: "Organização" },
+          };
+        }
+      }
+
+      setQuadro(data);
+      setMembros(extractList(resMembros));
+      setPapeis(extractList(resPapeis));
+    } catch (error) {
+      setErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível carregar os membros."
+      );
+      setQuadro(null);
+      setMembros([]);
+    } finally {
+      setLoading(false);
     }
-
-    return {
-      ...quadroMock,
-      id: quadroId,
-    };
   }, [quadroId]);
 
+  useEffect(() => {
+    carregar();
+  }, [carregar]);
+
+  useEffect(() => {
+    if (papeis.length && !papelConvite) {
+      const padrao = papeis.find((p) => p.nome === "Colaborador") || papeis[0];
+      setPapelConvite(padrao?.nome || "");
+    }
+  }, [papeis, papelConvite]);
+
   const membrosFiltrados = useMemo(() => {
-    return quadro.membros.filter((membro) => {
+    return membros.filter((membro) => {
       const termo = busca.trim().toLowerCase();
-      const papeisTexto = formatarPapeis(membro.papeis).toLowerCase();
+      const papelStr =
+        membro.papel ||
+        (Array.isArray(membro.papeis)
+          ? membro.papeis.map((p) => p?.nome || p).join(" ")
+          : "");
 
       const correspondeBusca =
         !termo ||
-        membro.nome.toLowerCase().includes(termo) ||
-        membro.email.toLowerCase().includes(termo) ||
-        papeisTexto.includes(termo);
+        String(membro.nome || "")
+          .toLowerCase()
+          .includes(termo) ||
+        String(membro.email || "")
+          .toLowerCase()
+          .includes(termo) ||
+        String(papelStr).toLowerCase().includes(termo);
 
+      const status = membro.status || "ativo";
       const correspondeStatus =
-        filtroStatus === "todos" || membro.status === filtroStatus;
+        filtroStatus === "todos" || status === filtroStatus;
 
       return correspondeBusca && correspondeStatus;
     });
-  }, [busca, filtroStatus, quadro.membros]);
+  }, [busca, filtroStatus, membros]);
 
-  const totalAtivos = useMemo(() => {
-    return membrosFiltrados.filter((membro) => membro.status === "ativo").length;
-  }, [membrosFiltrados]);
+  const totalAtivos = membrosFiltrados.filter(
+    (m) => (m.status || "ativo") === "ativo"
+  ).length;
+  const totalPendentes = membrosFiltrados.filter(
+    (m) => m.status === "pendente"
+  ).length;
 
-  const totalPendentes = useMemo(() => {
-    return membrosFiltrados.filter((membro) => membro.status === "pendente").length;
-  }, [membrosFiltrados]);
-
-  function handleConvidarMembro() {
-    console.log("Convidar membro para quadro:", quadro.id);
+  async function handleAlterarPapel(membroId, novoPapelNome) {
+    setAcaoErro("");
+    try {
+      await quadroMembroService.atualizarPapel(quadroId, membroId, {
+        papel: novoPapelNome,
+      });
+      await carregar();
+    } catch (e) {
+      setAcaoErro(
+        e?.response?.data?.message ||
+          e?.message ||
+          "Não foi possível atualizar o papel."
+      );
+    }
   }
 
-  function handleGerenciarMembro(membroId) {
-    console.log("Gerenciar membro:", membroId);
+  async function handleRemover(membroId) {
+    if (!window.confirm("Remover este membro do quadro?")) return;
+    setAcaoErro("");
+    try {
+      await quadroMembroService.remover(quadroId, membroId);
+      await carregar();
+    } catch (e) {
+      setAcaoErro(
+        e?.response?.data?.message ||
+          e?.message ||
+          "Não foi possível remover o membro."
+      );
+    }
+  }
+
+  async function handleReenviarConvite(membroId) {
+    setAcaoErro("");
+    try {
+      await quadroMembroService.reenviarConvite(quadroId, membroId);
+      await carregar();
+    } catch (e) {
+      setAcaoErro(
+        e?.response?.data?.message ||
+          e?.message ||
+          "Não foi possível reenviar o convite."
+      );
+    }
+  }
+
+  async function handleEnviarConvite(event) {
+    event.preventDefault();
+    setAcaoErro("");
+    setConvidando(true);
+    try {
+      await quadroMembroService.convidar(quadroId, {
+        email: emailConvite.trim(),
+        papel: papelConvite || "Colaborador",
+      });
+      setModalConvite(false);
+      setEmailConvite("");
+      await carregar();
+    } catch (e) {
+      setAcaoErro(
+        e?.response?.data?.message ||
+          e?.message ||
+          "Não foi possível enviar o convite."
+      );
+    } finally {
+      setConvidando(false);
+    }
   }
 
   function handleAbrirQuadro() {
-    navigate(`/quadros/${quadro.id}`);
+    navigate(`/quadros/${quadroId}`);
+  }
+
+  if (loading && !quadro) {
+    return (
+      <AppLayout
+        title="Membros do quadro"
+        subtitle="Carregando…"
+        breadcrumbItems={[
+          { label: "Início", href: "/home" },
+          { label: "Quadros", href: "/quadros" },
+        ]}
+        user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
+      >
+        <LoadingState title="Carregando membros" />
+      </AppLayout>
+    );
+  }
+
+  if (erro || !quadro) {
+    return (
+      <AppLayout
+        title="Membros do quadro"
+        subtitle="Erro"
+        breadcrumbItems={[
+          { label: "Início", href: "/home" },
+          { label: "Quadros", href: "/quadros" },
+        ]}
+        user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
+      >
+        <ErrorState
+          title="Não foi possível carregar"
+          description={erro || "Quadro indisponível."}
+          action={
+            <Button variant="primary" onClick={() => navigate("/quadros")}>
+              Voltar
+            </Button>
+          }
+        />
+      </AppLayout>
+    );
   }
 
   return (
@@ -185,14 +256,12 @@ export default function QuadroMembrosPage() {
         { label: quadro.nome, href: `/quadros/${quadro.id}` },
         { label: "Membros" },
       ]}
-      user={{
-        name: "Usuário",
-      }}
+      user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
       topbarActions={
         <Button
           variant="primary"
           leftIcon={<UserPlus size={16} />}
-          onClick={handleConvidarMembro}
+          onClick={() => setModalConvite(true)}
         >
           Convidar membro
         </Button>
@@ -201,7 +270,7 @@ export default function QuadroMembrosPage() {
       <div className="quadro-membros-page">
         <PageHeader
           title="Membros do quadro"
-          description={`Controle quem participa do quadro "${quadro.nome}" e como cada membro interage com o fluxo operacional.`}
+          description={`Controle quem participa do quadro "${quadro.nome}".`}
           actions={
             <>
               <Button variant="secondary" onClick={handleAbrirQuadro}>
@@ -211,13 +280,22 @@ export default function QuadroMembrosPage() {
               <Button
                 variant="primary"
                 leftIcon={<UserPlus size={16} />}
-                onClick={handleConvidarMembro}
+                onClick={() => setModalConvite(true)}
               >
                 Convidar membro
               </Button>
             </>
           }
         />
+
+        {acaoErro ? (
+          <p
+            className="mb-4 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+            role="alert"
+          >
+            {acaoErro}
+          </p>
+        ) : null}
 
         <section
           className="quadro-membros-page__hero"
@@ -237,10 +315,8 @@ export default function QuadroMembrosPage() {
             </h2>
 
             <p className="quadro-membros-page__hero-description">
-              O quadro pertence à organização{" "}
-              <strong>{quadro.organizacao.nome}</strong>. Nesta área, o foco é
-              administrar membros, estados do vínculo e papéis associados,
-              evitando acoplamento desorganizado entre permissões e execução.
+              Organização:{" "}
+              <strong>{quadro.organizacao?.nome || "—"}</strong>.
             </p>
           </div>
         </section>
@@ -322,12 +398,12 @@ export default function QuadroMembrosPage() {
             <EmptyState
               icon={<Users size={40} />}
               title="Nenhum membro encontrado"
-              description="Não há membros compatíveis com os filtros aplicados. Revise a busca ou convide novos participantes."
+              description="Ajuste os filtros ou convide novos participantes."
               action={
                 <Button
                   variant="primary"
                   leftIcon={<UserPlus size={16} />}
-                  onClick={handleConvidarMembro}
+                  onClick={() => setModalConvite(true)}
                 >
                   Convidar membro
                 </Button>
@@ -335,89 +411,89 @@ export default function QuadroMembrosPage() {
             />
           </section>
         ) : (
-          <section
-            className="quadro-membros-page__list"
-            aria-label="Lista de membros do quadro"
-          >
-            {membrosFiltrados.map((membro) => {
-              const papelPrincipal = membro.papeis?.[0];
-              const IconePapel = obterIconePapel(
-                papelPrincipal?.nome || "Leitor"
-              );
-
-              return (
-                <article
-                  key={membro.id}
-                  className="quadro-membros-page__card"
-                  aria-labelledby={`membro-${membro.id}-nome`}
-                >
-                  <div className="quadro-membros-page__card-main">
-                    <div
-                      className="quadro-membros-page__avatar"
-                      aria-hidden="true"
-                    >
-                      {membro.nome.slice(0, 1).toUpperCase()}
-                    </div>
-
-                    <div className="quadro-membros-page__card-body">
-                      <div className="quadro-membros-page__card-header">
-                        <div className="quadro-membros-page__card-title-block">
-                          <h2
-                            id={`membro-${membro.id}-nome`}
-                            className="quadro-membros-page__card-title"
-                          >
-                            {membro.nome}
-                          </h2>
-
-                          <p className="quadro-membros-page__card-email">
-                            <Mail size={14} aria-hidden="true" />
-                            <span>{membro.email}</span>
-                          </p>
-                        </div>
-
-                        <span
-                          className={`quadro-membros-page__status quadro-membros-page__status--${membro.status}`}
-                        >
-                          {membro.status === "ativo" ? "Ativo" : "Pendente"}
-                        </span>
-                      </div>
-
-                      <div className="quadro-membros-page__meta">
-                        <span className="quadro-membros-page__meta-item">
-                          <IconePapel size={14} aria-hidden="true" />
-                          <span>{formatarPapeis(membro.papeis)}</span>
-                        </span>
-
-                        <span className="quadro-membros-page__meta-item">
-                          <CalendarDays size={14} aria-hidden="true" />
-                          <span>Desde {formatarData(membro.criadoEm)}</span>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="quadro-membros-page__card-actions">
-                    <Button
-                      variant="secondary"
-                      onClick={() => handleGerenciarMembro(membro.id)}
-                    >
-                      Gerenciar
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      leftIcon={<MoreHorizontal size={16} />}
-                      onClick={() => handleGerenciarMembro(membro.id)}
-                    >
-                      Ações
-                    </Button>
-                  </div>
-                </article>
-              );
-            })}
-          </section>
+          <QuadroMembrosTable
+            membros={membrosFiltrados}
+            papeisDisponiveis={papeis}
+            onAlterarPapel={handleAlterarPapel}
+            onRemover={handleRemover}
+            onReenviarConvite={handleReenviarConvite}
+          />
         )}
       </div>
+
+      {modalConvite ? (
+        <div
+          className="fixed inset-0 z-[1300] flex items-center justify-center bg-[var(--color-scrim)] p-4"
+          role="presentation"
+          onClick={() => !convidando && setModalConvite(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="convite-titulo"
+            className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-lg)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2
+              id="convite-titulo"
+              className="text-[var(--font-size-heading-3)] font-semibold text-[var(--color-text)]"
+            >
+              Convidar membro
+            </h2>
+            <form className="mt-4 flex flex-col gap-3" onSubmit={handleEnviarConvite}>
+              <div>
+                <label
+                  htmlFor="convite-email"
+                  className="mb-1 block text-[var(--font-size-sm)] font-medium"
+                >
+                  E-mail
+                </label>
+                <input
+                  id="convite-email"
+                  type="email"
+                  required
+                  value={emailConvite}
+                  onChange={(e) => setEmailConvite(e.target.value)}
+                  className="w-full rounded-lg border border-[var(--input-border)] px-3 py-2 text-[var(--font-size-sm)]"
+                  placeholder="nome@exemplo.com"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="convite-papel"
+                  className="mb-1 block text-[var(--font-size-sm)] font-medium"
+                >
+                  Papel inicial
+                </label>
+                <select
+                  id="convite-papel"
+                  value={papelConvite}
+                  onChange={(e) => setPapelConvite(e.target.value)}
+                  className="w-full rounded-lg border border-[var(--input-border)] px-3 py-2 text-[var(--font-size-sm)]"
+                >
+                  {papeis.map((p) => (
+                    <option key={p.id || p.nome} value={p.nome}>
+                      {p.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => !convidando && setModalConvite(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" variant="primary" loading={convidando}>
+                  Enviar convite
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </AppLayout>
   );
 }

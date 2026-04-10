@@ -328,12 +328,12 @@ docs/
 ✅pages/quadros/QuadroMembrosPage.jsx
 ✅pages/quadros/QuadroPapeisPage.jsx
 
-components/quadros/QuadroCard.jsx
-components/quadros/QuadroForm.jsx
-components/quadros/QuadroHeader.jsx
-components/quadros/QuadroPreferenciasForm.jsx
-components/quadros/QuadroMembrosTable.jsx
-components/quadros/QuadroPapelForm.jsx
+✅components/quadros/QuadroCard.jsx
+✅components/quadros/QuadroForm.jsx
+✅components/quadros/QuadroHeader.jsx
+✅components/quadros/QuadroPreferenciasForm.jsx
+✅components/quadros/QuadroMembrosTable.jsx
+✅components/quadros/QuadroPapelForm.jsx
 
 ✅services/quadroService.js
 ✅services/quadroMembroService.js

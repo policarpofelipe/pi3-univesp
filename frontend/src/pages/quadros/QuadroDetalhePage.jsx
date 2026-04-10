@@ -1,104 +1,32 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import AppLayout from "../../components/layout/AppLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/Button";
 import EmptyState from "../../components/ui/EmptyState";
+import LoadingState from "../../components/ui/LoadingState";
+import ErrorState from "../../components/ui/ErrorState";
+import QuadroHeader from "../../components/quadros/QuadroHeader";
+
+import quadroService from "../../services/quadroService";
+import quadroMembroService from "../../services/quadroMembroService";
+import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
+import { extractList, extractObject } from "../../utils/apiData";
+import useAuth from "../../hooks/useAuth";
 
 import {
   Building2,
-  KanbanSquare,
   ListTodo,
   CheckSquare,
   Plus,
-  Settings,
-  Users,
-  CalendarDays,
+  Tag,
   ArrowRight,
   Clock3,
-  Tag,
-  Archive,
-  FolderOpen,
+  Users,
 } from "lucide-react";
 
 import "../../styles/pages/quadro-detalhe.css";
-
-const quadroMock = {
-  id: 1,
-  nome: "Produto e Backlog",
-  descricao:
-    "Quadro principal para planejamento, priorização e acompanhamento das entregas do sistema de gestão de tarefas.",
-  organizacao: {
-    id: 1,
-    nome: "Projeto Integrador III",
-  },
-  organizacaoId: 1,
-  criadoPorUsuarioId: 1,
-  arquivadoEm: null,
-  criadoEm: "2026-04-01 09:00:00",
-  atualizadoEm: "2026-04-05 14:20:00",
-  membros: [
-    {
-      id: 1,
-      nome: "Felipe Policarpo",
-      papeis: ["Administrador"],
-    },
-    {
-      id: 2,
-      nome: "Ana Flávia",
-      papeis: ["Colaborador"],
-    },
-    {
-      id: 3,
-      nome: "Cesar Yukio",
-      papeis: ["Colaborador", "Revisor"],
-    },
-  ],
-  listas: [
-    {
-      id: 1,
-      nome: "A fazer",
-      limiteWip: 8,
-      totalCartoes: 6,
-    },
-    {
-      id: 2,
-      nome: "Em andamento",
-      limiteWip: 4,
-      totalCartoes: 3,
-    },
-    {
-      id: 3,
-      nome: "Em validação",
-      limiteWip: 3,
-      totalCartoes: 1,
-    },
-    {
-      id: 4,
-      nome: "Concluído",
-      limiteWip: null,
-      totalCartoes: 8,
-    },
-  ],
-  atividades: [
-    {
-      id: 1,
-      descricao: "Cartão “Refatorar Topbar” movido para Em validação.",
-      data: "2026-04-05 09:30",
-    },
-    {
-      id: 2,
-      descricao: "Nova lista “Em validação” criada no quadro.",
-      data: "2026-04-04 21:10",
-    },
-    {
-      id: 3,
-      descricao: "Membro Ana Flávia vinculado ao quadro.",
-      data: "2026-04-04 19:45",
-    },
-  ],
-};
 
 function formatarData(data) {
   if (!data) return "Não informado";
@@ -114,50 +42,152 @@ function formatarData(data) {
   }
 }
 
-function formatarStatusQuadro(quadro) {
-  return quadro.arquivadoEm ? "Arquivado" : "Ativo";
+function normalizarMembro(m) {
+  const papeis = [];
+  if (Array.isArray(m.papeis) && m.papeis.length) {
+    m.papeis.forEach((p) =>
+      papeis.push(typeof p === "string" ? p : p?.nome)
+    );
+  } else if (m.papel) {
+    papeis.push(m.papel);
+  }
+
+  return {
+    id: m.id,
+    nome: m.nome,
+    papeis: papeis.filter(Boolean),
+  };
 }
 
 export default function QuadroDetalhePage() {
   const navigate = useNavigate();
   const { quadroId } = useParams();
+  const { usuario } = useAuth();
 
-  const quadro = useMemo(() => {
-    if (!quadroId || String(quadroId) === String(quadroMock.id)) {
-      return quadroMock;
+  const [quadro, setQuadro] = useState(null);
+  const [membros, setMembros] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState("");
+
+  const carregar = useCallback(async () => {
+    if (!quadroId) return;
+
+    setLoading(true);
+    setErro("");
+
+    try {
+      const [resQuadro, resMembros] = await Promise.all([
+        quadroService.obterPorId(quadroId),
+        quadroMembroService.listar(quadroId).catch(() => ({ data: [] })),
+      ]);
+
+      let data = extractObject(resQuadro) || resQuadro;
+
+      if (data?.organizacaoId && !data.organizacao?.nome) {
+        try {
+          const orgRes = await buscarOrganizacaoPorId(data.organizacaoId);
+          const org = extractObject(orgRes) || orgRes;
+          data = {
+            ...data,
+            organizacao: { id: data.organizacaoId, nome: org?.nome || "" },
+            organizacaoNome: org?.nome,
+          };
+        } catch {
+          data = {
+            ...data,
+            organizacao: { id: data.organizacaoId, nome: "Organização" },
+          };
+        }
+      }
+
+      setQuadro(data);
+
+      const listaMembros = extractList(resMembros);
+      setMembros(listaMembros.map(normalizarMembro));
+    } catch (error) {
+      setErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível carregar o quadro."
+      );
+      setQuadro(null);
+      setMembros([]);
+    } finally {
+      setLoading(false);
     }
-
-    return {
-      ...quadroMock,
-      id: quadroId,
-    };
   }, [quadroId]);
 
+  useEffect(() => {
+    carregar();
+  }, [carregar]);
+
+  const listas = quadro?.listas && Array.isArray(quadro.listas) ? quadro.listas : [];
+  const atividades = quadro?.atividades && Array.isArray(quadro.atividades)
+    ? quadro.atividades
+    : [];
+
   const totalCartoes = useMemo(() => {
-    return quadro.listas.reduce(
-      (acc, lista) => acc + (lista.totalCartoes || 0),
-      0
-    );
-  }, [quadro]);
+    return listas.reduce((acc, lista) => acc + (lista.totalCartoes || 0), 0);
+  }, [listas]);
 
   function handleNovoCartao() {
-    console.log("Novo cartão no quadro:", quadro.id);
+    /* módulo de cartões */
   }
 
   function handleNovaLista() {
-    console.log("Nova lista no quadro:", quadro.id);
+    /* módulo de listas */
   }
 
   function handleConfigurarQuadro() {
-    navigate(`/quadros/${quadro.id}/configuracoes`);
+    navigate(`/quadros/${quadroId}/configuracoes`);
   }
 
   function handleAbrirMembros() {
-    navigate(`/quadros/${quadro.id}/membros`);
+    navigate(`/quadros/${quadroId}/membros`);
   }
 
   function handleAbrirPapeis() {
-    navigate(`/quadros/${quadro.id}/papeis`);
+    navigate(`/quadros/${quadroId}/papeis`);
+  }
+
+  if (loading && !quadro) {
+    return (
+      <AppLayout
+        title="Quadro"
+        subtitle="Carregando…"
+        breadcrumbItems={[
+          { label: "Início", href: "/home" },
+          { label: "Quadros", href: "/quadros" },
+        ]}
+        user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
+      >
+        <LoadingState title="Carregando quadro" />
+      </AppLayout>
+    );
+  }
+
+  if (erro || !quadro) {
+    return (
+      <AppLayout
+        title="Quadro"
+        subtitle="Erro"
+        breadcrumbItems={[
+          { label: "Início", href: "/home" },
+          { label: "Quadros", href: "/quadros" },
+        ]}
+        user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
+      >
+        <ErrorState
+          title="Não foi possível abrir o quadro"
+          description={erro || "Quadro indisponível."}
+          action={
+            <Button variant="primary" onClick={() => navigate("/quadros")}>
+              Voltar aos quadros
+            </Button>
+          }
+        />
+      </AppLayout>
+    );
   }
 
   return (
@@ -169,9 +199,7 @@ export default function QuadroDetalhePage() {
         { label: "Quadros", href: "/quadros" },
         { label: quadro.nome },
       ]}
-      user={{
-        name: "Usuário",
-      }}
+      user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
       topbarActions={
         <Button
           variant="primary"
@@ -190,12 +218,10 @@ export default function QuadroDetalhePage() {
             <>
               <Button
                 variant="secondary"
-                leftIcon={<Settings size={16} />}
                 onClick={handleConfigurarQuadro}
               >
                 Configurar
               </Button>
-
               <Button
                 variant="primary"
                 leftIcon={<Plus size={16} />}
@@ -207,47 +233,14 @@ export default function QuadroDetalhePage() {
           }
         />
 
-        <section
-          className="quadro-detalhe-page__hero"
-          aria-labelledby="quadro-resumo-titulo"
-        >
-          <div className="quadro-detalhe-page__hero-main">
-            <div className="quadro-detalhe-page__badge">
-              {quadro.arquivadoEm ? (
-                <Archive size={14} aria-hidden="true" />
-              ) : (
-                <FolderOpen size={14} aria-hidden="true" />
-              )}
-              <span>{formatarStatusQuadro(quadro)}</span>
-            </div>
-
-            <h2
-              id="quadro-resumo-titulo"
-              className="quadro-detalhe-page__hero-title"
-            >
-              Resumo do quadro
-            </h2>
-
-            <p className="quadro-detalhe-page__hero-description">
-              Este quadro pertence à organização{" "}
-              <strong>{quadro.organizacao.nome}</strong> e concentra listas,
-              cartões, membros e eventos recentes relacionados ao fluxo principal
-              de trabalho.
-            </p>
-          </div>
-
-          <div className="quadro-detalhe-page__hero-meta">
-            <div className="quadro-detalhe-page__hero-meta-item">
-              <Building2 size={16} aria-hidden="true" />
-              <span>{quadro.organizacao.nome}</span>
-            </div>
-
-            <div className="quadro-detalhe-page__hero-meta-item">
-              <CalendarDays size={16} aria-hidden="true" />
-              <span>Atualizado em {formatarData(quadro.atualizadoEm)}</span>
-            </div>
-          </div>
-        </section>
+        <div className="mt-6">
+          <QuadroHeader
+            quadro={quadro}
+            onConfigurar={handleConfigurarQuadro}
+            onMembros={handleAbrirMembros}
+            onPapeis={handleAbrirPapeis}
+          />
+        </div>
 
         <section
           className="quadro-detalhe-page__stats"
@@ -260,7 +253,7 @@ export default function QuadroDetalhePage() {
             <div className="quadro-detalhe-page__stat-body">
               <p className="quadro-detalhe-page__stat-label">Listas</p>
               <strong className="quadro-detalhe-page__stat-value">
-                {quadro.listas.length}
+                {listas.length}
               </strong>
             </div>
           </article>
@@ -284,14 +277,23 @@ export default function QuadroDetalhePage() {
             <div className="quadro-detalhe-page__stat-body">
               <p className="quadro-detalhe-page__stat-label">Membros</p>
               <strong className="quadro-detalhe-page__stat-value">
-                {quadro.membros.length}
+                {membros.length}
               </strong>
             </div>
           </article>
         </section>
 
+        <p className="quadro-detalhe-page__hero-meta-item mt-4 flex items-center gap-2 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+          <Building2 size={16} aria-hidden="true" />
+          <span>
+            {quadro.organizacao?.nome || quadro.organizacaoNome || "Organização"}
+          </span>
+          <span className="text-[var(--color-text-soft)]">·</span>
+          <span>Atualizado em {formatarData(quadro.atualizadoEm)}</span>
+        </p>
+
         <section
-          className="quadro-detalhe-page__content-grid"
+          className="quadro-detalhe-page__content-grid mt-8"
           aria-label="Detalhamento do quadro"
         >
           <div className="quadro-detalhe-page__panel quadro-detalhe-page__panel--main">
@@ -301,7 +303,7 @@ export default function QuadroDetalhePage() {
                   Listas do quadro
                 </h3>
                 <p className="quadro-detalhe-page__panel-description">
-                  Estrutura atual das listas e distribuição inicial dos cartões.
+                  Estrutura das listas e distribuição dos cartões.
                 </p>
               </div>
 
@@ -314,24 +316,24 @@ export default function QuadroDetalhePage() {
               </Button>
             </div>
 
-            {quadro.listas.length === 0 ? (
+            {listas.length === 0 ? (
               <EmptyState
                 icon={<ListTodo size={36} />}
                 title="Nenhuma lista criada"
-                description="Este quadro ainda não possui listas. Crie a primeira para começar a estruturar o fluxo."
+                description="Quando o módulo de listas estiver ativo, você poderá criar e gerenciar colunas aqui."
                 action={
                   <Button
                     variant="primary"
                     leftIcon={<Plus size={16} />}
                     onClick={handleNovaLista}
                   >
-                    Criar lista
+                    Nova lista
                   </Button>
                 }
               />
             ) : (
               <div className="quadro-detalhe-page__listas">
-                {quadro.listas.map((lista) => (
+                {listas.map((lista) => (
                   <article
                     key={lista.id}
                     className="quadro-detalhe-page__lista-card"
@@ -342,7 +344,7 @@ export default function QuadroDetalhePage() {
                       </h4>
 
                       <span className="quadro-detalhe-page__lista-total">
-                        {lista.totalCartoes} cartões
+                        {lista.totalCartoes ?? 0} cartões
                       </span>
                     </div>
 
@@ -378,30 +380,38 @@ export default function QuadroDetalhePage() {
                 </Button>
               </div>
 
-              <ul className="quadro-detalhe-page__membros">
-                {quadro.membros.map((membro) => (
-                  <li
-                    key={membro.id}
-                    className="quadro-detalhe-page__membro-item"
-                  >
-                    <div
-                      className="quadro-detalhe-page__membro-avatar"
-                      aria-hidden="true"
+              {membros.length === 0 ? (
+                <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+                  Nenhum membro listado.
+                </p>
+              ) : (
+                <ul className="quadro-detalhe-page__membros">
+                  {membros.slice(0, 6).map((membro) => (
+                    <li
+                      key={membro.id}
+                      className="quadro-detalhe-page__membro-item"
                     >
-                      {membro.nome.slice(0, 1).toUpperCase()}
-                    </div>
+                      <div
+                        className="quadro-detalhe-page__membro-avatar"
+                        aria-hidden="true"
+                      >
+                        {(membro.nome || "?").slice(0, 1).toUpperCase()}
+                      </div>
 
-                    <div className="quadro-detalhe-page__membro-body">
-                      <strong className="quadro-detalhe-page__membro-nome">
-                        {membro.nome}
-                      </strong>
-                      <span className="quadro-detalhe-page__membro-papel">
-                        {membro.papeis.join(", ")}
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                      <div className="quadro-detalhe-page__membro-body">
+                        <strong className="quadro-detalhe-page__membro-nome">
+                          {membro.nome}
+                        </strong>
+                        <span className="quadro-detalhe-page__membro-papel">
+                          {membro.papeis.length
+                            ? membro.papeis.join(", ")
+                            : "Sem papel"}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
 
             <section className="quadro-detalhe-page__section">
@@ -416,8 +426,8 @@ export default function QuadroDetalhePage() {
               </div>
 
               <p className="quadro-detalhe-page__section-text">
-                Os papéis controlam permissões como gerenciamento do quadro,
-                listas, automações, campos, convites e criação de cartões.
+                Os papéis controlam permissões de visualização, edição, listas,
+                cartões e membros.
               </p>
             </section>
 
@@ -426,31 +436,37 @@ export default function QuadroDetalhePage() {
                 Atividade recente
               </h3>
 
-              <ol className="quadro-detalhe-page__atividades">
-                {quadro.atividades.map((atividade) => (
-                  <li
-                    key={atividade.id}
-                    className="quadro-detalhe-page__atividade-item"
-                  >
-                    <span
-                      className="quadro-detalhe-page__atividade-icon"
-                      aria-hidden="true"
+              {atividades.length === 0 ? (
+                <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+                  Sem eventos recentes.
+                </p>
+              ) : (
+                <ol className="quadro-detalhe-page__atividades">
+                  {atividades.map((atividade) => (
+                    <li
+                      key={atividade.id}
+                      className="quadro-detalhe-page__atividade-item"
                     >
-                      <ArrowRight size={14} />
-                    </span>
+                      <span
+                        className="quadro-detalhe-page__atividade-icon"
+                        aria-hidden="true"
+                      >
+                        <ArrowRight size={14} />
+                      </span>
 
-                    <div className="quadro-detalhe-page__atividade-body">
-                      <p className="quadro-detalhe-page__atividade-texto">
-                        {atividade.descricao}
-                      </p>
-                      <p className="quadro-detalhe-page__atividade-data">
-                        <Clock3 size={13} aria-hidden="true" />
-                        <span>{atividade.data}</span>
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
+                      <div className="quadro-detalhe-page__atividade-body">
+                        <p className="quadro-detalhe-page__atividade-texto">
+                          {atividade.descricao}
+                        </p>
+                        <p className="quadro-detalhe-page__atividade-data">
+                          <Clock3 size={13} aria-hidden="true" />
+                          <span>{atividade.data}</span>
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              )}
             </section>
           </aside>
         </section>
