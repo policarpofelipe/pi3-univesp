@@ -21,7 +21,7 @@ export default function FontSizeControl({
       aria-label="Controle de tamanho da fonte"
     >
       {showLabel && (
-        <span className="text-sm text-[var(--color-text)] whitespace-nowrap">
+        <span className="text-[var(--font-size-sm)] text-[var(--color-text)] whitespace-nowrap">
           Tamanho da fonte
         </span>
       )}
@@ -39,7 +39,7 @@ export default function FontSizeControl({
               aria-label={`Definir tamanho da fonte como ${option.label}`}
               title={`Tamanho ${option.label}`}
               className={[
-                "min-w-[2.5rem] h-9 px-3 rounded-md text-sm font-medium transition-all duration-150",
+                "min-w-[2.5rem] h-9 px-3 rounded-md text-[var(--font-size-sm)] font-medium transition-all duration-150",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2",
                 isActive
                   ? "bg-[var(--color-primary)] text-[var(--color-on-primary)]"
