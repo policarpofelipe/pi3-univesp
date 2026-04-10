@@ -370,7 +370,7 @@ services/listaTransicaoService.js
 ✅components/cartoes/CartaoHeader.jsx
 ✅components/cartoes/CartaoDescricao.jsx
 ✅components/cartoes/CartaoPrazo.jsx
-components/cartoes/CartaoPrioridade.jsx
+✅components/cartoes/CartaoPrioridade.jsx
 components/cartoes/CartaoAtribuicoes.jsx
 components/cartoes/CartaoTags.jsx
 components/cartoes/CartaoCamposPersonalizados.jsx
@@ -478,7 +478,7 @@ utils/positionUtils.js
 utils/filterUtils.js
 
 constants/roles.js
-constants/prioridades.js
+✅constants/prioridades.js
 constants/tiposCampo.js
 constants/tiposEvento.js
 

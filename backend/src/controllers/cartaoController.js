@@ -1,5 +1,21 @@
 const store = require("../data/boardMemoryStore");
 
+const PRIORIDADES_CARTAO = new Set(["baixa", "media", "alta"]);
+
+function normalizarPrioridade(val) {
+  if (val === undefined) {
+    return { skip: true };
+  }
+  if (val === null || val === "") {
+    return { value: null };
+  }
+  const v = String(val).toLowerCase().trim();
+  if (!PRIORIDADES_CARTAO.has(v)) {
+    return { invalid: true };
+  }
+  return { value: v };
+}
+
 function normalizarPrazoEm(val) {
   if (val === undefined) {
     return { skip: true };
@@ -70,7 +86,7 @@ const cartaoController = {
   async criar(req, res, next) {
     try {
       const { quadroId } = req.params;
-      const { listaId, titulo, descricao = "", prazoEm } = req.body;
+      const { listaId, titulo, descricao = "", prazoEm, prioridade } = req.body;
 
       if (!listaId) {
         return res.status(400).json({
@@ -119,6 +135,17 @@ const cartaoController = {
         novo.prazoEm = prazo.value;
       }
 
+      const pri = normalizarPrioridade(prioridade);
+      if (pri.invalid) {
+        return res.status(400).json({
+          success: false,
+          message: "Prioridade inválida. Use: baixa, media ou alta.",
+        });
+      }
+      if (!pri.skip && pri.value != null) {
+        novo.prioridade = pri.value;
+      }
+
       cartoes.push(novo);
       store.syncListaTotals(quadroId);
 
@@ -135,7 +162,7 @@ const cartaoController = {
   async atualizar(req, res, next) {
     try {
       const { quadroId, cartaoId } = req.params;
-      const { titulo, descricao, prazoEm } = req.body;
+      const { titulo, descricao, prazoEm, prioridade } = req.body;
 
       const cartoes = store.getCartoes(quadroId);
       const cartao = cartoes.find((c) => String(c.id) === String(cartaoId));
@@ -173,6 +200,21 @@ const cartaoController = {
           delete cartao.prazoEm;
         } else {
           cartao.prazoEm = prazo.value;
+        }
+      }
+
+      const pri = normalizarPrioridade(prioridade);
+      if (pri.invalid) {
+        return res.status(400).json({
+          success: false,
+          message: "Prioridade inválida. Use: baixa, media ou alta.",
+        });
+      }
+      if (!pri.skip) {
+        if (pri.value == null) {
+          delete cartao.prioridade;
+        } else {
+          cartao.prioridade = pri.value;
         }
       }
 

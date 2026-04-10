@@ -8,6 +8,8 @@ import {
   formatarPrazoExibicao,
   prazoEstaAtrasado,
 } from "./CartaoPrazo";
+import { labelPrioridadeCartao } from "../../constants/prioridades";
+import { classePrioridadeCartao } from "./CartaoPrioridade";
 
 export default function CartaoCard({
   quadroId = "",
@@ -35,6 +37,18 @@ export default function CartaoCard({
           cartao.titulo
         )}
       </h5>
+      {cartao.prioridade ? (
+        <p className="mt-1">
+          <span
+            className={[
+              "inline-flex rounded-full border px-2 py-0.5 text-[var(--font-size-xs)] font-medium",
+              classePrioridadeCartao(cartao.prioridade),
+            ].join(" ")}
+          >
+            {labelPrioridadeCartao(cartao.prioridade)}
+          </span>
+        </p>
+      ) : null}
       <CartaoDescricao texto={cartao.descricao} variant="compact" />
 
       {cartao.prazoEm ? (
