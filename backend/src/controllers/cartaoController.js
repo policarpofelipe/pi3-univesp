@@ -1,5 +1,19 @@
 const store = require("../data/boardMemoryStore");
 
+function normalizarPrazoEm(val) {
+  if (val === undefined) {
+    return { skip: true };
+  }
+  if (val === null || val === "") {
+    return { value: null };
+  }
+  const d = new Date(val);
+  if (Number.isNaN(d.getTime())) {
+    return { invalid: true };
+  }
+  return { value: d.toISOString() };
+}
+
 const cartaoController = {
   async listar(req, res, next) {
     try {
@@ -56,7 +70,7 @@ const cartaoController = {
   async criar(req, res, next) {
     try {
       const { quadroId } = req.params;
-      const { listaId, titulo, descricao = "" } = req.body;
+      const { listaId, titulo, descricao = "", prazoEm } = req.body;
 
       if (!listaId) {
         return res.status(400).json({
@@ -94,6 +108,17 @@ const cartaoController = {
         criadoEm: new Date().toISOString(),
       };
 
+      const prazo = normalizarPrazoEm(prazoEm);
+      if (prazo.invalid) {
+        return res.status(400).json({
+          success: false,
+          message: "Data de prazo inválida.",
+        });
+      }
+      if (!prazo.skip && prazo.value != null) {
+        novo.prazoEm = prazo.value;
+      }
+
       cartoes.push(novo);
       store.syncListaTotals(quadroId);
 
@@ -110,7 +135,7 @@ const cartaoController = {
   async atualizar(req, res, next) {
     try {
       const { quadroId, cartaoId } = req.params;
-      const { titulo, descricao } = req.body;
+      const { titulo, descricao, prazoEm } = req.body;
 
       const cartoes = store.getCartoes(quadroId);
       const cartao = cartoes.find((c) => String(c.id) === String(cartaoId));
@@ -134,6 +159,21 @@ const cartaoController = {
 
       if (descricao !== undefined) {
         cartao.descricao = String(descricao || "").trim();
+      }
+
+      const prazo = normalizarPrazoEm(prazoEm);
+      if (prazo.invalid) {
+        return res.status(400).json({
+          success: false,
+          message: "Data de prazo inválida.",
+        });
+      }
+      if (!prazo.skip) {
+        if (prazo.value == null) {
+          delete cartao.prazoEm;
+        } else {
+          cartao.prazoEm = prazo.value;
+        }
       }
 
       return res.status(200).json({

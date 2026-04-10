@@ -1,7 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { CalendarDays } from "lucide-react";
+
 import Button from "../ui/Button";
 import CartaoDescricao from "./CartaoDescricao";
+import {
+  formatarPrazoExibicao,
+  prazoEstaAtrasado,
+} from "./CartaoPrazo";
 
 export default function CartaoCard({
   quadroId = "",
@@ -30,6 +36,22 @@ export default function CartaoCard({
         )}
       </h5>
       <CartaoDescricao texto={cartao.descricao} variant="compact" />
+
+      {cartao.prazoEm ? (
+        <p
+          className={[
+            "mt-2 flex items-center gap-1 text-[var(--font-size-xs)]",
+            prazoEstaAtrasado(cartao.prazoEm)
+              ? "text-[var(--color-danger-text)]"
+              : "text-[var(--color-text-muted)]",
+          ].join(" ")}
+        >
+          <CalendarDays size={12} aria-hidden="true" />
+          <time dateTime={cartao.prazoEm}>
+            {formatarPrazoExibicao(cartao.prazoEm)}
+          </time>
+        </p>
+      ) : null}
 
       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         {listas.length > 1 ? (

@@ -7,6 +7,7 @@ import CartaoHeader from "../../components/cartoes/CartaoHeader";
 import LoadingState from "../../components/ui/LoadingState";
 import ErrorState from "../../components/ui/ErrorState";
 import CartaoForm from "../../components/cartoes/CartaoForm";
+import CartaoPrazo from "../../components/cartoes/CartaoPrazo";
 import CartaoChecklist from "../../components/cartoes/CartaoChecklist";
 import CartaoComentarios from "../../components/cartoes/CartaoComentarios";
 
@@ -33,6 +34,7 @@ export default function CartaoDetalhePage() {
   const [salvando, setSalvando] = useState(false);
   const [movendoLista, setMovendoLista] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
+  const [salvandoPrazo, setSalvandoPrazo] = useState(false);
 
   const carregar = useCallback(async () => {
     if (!quadroId || !cartaoId) return;
@@ -169,6 +171,22 @@ export default function CartaoDetalhePage() {
     navigate(`/quadros/${quadroId}`);
   }
 
+  async function handleSalvarPrazo(iso) {
+    if (!quadroId || !cartaoId) return;
+    setSalvandoPrazo(true);
+    try {
+      const res = await cartaoService.atualizar(quadroId, cartaoId, {
+        prazoEm: iso,
+      });
+      const atualizado = extractObject(res) || res;
+      if (atualizado) {
+        setCartao(atualizado);
+      }
+    } finally {
+      setSalvandoPrazo(false);
+    }
+  }
+
   if (loading && !cartao) {
     return (
       <AppLayout
@@ -289,6 +307,12 @@ export default function CartaoDetalhePage() {
               </p>
             )}
           </div>
+
+          <CartaoPrazo
+            prazoEm={cartao.prazoEm}
+            loading={salvandoPrazo}
+            onSave={handleSalvarPrazo}
+          />
 
           <CartaoForm
             modo="editar"

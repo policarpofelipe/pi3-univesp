@@ -369,7 +369,7 @@ services/listaTransicaoService.js
 ✅components/cartoes/CartaoForm.jsx
 ✅components/cartoes/CartaoHeader.jsx
 ✅components/cartoes/CartaoDescricao.jsx
-components/cartoes/CartaoPrazo.jsx
+✅components/cartoes/CartaoPrazo.jsx
 components/cartoes/CartaoPrioridade.jsx
 components/cartoes/CartaoAtribuicoes.jsx
 components/cartoes/CartaoTags.jsx
