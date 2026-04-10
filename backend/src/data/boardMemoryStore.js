@@ -6,12 +6,23 @@ const listasStore = new Map();
 /** @type {Map<string, Array<object>>} */
 const cartoesStore = new Map();
 
+/** @type {Map<string, Array<object>>} chave `${quadroId}::${cartaoId}` */
+const comentariosStore = new Map();
+
 function makeListaId() {
   return `lst_${randomBytes(6).toString("hex")}`;
 }
 
 function makeCartaoId() {
   return `crd_${randomBytes(6).toString("hex")}`;
+}
+
+function makeComentarioId() {
+  return `cmt_${randomBytes(6).toString("hex")}`;
+}
+
+function comentariosKey(quadroId, cartaoId) {
+  return `${quadroId}::${cartaoId}`;
 }
 
 function ensureListas(quadroId) {
@@ -104,15 +115,37 @@ function renumerarPosicoesLista(quadroId, listaId) {
   });
 }
 
+function findCartao(quadroId, cartaoId) {
+  return getCartoes(quadroId).find(
+    (c) => String(c.id) === String(cartaoId)
+  );
+}
+
+function getComentarios(quadroId, cartaoId) {
+  const k = comentariosKey(quadroId, cartaoId);
+  if (!comentariosStore.has(k)) {
+    comentariosStore.set(k, []);
+  }
+  return comentariosStore.get(k);
+}
+
+function removeComentariosDoCartao(quadroId, cartaoId) {
+  comentariosStore.delete(comentariosKey(quadroId, cartaoId));
+}
+
 module.exports = {
   makeListaId,
   makeCartaoId,
+  makeComentarioId,
   ensureListas,
   sortedListas,
   findLista,
+  findCartao,
   syncListaTotals,
   getCartoes,
   cartoesNaListaOrdenados,
   removeCartoesDaLista,
   renumerarPosicoesLista,
+  getComentarios,
+  removeComentariosDoCartao,
 };

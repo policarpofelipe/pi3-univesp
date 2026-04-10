@@ -376,14 +376,14 @@ components/cartoes/CartaoTags.jsx
 components/cartoes/CartaoCamposPersonalizados.jsx
 components/cartoes/CartaoChecklist.jsx
 components/cartoes/CartaoChecklistItem.jsx
-components/cartoes/CartaoComentarios.jsx
+✅components/cartoes/CartaoComentarios.jsx
 components/cartoes/CartaoAnexos.jsx
 components/cartoes/CartaoHistorico.jsx
 components/cartoes/CartaoRelacoes.jsx
 ✅components/cartoes/CriacaoRapidaCartao.jsx
 
 ✅services/cartaoService.js
-services/cartaoComentarioService.js
+✅services/cartaoComentarioService.js
 services/cartaoChecklistService.js
 services/cartaoAnexoService.js
 services/cartaoAtribuicaoService.js
@@ -511,7 +511,7 @@ src/routes/visaoRoutes.js
 src/routes/tagRoutes.js
 src/routes/campoPersonalizadoRoutes.js
 ✅src/routes/cartaoRoutes.js
-src/routes/cartaoComentarioRoutes.js
+✅src/routes/cartaoComentarioRoutes.js
 src/routes/cartaoChecklistRoutes.js
 src/routes/cartaoAnexoRoutes.js
 src/routes/cartaoAtribuicaoRoutes.js
@@ -530,6 +530,7 @@ src/controllers/OrganizacaoController.js
 ✅src/controllers/QuadroPapelController.js
 ✅src/controllers/listaController.js
 ✅src/controllers/cartaoController.js
+✅src/controllers/cartaoComentarioController.js
 src/controllers/ListaPermissaoController.js
 src/controllers/ListaTransicaoController.js
 src/controllers/VisaoController.js

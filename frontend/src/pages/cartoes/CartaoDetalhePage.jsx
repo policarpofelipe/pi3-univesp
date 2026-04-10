@@ -7,6 +7,7 @@ import CartaoHeader from "../../components/cartoes/CartaoHeader";
 import LoadingState from "../../components/ui/LoadingState";
 import ErrorState from "../../components/ui/ErrorState";
 import CartaoForm from "../../components/cartoes/CartaoForm";
+import CartaoComentarios from "../../components/cartoes/CartaoComentarios";
 
 import quadroService from "../../services/quadroService";
 import listaService from "../../services/listaService";
@@ -21,6 +22,7 @@ export default function CartaoDetalhePage() {
   const navigate = useNavigate();
   const { quadroId, cartaoId } = useParams();
   const { usuario } = useAuth();
+  const usuarioChave = usuario?.id ?? usuario?.usuarioId ?? "";
 
   const [quadro, setQuadro] = useState(null);
   const [listas, setListas] = useState([]);
@@ -295,6 +297,12 @@ export default function CartaoDetalhePage() {
             submitLabel="Salvar alterações"
           />
         </section>
+
+        <CartaoComentarios
+          quadroId={quadroId}
+          cartaoId={cartaoId}
+          usuarioId={usuarioChave}
+        />
       </div>
     </AppLayout>
   );

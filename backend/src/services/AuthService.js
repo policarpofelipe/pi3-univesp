@@ -60,6 +60,7 @@ async function login({ email, senha }) {
   const token = generateToken({
     id: usuario.id,
     email: usuario.email,
+    nomeExibicao: usuario.nome_exibicao || usuario.nomeExibicao || "",
   });
 
   return {
