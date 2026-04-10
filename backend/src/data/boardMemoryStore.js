@@ -9,6 +9,9 @@ const cartoesStore = new Map();
 /** @type {Map<string, Array<object>>} chave `${quadroId}::${cartaoId}` */
 const comentariosStore = new Map();
 
+/** @type {Map<string, Array<object>>} checklists por cartão */
+const checklistsStore = new Map();
+
 function makeListaId() {
   return `lst_${randomBytes(6).toString("hex")}`;
 }
@@ -21,7 +24,15 @@ function makeComentarioId() {
   return `cmt_${randomBytes(6).toString("hex")}`;
 }
 
-function comentariosKey(quadroId, cartaoId) {
+function makeChecklistId() {
+  return `chk_${randomBytes(6).toString("hex")}`;
+}
+
+function makeChecklistItemId() {
+  return `cki_${randomBytes(6).toString("hex")}`;
+}
+
+function cartaoEscopoKey(quadroId, cartaoId) {
   return `${quadroId}::${cartaoId}`;
 }
 
@@ -122,7 +133,7 @@ function findCartao(quadroId, cartaoId) {
 }
 
 function getComentarios(quadroId, cartaoId) {
-  const k = comentariosKey(quadroId, cartaoId);
+  const k = cartaoEscopoKey(quadroId, cartaoId);
   if (!comentariosStore.has(k)) {
     comentariosStore.set(k, []);
   }
@@ -130,13 +141,52 @@ function getComentarios(quadroId, cartaoId) {
 }
 
 function removeComentariosDoCartao(quadroId, cartaoId) {
-  comentariosStore.delete(comentariosKey(quadroId, cartaoId));
+  comentariosStore.delete(cartaoEscopoKey(quadroId, cartaoId));
+}
+
+function getChecklistsArray(quadroId, cartaoId) {
+  const k = cartaoEscopoKey(quadroId, cartaoId);
+  if (!checklistsStore.has(k)) {
+    checklistsStore.set(k, []);
+  }
+  return checklistsStore.get(k);
+}
+
+function listChecklistsOrdenadas(quadroId, cartaoId) {
+  const arr = getChecklistsArray(quadroId, cartaoId);
+  const sorted = [...arr].sort((a, b) => (a.posicao ?? 0) - (b.posicao ?? 0));
+  return sorted.map((cl) => ({
+    ...cl,
+    itens: [...(cl.itens || [])].sort(
+      (i, j) => (i.posicao ?? 0) - (j.posicao ?? 0)
+    ),
+  }));
+}
+
+function findChecklist(quadroId, cartaoId, checklistId) {
+  return getChecklistsArray(quadroId, cartaoId).find(
+    (c) => String(c.id) === String(checklistId)
+  );
+}
+
+function removeChecklistsDoCartao(quadroId, cartaoId) {
+  checklistsStore.delete(cartaoEscopoKey(quadroId, cartaoId));
+}
+
+function renumerarPosicoesItens(itens) {
+  const arr = itens || [];
+  arr.sort((a, b) => (a.posicao ?? 0) - (b.posicao ?? 0));
+  arr.forEach((it, idx) => {
+    it.posicao = idx;
+  });
 }
 
 module.exports = {
   makeListaId,
   makeCartaoId,
   makeComentarioId,
+  makeChecklistId,
+  makeChecklistItemId,
   ensureListas,
   sortedListas,
   findLista,
@@ -148,4 +198,9 @@ module.exports = {
   renumerarPosicoesLista,
   getComentarios,
   removeComentariosDoCartao,
+  getChecklistsArray,
+  listChecklistsOrdenadas,
+  findChecklist,
+  removeChecklistsDoCartao,
+  renumerarPosicoesItens,
 };

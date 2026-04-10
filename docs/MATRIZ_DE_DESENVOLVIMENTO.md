@@ -374,8 +374,8 @@ components/cartoes/CartaoPrioridade.jsx
 components/cartoes/CartaoAtribuicoes.jsx
 components/cartoes/CartaoTags.jsx
 components/cartoes/CartaoCamposPersonalizados.jsx
-components/cartoes/CartaoChecklist.jsx
-components/cartoes/CartaoChecklistItem.jsx
+✅components/cartoes/CartaoChecklist.jsx
+✅components/cartoes/CartaoChecklistItem.jsx
 ✅components/cartoes/CartaoComentarios.jsx
 components/cartoes/CartaoAnexos.jsx
 components/cartoes/CartaoHistorico.jsx
@@ -512,7 +512,7 @@ src/routes/tagRoutes.js
 src/routes/campoPersonalizadoRoutes.js
 ✅src/routes/cartaoRoutes.js
 ✅src/routes/cartaoComentarioRoutes.js
-src/routes/cartaoChecklistRoutes.js
+✅src/routes/cartaoChecklistRoutes.js
 src/routes/cartaoAnexoRoutes.js
 src/routes/cartaoAtribuicaoRoutes.js
 src/routes/cartaoRelacaoRoutes.js
@@ -538,7 +538,7 @@ src/controllers/TagController.js
 src/controllers/CampoPersonalizadoController.js
 src/controllers/CartaoController.js
 src/controllers/CartaoComentarioController.js
-src/controllers/CartaoChecklistController.js
+✅src/controllers/cartaoChecklistController.js
 src/controllers/CartaoAnexoController.js
 src/controllers/CartaoAtribuicaoController.js
 src/controllers/CartaoRelacaoController.js

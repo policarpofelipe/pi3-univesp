@@ -7,6 +7,7 @@ import CartaoHeader from "../../components/cartoes/CartaoHeader";
 import LoadingState from "../../components/ui/LoadingState";
 import ErrorState from "../../components/ui/ErrorState";
 import CartaoForm from "../../components/cartoes/CartaoForm";
+import CartaoChecklist from "../../components/cartoes/CartaoChecklist";
 import CartaoComentarios from "../../components/cartoes/CartaoComentarios";
 
 import quadroService from "../../services/quadroService";
@@ -297,6 +298,8 @@ export default function CartaoDetalhePage() {
             submitLabel="Salvar alterações"
           />
         </section>
+
+        <CartaoChecklist quadroId={quadroId} cartaoId={cartaoId} />
 
         <CartaoComentarios
           quadroId={quadroId}

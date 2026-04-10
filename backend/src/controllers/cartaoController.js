@@ -236,6 +236,7 @@ const cartaoController = {
       const listaId = cartoes[idx].listaId;
       cartoes.splice(idx, 1);
       store.removeComentariosDoCartao(quadroId, cartaoId);
+      store.removeChecklistsDoCartao(quadroId, cartaoId);
       store.renumerarPosicoesLista(quadroId, listaId);
       store.syncListaTotals(quadroId);
 
