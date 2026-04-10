@@ -13,6 +13,7 @@ import quadroService from "../../services/quadroService";
 import quadroMembroService from "../../services/quadroMembroService";
 import listaService from "../../services/listaService";
 import cartaoService from "../../services/cartaoService";
+import tagService from "../../services/tagService";
 import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 import ListaForm from "../../components/listas/ListaForm";
 import ListaHeader from "../../components/listas/ListaHeader";
@@ -20,6 +21,8 @@ import ReordenacaoListas from "../../components/listas/ReordenacaoListas";
 import CartaoCard from "../../components/cartoes/CartaoCard";
 import CartaoModal from "../../components/cartoes/CartaoModal";
 import CriacaoRapidaCartao from "../../components/cartoes/CriacaoRapidaCartao";
+import TagList from "../../components/quadros/TagList";
+import TagForm from "../../components/quadros/TagForm";
 import { extractList, extractObject } from "../../utils/apiData";
 import useAuth from "../../hooks/useAuth";
 
@@ -82,6 +85,9 @@ export default function QuadroDetalhePage() {
   const [cartaoModal, setCartaoModal] = useState(null);
   const [cartaoSalvando, setCartaoSalvando] = useState(false);
   const [movendoCartaoId, setMovendoCartaoId] = useState(null);
+  const [tags, setTags] = useState([]);
+  const [removendoTagId, setRemovendoTagId] = useState(null);
+  const [criandoTag, setCriandoTag] = useState(false);
 
   const carregar = useCallback(async () => {
     if (!quadroId) return;
@@ -90,12 +96,14 @@ export default function QuadroDetalhePage() {
     setErro("");
 
     try {
-      const [resQuadro, resMembros, resListas, resCartoes] = await Promise.all([
-        quadroService.obterPorId(quadroId),
-        quadroMembroService.listar(quadroId).catch(() => ({ data: [] })),
-        listaService.listar(quadroId).catch(() => ({ data: [] })),
-        cartaoService.listar(quadroId).catch(() => ({ data: [] })),
-      ]);
+      const [resQuadro, resMembros, resListas, resCartoes, resTags] =
+        await Promise.all([
+          quadroService.obterPorId(quadroId),
+          quadroMembroService.listar(quadroId).catch(() => ({ data: [] })),
+          listaService.listar(quadroId).catch(() => ({ data: [] })),
+          cartaoService.listar(quadroId).catch(() => ({ data: [] })),
+          tagService.listar(quadroId).catch(() => ({ data: [] })),
+        ]);
 
       let data = extractObject(resQuadro) || resQuadro;
 
@@ -127,6 +135,7 @@ export default function QuadroDetalhePage() {
       );
 
       setCartoes(extractList(resCartoes));
+      setTags(extractList(resTags));
     } catch (error) {
       setErro(
         error?.response?.data?.message ||
@@ -137,6 +146,7 @@ export default function QuadroDetalhePage() {
       setMembros([]);
       setListas([]);
       setCartoes([]);
+      setTags([]);
     } finally {
       setLoading(false);
     }
@@ -187,9 +197,44 @@ export default function QuadroDetalhePage() {
     }
   }, [quadroId]);
 
+  const carregarTags = useCallback(async () => {
+    if (!quadroId) return;
+    try {
+      const res = await tagService.listar(quadroId);
+      setTags(extractList(res));
+    } catch {
+      setTags([]);
+    }
+  }, [quadroId]);
+
   async function atualizarListasETotais() {
     await carregarListas();
     await carregarCartoes();
+  }
+
+  async function handleCriarTagQuadro(payload) {
+    setCriandoTag(true);
+    try {
+      await tagService.criar(quadroId, payload);
+      await carregarTags();
+      await carregarCartoes();
+    } catch (err) {
+      throw err;
+    } finally {
+      setCriandoTag(false);
+    }
+  }
+
+  async function handleRemoverTagQuadro(tag) {
+    if (!window.confirm(`Remover a tag "${tag.nome}" dos cartões?`)) return;
+    setRemovendoTagId(tag.id);
+    try {
+      await tagService.remover(quadroId, tag.id);
+      await carregarTags();
+      await carregarCartoes();
+    } finally {
+      setRemovendoTagId(null);
+    }
   }
 
   function handleNovoCartao() {
@@ -582,6 +627,7 @@ export default function QuadroDetalhePage() {
                             key={c.id}
                             quadroId={quadroId}
                             cartao={c}
+                            tagsDisponiveis={tags}
                             listas={listas}
                             movendo={movendoCartaoId === c.id}
                             onEdit={(cc) =>
@@ -643,6 +689,28 @@ export default function QuadroDetalhePage() {
                   ))}
                 </ul>
               )}
+            </section>
+
+            <section className="quadro-detalhe-page__section">
+              <h3 className="quadro-detalhe-page__section-title">
+                Tags do quadro
+              </h3>
+              <p className="quadro-detalhe-page__section-text mb-3">
+                Use tags nos cartões para classificar o trabalho. Remover uma tag
+                aqui tira a etiqueta de todos os cartões.
+              </p>
+              <TagList
+                tags={tags}
+                onRemover={handleRemoverTagQuadro}
+                removendoId={removendoTagId}
+              />
+              <div className="mt-4 border-t border-[var(--color-border)] pt-4">
+                <TagForm
+                  loading={criandoTag}
+                  submitLabel="Adicionar tag"
+                  onSubmit={handleCriarTagQuadro}
+                />
+              </div>
             </section>
 
             <section className="quadro-detalhe-page__section">

@@ -10,16 +10,23 @@ import {
 } from "./CartaoPrazo";
 import { labelPrioridadeCartao } from "../../constants/prioridades";
 import { classePrioridadeCartao } from "./CartaoPrioridade";
+import TagBadge from "./TagBadge";
 
 export default function CartaoCard({
   quadroId = "",
   cartao,
+  tagsDisponiveis = [],
   listas = [],
   onEdit,
   onDelete,
   onMoverLista,
   movendo = false,
 }) {
+  const idsTag = Array.isArray(cartao.tagIds) ? cartao.tagIds.map(String) : [];
+  const tagsNoCartao = idsTag
+    .map((id) => tagsDisponiveis.find((t) => String(t.id) === id))
+    .filter(Boolean);
+
   return (
     <article
       className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-[var(--shadow-xs)]"
@@ -48,6 +55,13 @@ export default function CartaoCard({
             {labelPrioridadeCartao(cartao.prioridade)}
           </span>
         </p>
+      ) : null}
+      {tagsNoCartao.length ? (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {tagsNoCartao.map((t) => (
+            <TagBadge key={t.id} nome={t.nome} cor={t.cor} />
+          ))}
+        </div>
       ) : null}
       <CartaoDescricao texto={cartao.descricao} variant="compact" />
 

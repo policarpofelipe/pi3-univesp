@@ -11,10 +11,12 @@ import CartaoPrazo from "../../components/cartoes/CartaoPrazo";
 import CartaoPrioridade from "../../components/cartoes/CartaoPrioridade";
 import CartaoChecklist from "../../components/cartoes/CartaoChecklist";
 import CartaoComentarios from "../../components/cartoes/CartaoComentarios";
+import TagSelector from "../../components/cartoes/TagSelector";
 
 import quadroService from "../../services/quadroService";
 import listaService from "../../services/listaService";
 import cartaoService from "../../services/cartaoService";
+import tagService from "../../services/tagService";
 import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 import { extractList, extractObject } from "../../utils/apiData";
 import useAuth from "../../hooks/useAuth";
@@ -37,6 +39,7 @@ export default function CartaoDetalhePage() {
   const [excluindo, setExcluindo] = useState(false);
   const [salvandoPrazo, setSalvandoPrazo] = useState(false);
   const [salvandoPrioridade, setSalvandoPrioridade] = useState(false);
+  const [salvandoTags, setSalvandoTags] = useState(false);
 
   const carregar = useCallback(async () => {
     if (!quadroId || !cartaoId) return;
@@ -45,10 +48,11 @@ export default function CartaoDetalhePage() {
     setErro("");
 
     try {
-      const [resQuadro, resListas, resCartao] = await Promise.all([
+      const [resQuadro, resListas, resCartao, resTags] = await Promise.all([
         quadroService.obterPorId(quadroId),
         listaService.listar(quadroId),
         cartaoService.obterPorId(quadroId, cartaoId),
+        tagService.listar(quadroId).catch(() => ({ data: [] })),
       ]);
 
       let dataQuadro = extractObject(resQuadro) || resQuadro;
@@ -83,6 +87,7 @@ export default function CartaoDetalhePage() {
 
       const dataCartao = extractObject(resCartao) || resCartao;
       setCartao(dataCartao);
+      setTags(extractList(resTags));
     } catch (error) {
       setErro(
         error?.response?.data?.message ||
@@ -92,6 +97,7 @@ export default function CartaoDetalhePage() {
       setQuadro(null);
       setListas([]);
       setCartao(null);
+      setTags([]);
     } finally {
       setLoading(false);
     }
@@ -202,6 +208,32 @@ export default function CartaoDetalhePage() {
       }
     } finally {
       setSalvandoPrioridade(false);
+    }
+  }
+
+  const carregarTags = useCallback(async () => {
+    if (!quadroId) return;
+    try {
+      const res = await tagService.listar(quadroId);
+      setTags(extractList(res));
+    } catch {
+      setTags([]);
+    }
+  }, [quadroId]);
+
+  async function handleSalvarTagIds(newIds) {
+    if (!quadroId || !cartaoId) return;
+    setSalvandoTags(true);
+    try {
+      const res = await cartaoService.atualizar(quadroId, cartaoId, {
+        tagIds: newIds,
+      });
+      const atualizado = extractObject(res) || res;
+      if (atualizado) {
+        setCartao(atualizado);
+      }
+    } finally {
+      setSalvandoTags(false);
     }
   }
 
@@ -337,6 +369,17 @@ export default function CartaoDetalhePage() {
             loading={salvandoPrioridade}
             onSave={handleSalvarPrioridade}
           />
+
+          <div className="mb-6">
+            <TagSelector
+              quadroId={quadroId}
+              tagIds={cartao.tagIds}
+              tags={tags}
+              disabled={salvandoTags}
+              onChange={handleSalvarTagIds}
+              onTagsRefresh={carregarTags}
+            />
+          </div>
 
           <CartaoForm
             modo="editar"

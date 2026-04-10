@@ -10,6 +10,7 @@ const listaRoutes = require("./routes/listaRoutes");
 const cartaoRoutes = require("./routes/cartaoRoutes");
 const cartaoComentarioRoutes = require("./routes/cartaoComentarioRoutes");
 const cartaoChecklistRoutes = require("./routes/cartaoChecklistRoutes");
+const tagRoutes = require("./routes/tagRoutes");
 const errorMiddleware = require("./middlewares/errorMiddleware");
 
 const app = express();
@@ -38,6 +39,7 @@ app.use("/api/quadros", quadroRoutes);
 app.use("/api/quadros", quadroMembroRoutes);
 app.use("/api/quadros", quadroPapelRoutes);
 app.use("/api/quadros", listaRoutes);
+app.use("/api/quadros", tagRoutes);
 app.use("/api/quadros", cartaoComentarioRoutes);
 app.use("/api/quadros", cartaoChecklistRoutes);
 app.use("/api/quadros", cartaoRoutes);

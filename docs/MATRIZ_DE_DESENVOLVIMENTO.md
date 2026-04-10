@@ -408,12 +408,12 @@ services/visaoService.js
 
 3.8. Tags
 
-components/cartoes/TagBadge.jsx
-components/cartoes/TagSelector.jsx
-components/quadros/TagForm.jsx
-components/quadros/TagList.jsx
+✅components/cartoes/TagBadge.jsx
+✅components/cartoes/TagSelector.jsx
+✅components/quadros/TagForm.jsx
+✅components/quadros/TagList.jsx
 
-services/tagService.js
+✅services/tagService.js
 
 --------------------------------------------------
 
@@ -508,7 +508,7 @@ constants/tiposEvento.js
 src/routes/listaPermissaoRoutes.js
 src/routes/listaTransicaoRoutes.js
 src/routes/visaoRoutes.js
-src/routes/tagRoutes.js
+✅src/routes/tagRoutes.js
 src/routes/campoPersonalizadoRoutes.js
 ✅src/routes/cartaoRoutes.js
 ✅src/routes/cartaoComentarioRoutes.js
@@ -534,7 +534,7 @@ src/controllers/OrganizacaoController.js
 src/controllers/ListaPermissaoController.js
 src/controllers/ListaTransicaoController.js
 src/controllers/VisaoController.js
-src/controllers/TagController.js
+✅src/controllers/tagController.js
 src/controllers/CampoPersonalizadoController.js
 src/controllers/CartaoController.js
 src/controllers/CartaoComentarioController.js

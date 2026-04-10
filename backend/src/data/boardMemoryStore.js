@@ -12,6 +12,9 @@ const comentariosStore = new Map();
 /** @type {Map<string, Array<object>>} checklists por cartão */
 const checklistsStore = new Map();
 
+/** @type {Map<string, Array<object>>} tags por quadro */
+const tagsStore = new Map();
+
 function makeListaId() {
   return `lst_${randomBytes(6).toString("hex")}`;
 }
@@ -30,6 +33,10 @@ function makeChecklistId() {
 
 function makeChecklistItemId() {
   return `cki_${randomBytes(6).toString("hex")}`;
+}
+
+function makeTagId() {
+  return `tag_${randomBytes(6).toString("hex")}`;
 }
 
 function cartaoEscopoKey(quadroId, cartaoId) {
@@ -181,6 +188,57 @@ function renumerarPosicoesItens(itens) {
   });
 }
 
+function getTags(quadroId) {
+  if (!tagsStore.has(quadroId)) {
+    tagsStore.set(quadroId, []);
+  }
+  return tagsStore.get(quadroId);
+}
+
+function findTag(quadroId, tagId) {
+  return getTags(quadroId).find((t) => String(t.id) === String(tagId));
+}
+
+function removerTagDoQuadro(quadroId, tagId) {
+  const arr = getTags(quadroId);
+  const idx = arr.findIndex((t) => String(t.id) === String(tagId));
+  if (idx >= 0) {
+    arr.splice(idx, 1);
+  }
+  getCartoes(quadroId).forEach((c) => {
+    if (!Array.isArray(c.tagIds)) return;
+    c.tagIds = c.tagIds.filter((id) => String(id) !== String(tagId));
+  });
+}
+
+/**
+ * @returns {{ skip?: boolean, invalid?: boolean, unknown?: string, value?: string[] }}
+ */
+function normalizarTagIdsParaCartao(quadroId, val) {
+  if (val === undefined) {
+    return { skip: true };
+  }
+  if (!Array.isArray(val)) {
+    return { invalid: true };
+  }
+  const validIds = new Set(getTags(quadroId).map((t) => String(t.id)));
+  const raw = val.map((id) => String(id));
+  for (let i = 0; i < raw.length; i += 1) {
+    if (!validIds.has(raw[i])) {
+      return { invalid: true, unknown: raw[i] };
+    }
+  }
+  const seen = new Set();
+  const out = [];
+  raw.forEach((id) => {
+    if (!seen.has(id)) {
+      seen.add(id);
+      out.push(id);
+    }
+  });
+  return { value: out };
+}
+
 module.exports = {
   makeListaId,
   makeCartaoId,
@@ -203,4 +261,9 @@ module.exports = {
   findChecklist,
   removeChecklistsDoCartao,
   renumerarPosicoesItens,
+  makeTagId,
+  getTags,
+  findTag,
+  removerTagDoQuadro,
+  normalizarTagIdsParaCartao,
 };

@@ -86,7 +86,14 @@ const cartaoController = {
   async criar(req, res, next) {
     try {
       const { quadroId } = req.params;
-      const { listaId, titulo, descricao = "", prazoEm, prioridade } = req.body;
+      const {
+        listaId,
+        titulo,
+        descricao = "",
+        prazoEm,
+        prioridade,
+        tagIds,
+      } = req.body;
 
       if (!listaId) {
         return res.status(400).json({
@@ -146,6 +153,19 @@ const cartaoController = {
         novo.prioridade = pri.value;
       }
 
+      const tags = store.normalizarTagIdsParaCartao(quadroId, tagIds);
+      if (tags.invalid) {
+        return res.status(400).json({
+          success: false,
+          message: tags.unknown
+            ? `Tag não encontrada neste quadro: ${tags.unknown}.`
+            : "Lista de tags inválida.",
+        });
+      }
+      if (!tags.skip) {
+        novo.tagIds = tags.value;
+      }
+
       cartoes.push(novo);
       store.syncListaTotals(quadroId);
 
@@ -162,7 +182,7 @@ const cartaoController = {
   async atualizar(req, res, next) {
     try {
       const { quadroId, cartaoId } = req.params;
-      const { titulo, descricao, prazoEm, prioridade } = req.body;
+      const { titulo, descricao, prazoEm, prioridade, tagIds } = req.body;
 
       const cartoes = store.getCartoes(quadroId);
       const cartao = cartoes.find((c) => String(c.id) === String(cartaoId));
@@ -216,6 +236,19 @@ const cartaoController = {
         } else {
           cartao.prioridade = pri.value;
         }
+      }
+
+      const tags = store.normalizarTagIdsParaCartao(quadroId, tagIds);
+      if (tags.invalid) {
+        return res.status(400).json({
+          success: false,
+          message: tags.unknown
+            ? `Tag não encontrada neste quadro: ${tags.unknown}.`
+            : "Lista de tags inválida.",
+        });
+      }
+      if (!tags.skip) {
+        cartao.tagIds = tags.value;
       }
 
       return res.status(200).json({
