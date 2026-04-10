@@ -18,6 +18,9 @@ const tagsStore = new Map();
 /** @type {Map<string, Array<object>>} anexos por cartão `${quadroId}::${cartaoId}` */
 const anexosStore = new Map();
 
+/** @type {Map<string, Array<object>>} histórico por cartão */
+const historicoStore = new Map();
+
 function makeListaId() {
   return `lst_${randomBytes(6).toString("hex")}`;
 }
@@ -44,6 +47,10 @@ function makeTagId() {
 
 function makeAnexoId() {
   return `anx_${randomBytes(6).toString("hex")}`;
+}
+
+function makeHistoricoId() {
+  return `his_${randomBytes(6).toString("hex")}`;
 }
 
 function cartaoEscopoKey(quadroId, cartaoId) {
@@ -264,6 +271,39 @@ function removeAnexosDoCartao(quadroId, cartaoId) {
   anexosStore.delete(cartaoEscopoKey(quadroId, cartaoId));
 }
 
+function getHistorico(quadroId, cartaoId) {
+  const k = cartaoEscopoKey(quadroId, cartaoId);
+  if (!historicoStore.has(k)) {
+    historicoStore.set(k, []);
+  }
+  return historicoStore.get(k);
+}
+
+function appendCartaoHistorico(req, quadroId, cartaoId, { tipo, descricao }) {
+  const u = req.usuario || {};
+  getHistorico(quadroId, cartaoId).push({
+    id: makeHistoricoId(),
+    tipo: String(tipo || "evento"),
+    descricao: String(descricao || ""),
+    criadoEm: new Date().toISOString(),
+    autorId: u.id != null ? String(u.id) : "",
+    autorNome:
+      u.nomeExibicao || u.nome_exibicao || u.email || "Usuário",
+  });
+}
+
+function listHistoricoOrdenado(quadroId, cartaoId) {
+  const arr = getHistorico(quadroId, cartaoId);
+  return [...arr].sort(
+    (a, b) =>
+      new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime()
+  );
+}
+
+function removeHistoricoDoCartao(quadroId, cartaoId) {
+  historicoStore.delete(cartaoEscopoKey(quadroId, cartaoId));
+}
+
 module.exports = {
   makeListaId,
   makeCartaoId,
@@ -295,4 +335,9 @@ module.exports = {
   getAnexos,
   findAnexo,
   removeAnexosDoCartao,
+  makeHistoricoId,
+  getHistorico,
+  appendCartaoHistorico,
+  listHistoricoOrdenado,
+  removeHistoricoDoCartao,
 };

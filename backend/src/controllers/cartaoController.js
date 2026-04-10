@@ -169,6 +169,11 @@ const cartaoController = {
       cartoes.push(novo);
       store.syncListaTotals(quadroId);
 
+      store.appendCartaoHistorico(req, quadroId, novo.id, {
+        tipo: "cartao_criado",
+        descricao: "Cartão criado.",
+      });
+
       return res.status(201).json({
         success: true,
         message: "Cartão criado com sucesso.",
@@ -251,6 +256,19 @@ const cartaoController = {
         cartao.tagIds = tags.value;
       }
 
+      const alteracoes = [];
+      if (titulo != null) alteracoes.push("título");
+      if (descricao !== undefined) alteracoes.push("descrição");
+      if (!prazo.skip) alteracoes.push("prazo");
+      if (!pri.skip) alteracoes.push("prioridade");
+      if (!tags.skip) alteracoes.push("tags");
+      if (alteracoes.length) {
+        store.appendCartaoHistorico(req, quadroId, cartaoId, {
+          tipo: "cartao_editado",
+          descricao: `Atualizou: ${alteracoes.join(", ")}.`,
+        });
+      }
+
       return res.status(200).json({
         success: true,
         message: "Cartão atualizado com sucesso.",
@@ -325,6 +343,20 @@ const cartaoController = {
 
       store.syncListaTotals(quadroId);
 
+      const destLista = store.findLista(quadroId, dest);
+      const nomeLista = destLista?.nome || "lista";
+      if (origem !== dest) {
+        store.appendCartaoHistorico(req, quadroId, cartaoId, {
+          tipo: "cartao_movido",
+          descricao: `Moveu o cartão para a lista "${nomeLista}".`,
+        });
+      } else {
+        store.appendCartaoHistorico(req, quadroId, cartaoId, {
+          tipo: "cartao_reordenado",
+          descricao: "Alterou a ordem do cartão na lista.",
+        });
+      }
+
       return res.status(200).json({
         success: true,
         message: "Cartão movido com sucesso.",
@@ -350,6 +382,7 @@ const cartaoController = {
 
       const listaId = cartoes[idx].listaId;
       cartoes.splice(idx, 1);
+      store.removeHistoricoDoCartao(quadroId, cartaoId);
       store.removeComentariosDoCartao(quadroId, cartaoId);
       store.removeChecklistsDoCartao(quadroId, cartaoId);
       store.removeAnexosDoCartao(quadroId, cartaoId);

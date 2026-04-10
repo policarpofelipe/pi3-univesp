@@ -24,6 +24,7 @@ export default function CartaoComentarios({
   quadroId,
   cartaoId,
   usuarioId = "",
+  onHistoricoMudou,
 }) {
   const [itens, setItens] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,6 +68,7 @@ export default function CartaoComentarios({
         await carregar();
       }
       setTexto("");
+      onHistoricoMudou?.();
     } catch (err) {
       setErroEnvio(
         err?.response?.data?.message ||
@@ -88,6 +90,7 @@ export default function CartaoComentarios({
         comentario.id
       );
       setItens((prev) => prev.filter((c) => c.id !== comentario.id));
+      onHistoricoMudou?.();
     } catch {
       await carregar();
     } finally {

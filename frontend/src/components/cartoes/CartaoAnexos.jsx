@@ -29,7 +29,11 @@ function mimeDeDataUrl(dataUrl) {
   return m ? m[1] : "application/octet-stream";
 }
 
-export default function CartaoAnexos({ quadroId, cartaoId }) {
+export default function CartaoAnexos({
+  quadroId,
+  cartaoId,
+  onHistoricoMudou,
+}) {
   const [itens, setItens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [enviando, setEnviando] = useState(false);
@@ -84,6 +88,7 @@ export default function CartaoAnexos({ quadroId, cartaoId }) {
         dadosBase64,
       });
       await carregar();
+      onHistoricoMudou?.();
     } catch (err) {
       setErro(
         err?.response?.data?.message ||
@@ -133,6 +138,7 @@ export default function CartaoAnexos({ quadroId, cartaoId }) {
     try {
       await cartaoAnexoService.remover(quadroId, cartaoId, anexo.id);
       await carregar();
+      onHistoricoMudou?.();
     } catch {
       await carregar();
     } finally {

@@ -66,6 +66,11 @@ const cartaoComentarioController = {
 
       store.getComentarios(quadroId, cartaoId).push(novo);
 
+      store.appendCartaoHistorico(req, quadroId, cartaoId, {
+        tipo: "comentario_adicionado",
+        descricao: "Adicionou um comentário.",
+      });
+
       return res.status(201).json({
         success: true,
         message: "Comentário adicionado.",
@@ -108,6 +113,11 @@ const cartaoComentarioController = {
       }
 
       lista.splice(idx, 1);
+
+      store.appendCartaoHistorico(req, quadroId, cartaoId, {
+        tipo: "comentario_removido",
+        descricao: "Removeu um comentário.",
+      });
 
       return res.status(200).json({
         success: true,

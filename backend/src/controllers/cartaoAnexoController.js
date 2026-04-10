@@ -139,6 +139,11 @@ const cartaoAnexoController = {
 
       store.getAnexos(quadroId, cartaoId).push(novo);
 
+      store.appendCartaoHistorico(req, quadroId, cartaoId, {
+        tipo: "anexo_adicionado",
+        descricao: `Anexou o arquivo "${novo.nomeArquivo}".`,
+      });
+
       return res.status(201).json({
         success: true,
         message: "Anexo adicionado.",
@@ -169,7 +174,13 @@ const cartaoAnexoController = {
         });
       }
 
+      const nomeArquivo = lista[idx].nomeArquivo || "arquivo";
       lista.splice(idx, 1);
+
+      store.appendCartaoHistorico(req, quadroId, cartaoId, {
+        tipo: "anexo_removido",
+        descricao: `Removeu o anexo "${nomeArquivo}".`,
+      });
 
       return res.status(200).json({
         success: true,

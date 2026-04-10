@@ -12,6 +12,7 @@ import CartaoPrioridade from "../../components/cartoes/CartaoPrioridade";
 import CartaoChecklist from "../../components/cartoes/CartaoChecklist";
 import CartaoAnexos from "../../components/cartoes/CartaoAnexos";
 import CartaoComentarios from "../../components/cartoes/CartaoComentarios";
+import CartaoHistorico from "../../components/cartoes/CartaoHistorico";
 import TagSelector from "../../components/cartoes/TagSelector";
 
 import quadroService from "../../services/quadroService";
@@ -41,6 +42,11 @@ export default function CartaoDetalhePage() {
   const [salvandoPrazo, setSalvandoPrazo] = useState(false);
   const [salvandoPrioridade, setSalvandoPrioridade] = useState(false);
   const [salvandoTags, setSalvandoTags] = useState(false);
+  const [historicoTick, setHistoricoTick] = useState(0);
+
+  const bumpHistorico = useCallback(() => {
+    setHistoricoTick((n) => n + 1);
+  }, []);
 
   const carregar = useCallback(async () => {
     if (!quadroId || !cartaoId) return;
@@ -134,6 +140,7 @@ export default function CartaoDetalhePage() {
       const atualizado = extractObject(res) || res;
       if (atualizado) {
         setCartao(atualizado);
+        bumpHistorico();
       }
     } finally {
       setSalvando(false);
@@ -152,6 +159,7 @@ export default function CartaoDetalhePage() {
       const atualizado = extractObject(res) || res;
       if (atualizado) {
         setCartao(atualizado);
+        bumpHistorico();
       }
     } catch {
       await carregar();
@@ -190,6 +198,7 @@ export default function CartaoDetalhePage() {
       const atualizado = extractObject(res) || res;
       if (atualizado) {
         setCartao(atualizado);
+        bumpHistorico();
       }
     } finally {
       setSalvandoPrazo(false);
@@ -206,6 +215,7 @@ export default function CartaoDetalhePage() {
       const atualizado = extractObject(res) || res;
       if (atualizado) {
         setCartao(atualizado);
+        bumpHistorico();
       }
     } finally {
       setSalvandoPrioridade(false);
@@ -232,6 +242,7 @@ export default function CartaoDetalhePage() {
       const atualizado = extractObject(res) || res;
       if (atualizado) {
         setCartao(atualizado);
+        bumpHistorico();
       }
     } finally {
       setSalvandoTags(false);
@@ -393,12 +404,23 @@ export default function CartaoDetalhePage() {
 
         <CartaoChecklist quadroId={quadroId} cartaoId={cartaoId} />
 
-        <CartaoAnexos quadroId={quadroId} cartaoId={cartaoId} />
+        <CartaoAnexos
+          quadroId={quadroId}
+          cartaoId={cartaoId}
+          onHistoricoMudou={bumpHistorico}
+        />
 
         <CartaoComentarios
           quadroId={quadroId}
           cartaoId={cartaoId}
           usuarioId={usuarioChave}
+          onHistoricoMudou={bumpHistorico}
+        />
+
+        <CartaoHistorico
+          quadroId={quadroId}
+          cartaoId={cartaoId}
+          recarregarSignal={historicoTick}
         />
       </div>
     </AppLayout>
