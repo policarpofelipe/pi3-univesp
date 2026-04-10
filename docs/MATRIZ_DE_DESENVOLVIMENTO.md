@@ -365,7 +365,7 @@ services/listaTransicaoService.js
 ✅pages/cartoes/CartaoDetalhePage.jsx
 
 ✅components/cartoes/CartaoCard.jsx
-components/cartoes/CartaoModal.jsx
+✅components/cartoes/CartaoModal.jsx
 ✅components/cartoes/CartaoForm.jsx
 components/cartoes/CartaoHeader.jsx
 components/cartoes/CartaoDescricao.jsx

@@ -17,8 +17,8 @@ import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 import ListaForm from "../../components/listas/ListaForm";
 import ListaHeader from "../../components/listas/ListaHeader";
 import ReordenacaoListas from "../../components/listas/ReordenacaoListas";
-import CartaoForm from "../../components/cartoes/CartaoForm";
 import CartaoCard from "../../components/cartoes/CartaoCard";
+import CartaoModal from "../../components/cartoes/CartaoModal";
 import CriacaoRapidaCartao from "../../components/cartoes/CriacaoRapidaCartao";
 import { extractList, extractObject } from "../../utils/apiData";
 import useAuth from "../../hooks/useAuth";
@@ -703,47 +703,16 @@ export default function QuadroDetalhePage() {
         </section>
       </div>
 
-      {cartaoModal ? (
-        <div
-          className="fixed inset-0 z-[1300] flex items-center justify-center bg-[var(--color-scrim)] p-4"
-          role="presentation"
-          onClick={() => !cartaoSalvando && setCartaoModal(null)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="cartao-modal-titulo"
-            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-lg)]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2
-              id="cartao-modal-titulo"
-              className="text-[var(--font-size-heading-3)] font-semibold text-[var(--color-text)]"
-            >
-              {cartaoModal.mode === "criar" ? "Novo cartão" : "Editar cartão"}
-            </h2>
-            <div className="mt-4">
-              <CartaoForm
-                modo={cartaoModal.mode === "criar" ? "criar" : "editar"}
-                listas={listas}
-                listaIdFixo={cartaoModal.listaIdFixo || ""}
-                initialValues={
-                  cartaoModal.cartao
-                    ? {
-                        titulo: cartaoModal.cartao.titulo,
-                        descricao: cartaoModal.cartao.descricao,
-                        listaId: cartaoModal.cartao.listaId,
-                      }
-                    : {}
-                }
-                loading={cartaoSalvando}
-                onCancel={() => !cartaoSalvando && setCartaoModal(null)}
-                onSubmit={handleSalvarCartao}
-              />
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <CartaoModal
+        open={Boolean(cartaoModal)}
+        modo={cartaoModal?.mode === "criar" ? "criar" : "editar"}
+        listas={listas}
+        listaIdFixo={cartaoModal?.listaIdFixo || ""}
+        cartaoEmEdicao={cartaoModal?.cartao ?? null}
+        loading={cartaoSalvando}
+        onClose={() => setCartaoModal(null)}
+        onSubmit={handleSalvarCartao}
+      />
 
       {listaModal ? (
         <div
