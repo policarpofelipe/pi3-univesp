@@ -12,10 +12,14 @@ import QuadroHeader from "../../components/quadros/QuadroHeader";
 import quadroService from "../../services/quadroService";
 import quadroMembroService from "../../services/quadroMembroService";
 import listaService from "../../services/listaService";
+import cartaoService from "../../services/cartaoService";
 import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 import ListaForm from "../../components/listas/ListaForm";
 import ListaHeader from "../../components/listas/ListaHeader";
 import ReordenacaoListas from "../../components/listas/ReordenacaoListas";
+import CartaoForm from "../../components/cartoes/CartaoForm";
+import CartaoCard from "../../components/cartoes/CartaoCard";
+import CriacaoRapidaCartao from "../../components/cartoes/CriacaoRapidaCartao";
 import { extractList, extractObject } from "../../utils/apiData";
 import useAuth from "../../hooks/useAuth";
 
@@ -70,10 +74,14 @@ export default function QuadroDetalhePage() {
   const [quadro, setQuadro] = useState(null);
   const [membros, setMembros] = useState([]);
   const [listas, setListas] = useState([]);
+  const [cartoes, setCartoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [listaModal, setListaModal] = useState(null);
   const [listaSalvando, setListaSalvando] = useState(false);
+  const [cartaoModal, setCartaoModal] = useState(null);
+  const [cartaoSalvando, setCartaoSalvando] = useState(false);
+  const [movendoCartaoId, setMovendoCartaoId] = useState(null);
 
   const carregar = useCallback(async () => {
     if (!quadroId) return;
@@ -82,10 +90,11 @@ export default function QuadroDetalhePage() {
     setErro("");
 
     try {
-      const [resQuadro, resMembros, resListas] = await Promise.all([
+      const [resQuadro, resMembros, resListas, resCartoes] = await Promise.all([
         quadroService.obterPorId(quadroId),
         quadroMembroService.listar(quadroId).catch(() => ({ data: [] })),
         listaService.listar(quadroId).catch(() => ({ data: [] })),
+        cartaoService.listar(quadroId).catch(() => ({ data: [] })),
       ]);
 
       let data = extractObject(resQuadro) || resQuadro;
@@ -116,6 +125,8 @@ export default function QuadroDetalhePage() {
       setListas(
         rawListas.sort((a, b) => (a.posicao ?? 0) - (b.posicao ?? 0))
       );
+
+      setCartoes(extractList(resCartoes));
     } catch (error) {
       setErro(
         error?.response?.data?.message ||
@@ -125,6 +136,7 @@ export default function QuadroDetalhePage() {
       setQuadro(null);
       setMembros([]);
       setListas([]);
+      setCartoes([]);
     } finally {
       setLoading(false);
     }
@@ -142,13 +154,17 @@ export default function QuadroDetalhePage() {
     return listas.reduce((acc, lista) => acc + (lista.totalCartoes || 0), 0);
   }, [listas]);
 
-  function handleNovoCartao() {
-    /* módulo de cartões */
-  }
-
-  function handleNovaLista() {
-    setListaModal({ mode: "criar", lista: null });
-  }
+  const cartoesPorLista = useMemo(() => {
+    const map = new Map();
+    for (const l of listas) {
+      const key = String(l.id);
+      const arr = cartoes
+        .filter((c) => String(c.listaId) === key)
+        .sort((a, b) => (a.posicao ?? 0) - (b.posicao ?? 0));
+      map.set(key, arr);
+    }
+    return map;
+  }, [listas, cartoes]);
 
   const carregarListas = useCallback(async () => {
     if (!quadroId) return;
@@ -160,6 +176,107 @@ export default function QuadroDetalhePage() {
       setListas([]);
     }
   }, [quadroId]);
+
+  const carregarCartoes = useCallback(async () => {
+    if (!quadroId) return;
+    try {
+      const res = await cartaoService.listar(quadroId);
+      setCartoes(extractList(res));
+    } catch {
+      setCartoes([]);
+    }
+  }, [quadroId]);
+
+  async function atualizarListasETotais() {
+    await carregarListas();
+    await carregarCartoes();
+  }
+
+  function handleNovoCartao() {
+    if (!listas.length) {
+      window.alert(
+        "Crie pelo menos uma lista antes de adicionar cartões a este quadro."
+      );
+      return;
+    }
+    setCartaoModal({ mode: "criar" });
+  }
+
+  async function handleSalvarCartao(payload) {
+    if (!cartaoModal) return;
+
+    setCartaoSalvando(true);
+    try {
+      if (cartaoModal.mode === "criar") {
+        await cartaoService.criar(quadroId, {
+          titulo: payload.titulo,
+          descricao: payload.descricao || "",
+          listaId: payload.listaId,
+        });
+      } else if (cartaoModal.cartao?.id) {
+        await cartaoService.atualizar(quadroId, cartaoModal.cartao.id, {
+          titulo: payload.titulo,
+          descricao: payload.descricao,
+        });
+      } else {
+        throw new Error("Estado do cartão inválido.");
+      }
+      setCartaoModal(null);
+      await atualizarListasETotais();
+    } finally {
+      setCartaoSalvando(false);
+    }
+  }
+
+  async function handleExcluirCartao(cartao) {
+    if (!window.confirm(`Excluir o cartão "${cartao.titulo}"?`)) return;
+    try {
+      await cartaoService.remover(quadroId, cartao.id);
+      await atualizarListasETotais();
+    } catch {
+      /* backend pode retornar erro */
+    }
+  }
+
+  async function handleMoverCartaoLista(cartao, novaListaId) {
+    if (String(cartao.listaId) === String(novaListaId)) return;
+    setMovendoCartaoId(cartao.id);
+    try {
+      await cartaoService.mover(quadroId, cartao.id, {
+        listaId: novaListaId,
+      });
+      await atualizarListasETotais();
+    } catch {
+      await atualizarListasETotais();
+    } finally {
+      setMovendoCartaoId(null);
+    }
+  }
+
+  const handleCriacaoRapidaCartao = useCallback(
+    async ({ titulo, listaId }) => {
+      try {
+        await cartaoService.criar(quadroId, {
+          titulo,
+          descricao: "",
+          listaId,
+        });
+        await carregarListas();
+        await carregarCartoes();
+      } catch (err) {
+        window.alert(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Não foi possível criar o cartão."
+        );
+      }
+    },
+    [quadroId, carregarListas, carregarCartoes]
+  );
+
+  function handleNovaLista() {
+    setListaModal({ mode: "criar", lista: null });
+  }
 
   async function aplicarOrdem(novaOrdem) {
     const ids = novaOrdem.map((l) => l.id);
@@ -208,7 +325,7 @@ export default function QuadroDetalhePage() {
     if (!window.confirm(`Excluir a lista "${lista.nome}"?`)) return;
     try {
       await listaService.remover(quadroId, lista.id);
-      await carregarListas();
+      await atualizarListasETotais();
     } catch {
       /* silencioso: backend pode retornar erro */
     }
@@ -454,10 +571,26 @@ export default function QuadroDetalhePage() {
                       </p>
                     ) : null}
 
-                    <div className="quadro-detalhe-page__lista-footer">
-                      <span className="text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
-                        Cartões nesta lista: módulo em evolução
-                      </span>
+                    <div className="flex flex-col gap-2">
+                      <CriacaoRapidaCartao
+                        listaId={lista.id}
+                        onCriar={handleCriacaoRapidaCartao}
+                      />
+                      {(cartoesPorLista.get(String(lista.id)) || []).map(
+                        (c) => (
+                          <CartaoCard
+                            key={c.id}
+                            cartao={c}
+                            listas={listas}
+                            movendo={movendoCartaoId === c.id}
+                            onEdit={(cc) =>
+                              setCartaoModal({ mode: "editar", cartao: cc })
+                            }
+                            onDelete={handleExcluirCartao}
+                            onMoverLista={handleMoverCartaoLista}
+                          />
+                        )
+                      )}
                     </div>
                   </article>
                 ))}
@@ -568,6 +701,48 @@ export default function QuadroDetalhePage() {
           </aside>
         </section>
       </div>
+
+      {cartaoModal ? (
+        <div
+          className="fixed inset-0 z-[1300] flex items-center justify-center bg-[var(--color-scrim)] p-4"
+          role="presentation"
+          onClick={() => !cartaoSalvando && setCartaoModal(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cartao-modal-titulo"
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-lg)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2
+              id="cartao-modal-titulo"
+              className="text-[var(--font-size-heading-3)] font-semibold text-[var(--color-text)]"
+            >
+              {cartaoModal.mode === "criar" ? "Novo cartão" : "Editar cartão"}
+            </h2>
+            <div className="mt-4">
+              <CartaoForm
+                modo={cartaoModal.mode === "criar" ? "criar" : "editar"}
+                listas={listas}
+                listaIdFixo={cartaoModal.listaIdFixo || ""}
+                initialValues={
+                  cartaoModal.cartao
+                    ? {
+                        titulo: cartaoModal.cartao.titulo,
+                        descricao: cartaoModal.cartao.descricao,
+                        listaId: cartaoModal.cartao.listaId,
+                      }
+                    : {}
+                }
+                loading={cartaoSalvando}
+                onCancel={() => !cartaoSalvando && setCartaoModal(null)}
+                onSubmit={handleSalvarCartao}
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {listaModal ? (
         <div

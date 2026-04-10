@@ -364,9 +364,9 @@ services/listaTransicaoService.js
 
 pages/cartoes/CartaoDetalhePage.jsx
 
-components/cartoes/CartaoCard.jsx
+✅components/cartoes/CartaoCard.jsx
 components/cartoes/CartaoModal.jsx
-components/cartoes/CartaoForm.jsx
+✅components/cartoes/CartaoForm.jsx
 components/cartoes/CartaoHeader.jsx
 components/cartoes/CartaoDescricao.jsx
 components/cartoes/CartaoPrazo.jsx
@@ -380,9 +380,9 @@ components/cartoes/CartaoComentarios.jsx
 components/cartoes/CartaoAnexos.jsx
 components/cartoes/CartaoHistorico.jsx
 components/cartoes/CartaoRelacoes.jsx
-components/cartoes/CriacaoRapidaCartao.jsx
+✅components/cartoes/CriacaoRapidaCartao.jsx
 
-services/cartaoService.js
+✅services/cartaoService.js
 services/cartaoComentarioService.js
 services/cartaoChecklistService.js
 services/cartaoAnexoService.js
@@ -510,7 +510,7 @@ src/routes/listaTransicaoRoutes.js
 src/routes/visaoRoutes.js
 src/routes/tagRoutes.js
 src/routes/campoPersonalizadoRoutes.js
-src/routes/cartaoRoutes.js
+✅src/routes/cartaoRoutes.js
 src/routes/cartaoComentarioRoutes.js
 src/routes/cartaoChecklistRoutes.js
 src/routes/cartaoAnexoRoutes.js
@@ -529,6 +529,7 @@ src/controllers/OrganizacaoController.js
 ✅src/controllers/QuadroMembroController.js
 ✅src/controllers/QuadroPapelController.js
 ✅src/controllers/listaController.js
+✅src/controllers/cartaoController.js
 src/controllers/ListaPermissaoController.js
 src/controllers/ListaTransicaoController.js
 src/controllers/VisaoController.js

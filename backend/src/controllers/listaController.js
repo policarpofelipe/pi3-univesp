@@ -1,50 +1,4 @@
-const { randomBytes } = require("crypto");
-
-/** @type {Map<string, Array<object>>} */
-const store = new Map();
-
-function makeId() {
-  return `lst_${randomBytes(6).toString("hex")}`;
-}
-
-function ensureSeed(quadroId) {
-  if (!store.has(quadroId)) {
-    store.set(quadroId, [
-      {
-        id: makeId(),
-        quadroId,
-        nome: "A fazer",
-        descricao: "",
-        posicao: 0,
-        limiteWip: null,
-        totalCartoes: 0,
-      },
-      {
-        id: makeId(),
-        quadroId,
-        nome: "Em andamento",
-        descricao: "",
-        posicao: 1,
-        limiteWip: 5,
-        totalCartoes: 0,
-      },
-      {
-        id: makeId(),
-        quadroId,
-        nome: "Concluído",
-        descricao: "",
-        posicao: 2,
-        limiteWip: null,
-        totalCartoes: 0,
-      },
-    ]);
-  }
-  return store.get(quadroId);
-}
-
-function sorted(quadroId) {
-  return [...ensureSeed(quadroId)].sort((a, b) => a.posicao - b.posicao);
-}
+const store = require("../data/boardMemoryStore");
 
 const listaController = {
   async listar(req, res, next) {
@@ -52,7 +6,7 @@ const listaController = {
       const { quadroId } = req.params;
       return res.status(200).json({
         success: true,
-        data: sorted(quadroId),
+        data: store.sortedListas(quadroId),
       });
     } catch (error) {
       return next(error);
@@ -62,8 +16,8 @@ const listaController = {
   async obterPorId(req, res, next) {
     try {
       const { quadroId, listaId } = req.params;
-      const list = ensureSeed(quadroId);
-      const lista = list.find((l) => String(l.id) === String(listaId));
+      store.syncListaTotals(quadroId);
+      const lista = store.findLista(quadroId, listaId);
 
       if (!lista) {
         return res.status(404).json({
@@ -93,7 +47,7 @@ const listaController = {
         });
       }
 
-      const list = ensureSeed(quadroId);
+      const list = store.ensureListas(quadroId);
       const maxPos = list.reduce((m, l) => Math.max(m, l.posicao ?? 0), -1);
       const wip =
         limiteWip === "" || limiteWip === undefined || limiteWip === null
@@ -101,7 +55,7 @@ const listaController = {
           : Number(limiteWip);
 
       const nova = {
-        id: makeId(),
+        id: store.makeListaId(),
         quadroId,
         nome: String(nome).trim(),
         descricao: String(descricao || "").trim(),
@@ -127,8 +81,7 @@ const listaController = {
       const { quadroId, listaId } = req.params;
       const { nome, descricao, limiteWip } = req.body;
 
-      const list = ensureSeed(quadroId);
-      const lista = list.find((l) => String(l.id) === String(listaId));
+      const lista = store.findLista(quadroId, listaId);
 
       if (!lista) {
         return res.status(404).json({
@@ -160,6 +113,8 @@ const listaController = {
           Number.isFinite(wip) && wip > 0 ? wip : null;
       }
 
+      store.syncListaTotals(quadroId);
+
       return res.status(200).json({
         success: true,
         message: "Lista atualizada com sucesso.",
@@ -173,7 +128,7 @@ const listaController = {
   async remover(req, res, next) {
     try {
       const { quadroId, listaId } = req.params;
-      const list = ensureSeed(quadroId);
+      const list = store.ensureListas(quadroId);
       const idx = list.findIndex((l) => String(l.id) === String(listaId));
 
       if (idx === -1) {
@@ -183,12 +138,15 @@ const listaController = {
         });
       }
 
+      store.removeCartoesDaLista(quadroId, listaId);
       list.splice(idx, 1);
       list
         .sort((a, b) => (a.posicao ?? 0) - (b.posicao ?? 0))
         .forEach((l, i) => {
           l.posicao = i;
         });
+
+      store.syncListaTotals(quadroId);
 
       return res.status(200).json({
         success: true,
@@ -212,7 +170,7 @@ const listaController = {
         });
       }
 
-      const list = ensureSeed(quadroId);
+      const list = store.ensureListas(quadroId);
       const byId = new Map(list.map((l) => [String(l.id), l]));
 
       ids.forEach((rawId, index) => {
@@ -222,10 +180,12 @@ const listaController = {
         }
       });
 
+      store.syncListaTotals(quadroId);
+
       return res.status(200).json({
         success: true,
         message: "Ordem das listas atualizada.",
-        data: sorted(quadroId),
+        data: store.sortedListas(quadroId),
       });
     } catch (error) {
       return next(error);
