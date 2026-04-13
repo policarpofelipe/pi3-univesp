@@ -3,6 +3,49 @@ const connectionModule = require("../database/connection");
 const db = connectionModule.pool || connectionModule.db || connectionModule;
 
 class OrganizacaoRepository {
+  /**
+   * Quando `true`, a coluna `organizacoes.descricao` existe e foi confirmada.
+   * Enquanto `undefined`/`false`, cada operação reconsulta (sem cache de "ausente")
+   * para que a API volte a funcionar logo após aplicar a migration sem reiniciar.
+   */
+  constructor() {
+    this._organizacoesColDescricaoConfirmada = undefined;
+  }
+
+  async _organizacoesTemColunaDescricao() {
+    if (this._organizacoesColDescricaoConfirmada === true) {
+      return true;
+    }
+    const existe = await this._probeColunaDescricaoOrganizacoes();
+    if (existe) {
+      this._organizacoesColDescricaoConfirmada = true;
+    }
+    return existe;
+  }
+
+  async _probeColunaDescricaoOrganizacoes() {
+    try {
+      const [rows] = await db.query(
+        `SELECT COUNT(*) AS c
+         FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE()
+           AND TABLE_NAME = 'organizacoes'
+           AND COLUMN_NAME = 'descricao'`
+      );
+      return Number(rows[0]?.c) > 0;
+    } catch {
+      try {
+        await db.query(`SELECT descricao FROM organizacoes LIMIT 0`);
+        return true;
+      } catch (err) {
+        if (err.errno === 1054 || err.code === "ER_BAD_FIELD_ERROR") {
+          return false;
+        }
+        throw err;
+      }
+    }
+  }
+
   mapRowToEntity(row) {
     if (!row) return null;
 
@@ -25,6 +68,10 @@ class OrganizacaoRepository {
   async listar(filtros = {}) {
     const { usuarioId, busca, ativo, limit, offset } = filtros;
 
+    const temDescricao = await this._organizacoesTemColunaDescricao();
+    const selectDescricao = temDescricao ? "o.descricao" : "NULL AS descricao";
+    const groupDescricao = temDescricao ? "        o.descricao,\n" : "";
+
     const where = [];
     const params = [];
 
@@ -33,7 +80,7 @@ class OrganizacaoRepository {
         o.id,
         o.nome,
         o.slug,
-        o.descricao,
+        ${selectDescricao},
         o.criado_por_usuario_id AS criadoPorUsuarioId,
         o.ativo,
         o.criado_em AS criadoEm,
@@ -58,10 +105,15 @@ class OrganizacaoRepository {
     }
 
     if (busca) {
-      where.push(
-        "(o.nome LIKE ? OR o.slug LIKE ? OR (o.descricao IS NOT NULL AND o.descricao LIKE ?))"
-      );
-      params.push(`%${busca}%`, `%${busca}%`, `%${busca}%`);
+      if (temDescricao) {
+        where.push(
+          "(o.nome LIKE ? OR o.slug LIKE ? OR (o.descricao IS NOT NULL AND o.descricao LIKE ?))"
+        );
+        params.push(`%${busca}%`, `%${busca}%`, `%${busca}%`);
+      } else {
+        where.push("(o.nome LIKE ? OR o.slug LIKE ?)");
+        params.push(`%${busca}%`, `%${busca}%`);
+      }
     }
 
     if (typeof ativo === "boolean") {
@@ -78,8 +130,7 @@ class OrganizacaoRepository {
         o.id,
         o.nome,
         o.slug,
-        o.descricao,
-        o.criado_por_usuario_id,
+${groupDescricao}        o.criado_por_usuario_id,
         o.ativo,
         o.criado_em,
         o.atualizado_em
@@ -101,12 +152,16 @@ class OrganizacaoRepository {
   }
 
   async obterPorId(organizacaoId) {
+    const temDescricao = await this._organizacoesTemColunaDescricao();
+    const selectDescricao = temDescricao ? "o.descricao" : "NULL AS descricao";
+    const groupDescricao = temDescricao ? "        o.descricao,\n" : "";
+
     const sql = `
       SELECT
         o.id,
         o.nome,
         o.slug,
-        o.descricao,
+        ${selectDescricao},
         o.criado_por_usuario_id AS criadoPorUsuarioId,
         o.ativo,
         o.criado_em AS criadoEm,
@@ -123,8 +178,7 @@ class OrganizacaoRepository {
         o.id,
         o.nome,
         o.slug,
-        o.descricao,
-        o.criado_por_usuario_id,
+${groupDescricao}        o.criado_por_usuario_id,
         o.ativo,
         o.criado_em,
         o.atualizado_em
@@ -136,12 +190,15 @@ class OrganizacaoRepository {
   }
 
   async obterPorSlug(slug) {
+    const temDescricao = await this._organizacoesTemColunaDescricao();
+    const selectDescricao = temDescricao ? "o.descricao" : "NULL AS descricao";
+
     const sql = `
       SELECT
         o.id,
         o.nome,
         o.slug,
-        o.descricao,
+        ${selectDescricao},
         o.criado_por_usuario_id AS criadoPorUsuarioId,
         o.ativo,
         o.criado_em AS criadoEm,
@@ -164,7 +221,13 @@ class OrganizacaoRepository {
       ativo = true,
     } = dados;
 
-    const sql = `
+    const temDescricao = await this._organizacoesTemColunaDescricao();
+
+    let sql;
+    let params;
+
+    if (temDescricao) {
+      sql = `
       INSERT INTO organizacoes (
         nome,
         slug,
@@ -176,19 +239,30 @@ class OrganizacaoRepository {
       )
       VALUES (?, ?, ?, ?, ?, NOW(), NOW())
     `;
+      params = [nome, slug, descricao, criadoPorUsuarioId, ativo ? 1 : 0];
+    } else {
+      sql = `
+      INSERT INTO organizacoes (
+        nome,
+        slug,
+        criado_por_usuario_id,
+        ativo,
+        criado_em,
+        atualizado_em
+      )
+      VALUES (?, ?, ?, ?, NOW(), NOW())
+    `;
+      params = [nome, slug, criadoPorUsuarioId, ativo ? 1 : 0];
+    }
 
-    const [result] = await db.query(sql, [
-      nome,
-      slug,
-      descricao,
-      criadoPorUsuarioId,
-      ativo ? 1 : 0,
-    ]);
+    const [result] = await db.query(sql, params);
 
     return this.obterPorId(result.insertId);
   }
 
   async atualizar(organizacaoId, dados = {}) {
+    const temDescricao = await this._organizacoesTemColunaDescricao();
+
     const campos = [];
     const params = [];
 
@@ -202,7 +276,7 @@ class OrganizacaoRepository {
       params.push(dados.slug);
     }
 
-    if (dados.descricao !== undefined) {
+    if (dados.descricao !== undefined && temDescricao) {
       campos.push("descricao = ?");
       params.push(dados.descricao);
     }
