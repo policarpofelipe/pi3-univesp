@@ -371,24 +371,24 @@ docs/
 ✅components/cartoes/CartaoDescricao.jsx
 ✅components/cartoes/CartaoPrazo.jsx
 ✅components/cartoes/CartaoPrioridade.jsx
-components/cartoes/CartaoAtribuicoes.jsx
-components/cartoes/CartaoTags.jsx
-components/cartoes/CartaoCamposPersonalizados.jsx
+✅components/cartoes/CartaoAtribuicoes.jsx
+✅components/cartoes/CartaoTags.jsx
+✅components/cartoes/CartaoCamposPersonalizados.jsx
 ✅components/cartoes/CartaoChecklist.jsx
 ✅components/cartoes/CartaoChecklistItem.jsx
 ✅components/cartoes/CartaoComentarios.jsx
 ✅components/cartoes/CartaoAnexos.jsx
 ✅components/cartoes/CartaoHistorico.jsx
-components/cartoes/CartaoRelacoes.jsx
+✅components/cartoes/CartaoRelacoes.jsx
 ✅components/cartoes/CriacaoRapidaCartao.jsx
 
 ✅services/cartaoService.js
 ✅services/cartaoComentarioService.js
 ✅services/cartaoChecklistService.js
 ✅services/cartaoAnexoService.js
-services/cartaoAtribuicaoService.js
+✅services/cartaoAtribuicaoService.js
 ✅services/cartaoHistoricoService.js
-services/cartaoRelacaoService.js
+✅services/cartaoRelacaoService.js
 
 --------------------------------------------------
 

@@ -13,7 +13,10 @@ import CartaoChecklist from "../../components/cartoes/CartaoChecklist";
 import CartaoAnexos from "../../components/cartoes/CartaoAnexos";
 import CartaoComentarios from "../../components/cartoes/CartaoComentarios";
 import CartaoHistorico from "../../components/cartoes/CartaoHistorico";
-import TagSelector from "../../components/cartoes/TagSelector";
+import CartaoTags from "../../components/cartoes/CartaoTags";
+import CartaoAtribuicoes from "../../components/cartoes/CartaoAtribuicoes";
+import CartaoCamposPersonalizados from "../../components/cartoes/CartaoCamposPersonalizados";
+import CartaoRelacoes from "../../components/cartoes/CartaoRelacoes";
 
 import quadroService from "../../services/quadroService";
 import listaService from "../../services/listaService";
@@ -382,16 +385,14 @@ export default function CartaoDetalhePage() {
             onSave={handleSalvarPrioridade}
           />
 
-          <div className="mb-6">
-            <TagSelector
-              quadroId={quadroId}
-              tagIds={cartao.tagIds}
-              tags={tags}
-              disabled={salvandoTags}
-              onChange={handleSalvarTagIds}
-              onTagsRefresh={carregarTags}
-            />
-          </div>
+          <CartaoTags
+            quadroId={quadroId}
+            tagIds={cartao.tagIds}
+            tags={tags}
+            disabled={salvandoTags}
+            onChange={handleSalvarTagIds}
+            onTagsRefresh={carregarTags}
+          />
 
           <CartaoForm
             modo="editar"
@@ -403,6 +404,9 @@ export default function CartaoDetalhePage() {
         </section>
 
         <CartaoChecklist quadroId={quadroId} cartaoId={cartaoId} />
+        <CartaoAtribuicoes quadroId={quadroId} cartaoId={cartaoId} />
+        <CartaoCamposPersonalizados quadroId={quadroId} cartaoId={cartaoId} />
+        <CartaoRelacoes quadroId={quadroId} cartaoId={cartaoId} />
 
         <CartaoAnexos
           quadroId={quadroId}
