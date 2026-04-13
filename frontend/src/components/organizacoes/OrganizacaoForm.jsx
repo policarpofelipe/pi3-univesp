@@ -52,8 +52,8 @@ function validate(values) {
 
   if (!values.nome.trim()) {
     errors.nome = "O nome da organização é obrigatório.";
-  } else if (values.nome.trim().length < 3) {
-    errors.nome = "O nome deve ter pelo menos 3 caracteres.";
+  } else if (values.nome.trim().length < 2) {
+    errors.nome = "O nome deve ter pelo menos 2 caracteres.";
   }
 
   if (values.slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(values.slug)) {

@@ -8,8 +8,13 @@ import EmptyState from "../../components/ui/EmptyState";
 import LoadingState from "../../components/ui/LoadingState";
 import ErrorState from "../../components/ui/ErrorState";
 import Button from "../../components/ui/Button";
+import Modal from "../../components/ui/Modal";
 import OrganizacaoCard from "../../components/organizacoes/OrganizacaoCard";
-import { listarOrganizacoes } from "../../services/organizacaoService";
+import OrganizacaoForm from "../../components/organizacoes/OrganizacaoForm";
+import {
+  listarOrganizacoes,
+  criarOrganizacao,
+} from "../../services/organizacaoService";
 
 import "../../styles/pages/organizacoes.css";
 
@@ -32,6 +37,9 @@ export default function OrganizacoesPage() {
   const [organizacoes, setOrganizacoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  const [modalCriarAberto, setModalCriarAberto] = useState(false);
+  const [modalCriarNonce, setModalCriarNonce] = useState(0);
+  const [salvandoOrganizacao, setSalvandoOrganizacao] = useState(false);
 
   const carregarOrganizacoes = useCallback(async () => {
     setLoading(true);
@@ -62,7 +70,44 @@ export default function OrganizacoesPage() {
   }, [carregarOrganizacoes]);
 
   function handleNovaOrganizacao() {
-    console.log("Abrir fluxo de criação de organização");
+    setModalCriarNonce((n) => n + 1);
+    setModalCriarAberto(true);
+  }
+
+  function handleFecharModalCriar() {
+    if (salvandoOrganizacao) return;
+    setModalCriarAberto(false);
+  }
+
+  async function handleCriarOrganizacaoSubmit(values) {
+    setSalvandoOrganizacao(true);
+    try {
+      const body = await criarOrganizacao({
+        nome: values.nome,
+        slug: values.slug,
+        ativo: values.ativo,
+      });
+
+      const org = body?.data;
+      const id = org?.id;
+      if (!id) {
+        throw new Error(
+          body?.message || "Não foi possível obter a organização criada."
+        );
+      }
+
+      setModalCriarAberto(false);
+      await carregarOrganizacoes();
+      navigate(`/organizacoes/${id}`);
+    } catch (error) {
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Não foi possível criar a organização.";
+      throw new Error(msg);
+    } finally {
+      setSalvandoOrganizacao(false);
+    }
   }
 
   function handleAbrirOrganizacao(id) {
@@ -70,7 +115,7 @@ export default function OrganizacoesPage() {
   }
 
   function handleEditarOrganizacao(id) {
-    console.log("Editar organização:", id);
+    navigate(`/organizacoes/${id}`);
   }
 
   return (
@@ -153,6 +198,23 @@ export default function OrganizacoesPage() {
             ))}
           </section>
         )}
+
+        <Modal
+          open={modalCriarAberto}
+          title="Nova organização"
+          onClose={handleFecharModalCriar}
+          closeLabel="Cancelar"
+          closeOnBackdrop={!salvandoOrganizacao}
+        >
+          <OrganizacaoForm
+            key={`nova-org-${modalCriarNonce}`}
+            submitLabel="Criar organização"
+            cancelLabel="Cancelar"
+            loading={salvandoOrganizacao}
+            onCancel={handleFecharModalCriar}
+            onSubmit={handleCriarOrganizacaoSubmit}
+          />
+        </Modal>
       </div>
     </AppLayout>
   );
