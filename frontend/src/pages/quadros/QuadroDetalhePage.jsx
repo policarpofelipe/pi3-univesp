@@ -34,6 +34,7 @@ import {
   ArrowRight,
   Clock3,
   Users,
+  Eye,
 } from "lucide-react";
 
 import "../../styles/pages/quadro-detalhe.css";
@@ -388,6 +389,10 @@ export default function QuadroDetalhePage() {
     navigate(`/quadros/${quadroId}/papeis`);
   }
 
+  function handleAbrirVisoes() {
+    navigate(`/quadros/${quadroId}/visoes`);
+  }
+
   if (loading && !quadro) {
     return (
       <AppLayout
@@ -711,6 +716,23 @@ export default function QuadroDetalhePage() {
                   onSubmit={handleCriarTagQuadro}
                 />
               </div>
+            </section>
+
+            <section className="quadro-detalhe-page__section">
+              <div className="quadro-detalhe-page__section-header">
+                <h3 className="quadro-detalhe-page__section-title">Visões</h3>
+                <Button
+                  variant="ghost"
+                  leftIcon={<Eye size={14} />}
+                  onClick={handleAbrirVisoes}
+                >
+                  Gerenciar
+                </Button>
+              </div>
+              <p className="quadro-detalhe-page__section-text">
+                Crie visões salvas para aplicar filtros recorrentes e acelerar a
+                análise do quadro.
+              </p>
             </section>
 
             <section className="quadro-detalhe-page__section">

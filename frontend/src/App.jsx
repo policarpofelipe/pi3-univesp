@@ -27,6 +27,8 @@ import QuadroPapeisPage from "./pages/quadros/QuadroPapeisPage";
 import ListaConfiguracoesPage from "./pages/listas/ListaConfiguracoesPage";
 import ListaPermissoesPage from "./pages/listas/ListaPermissoesPage";
 import ListaTransicoesPage from "./pages/listas/ListaTransicoesPage";
+import VisoesPage from "./pages/visoes/VisoesPage";
+import VisaoFormPage from "./pages/visoes/VisaoFormPage";
 
 // Cartões
 import CartaoDetalhePage from "./pages/cartoes/CartaoDetalhePage";
@@ -87,6 +89,15 @@ export default function App() {
             <Route
               path="/quadros/:quadroId/listas/:listaId/transicoes"
               element={<ListaTransicoesPage />}
+            />
+            <Route path="/quadros/:quadroId/visoes" element={<VisoesPage />} />
+            <Route
+              path="/quadros/:quadroId/visoes/nova"
+              element={<VisaoFormPage />}
+            />
+            <Route
+              path="/quadros/:quadroId/visoes/:visaoId/editar"
+              element={<VisaoFormPage />}
             />
           </Route>
 

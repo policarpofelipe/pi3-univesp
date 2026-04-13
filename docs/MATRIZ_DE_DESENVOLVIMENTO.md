@@ -394,15 +394,15 @@ services/cartaoRelacaoService.js
 
 3.7. Visões
 
-pages/visoes/VisoesPage.jsx
-pages/visoes/VisaoFormPage.jsx
+✅pages/visoes/VisoesPage.jsx
+✅pages/visoes/VisaoFormPage.jsx
 
-components/visoes/VisaoTabs.jsx
-components/visoes/VisaoListaResultados.jsx
-components/visoes/VisaoForm.jsx
-components/visoes/FiltroBuilder.jsx
+✅components/visoes/VisaoTabs.jsx
+✅components/visoes/VisaoListaResultados.jsx
+✅components/visoes/VisaoForm.jsx
+✅components/visoes/FiltroBuilder.jsx
 
-services/visaoService.js
+✅services/visaoService.js
 
 --------------------------------------------------
 
