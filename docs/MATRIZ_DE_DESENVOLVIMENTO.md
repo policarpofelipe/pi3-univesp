@@ -526,7 +526,7 @@ components/ui/Button.jsx
 4.3. Controllers
 
 ✅ src/controllers/AuthController.js - Felipe Policarpo 09/03/2026
-src/controllers/UsuarioController.js
+✅src/controllers/UsuarioController.js
 src/controllers/OrganizacaoController.js
 ✅src/controllers/QuadroController.js
 ✅src/controllers/QuadroMembroController.js
