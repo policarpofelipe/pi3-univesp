@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Button from "../ui/Button";
+import "../../styles/components/quadro-form.css";
 
 const DEFAULT_VALUES = {
   nome: "",
@@ -14,7 +15,8 @@ function normalize(values = {}) {
     descricao: values.descricao ?? "",
     visibilidade: values.visibilidade ?? "privado",
     arquivado: Boolean(values.arquivado ?? values.arquivadoEm),
-    organizacaoId: values.organizacaoId != null ? String(values.organizacaoId) : "",
+    organizacaoId:
+      values.organizacaoId != null ? String(values.organizacaoId) : "",
   };
 }
 
@@ -38,6 +40,8 @@ function validate(values, modo) {
   return errors;
 }
 
+const DESCRICAO_MAX = 2000;
+
 export default function QuadroForm({
   modo = "editar",
   initialValues = DEFAULT_VALUES,
@@ -50,7 +54,9 @@ export default function QuadroForm({
   cancelLabel = "Cancelar",
   showArquivado = true,
   formId = "",
+  autoFocusNome = true,
 }) {
+  const nomeInputRef = useRef(null);
   const mergedInitial = useMemo(
     () =>
       normalize({
@@ -70,6 +76,14 @@ export default function QuadroForm({
     setSubmitError("");
   }, [mergedInitial]);
 
+  useLayoutEffect(() => {
+    if (!autoFocusNome) return;
+    const id = window.requestAnimationFrame(() => {
+      nomeInputRef.current?.focus();
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [mergedInitial, autoFocusNome]);
+
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
     setValues((prev) => ({
@@ -84,7 +98,9 @@ export default function QuadroForm({
 
     const next = {
       ...values,
-      organizacaoId: String(values.organizacaoId || organizacaoId || "").trim(),
+      organizacaoId: String(
+        values.organizacaoId || organizacaoId || ""
+      ).trim(),
     };
 
     const v = validate(next, modo);
@@ -117,134 +133,163 @@ export default function QuadroForm({
     submitLabel ||
     (modo === "criar" ? "Criar quadro" : "Salvar alterações");
 
+  const descricaoLength = values.descricao.length;
+
   return (
     <form
       id={formId || undefined}
-      className="flex flex-col gap-4"
+      className="quadro-form"
       onSubmit={handleSubmit}
       noValidate
     >
-      {organizacaoNome ? (
-        <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-          Organização:{" "}
-          <strong className="text-[var(--color-text)]">{organizacaoNome}</strong>
-        </p>
-      ) : null}
+      <div className="quadro-form__panel">
+        <div className="quadro-form__grid">
+          {organizacaoNome ? (
+            <p className="quadro-form__meta quadro-form__field--full">
+              Organização:{" "}
+              <strong>{organizacaoNome}</strong>
+            </p>
+          ) : null}
 
-      <div>
-        <label
-          htmlFor="quadro-form-nome"
-          className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
-        >
-          Nome do quadro
-        </label>
-        <input
-          id="quadro-form-nome"
-          name="nome"
-          type="text"
-          autoComplete="off"
-          value={values.nome}
-          onChange={handleChange}
-          className="w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--input-text)] focus:border-[var(--input-border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
-          placeholder="Ex.: Produto e backlog"
-          aria-invalid={Boolean(errors.nome)}
-        />
-        {errors.nome ? (
-          <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-danger-text)]">
-            {errors.nome}
-          </p>
-        ) : null}
+          <div className="quadro-form__field quadro-form__field--full">
+            <label htmlFor="quadro-form-nome" className="quadro-form__label">
+              Nome do quadro
+            </label>
+            <input
+              ref={nomeInputRef}
+              id="quadro-form-nome"
+              name="nome"
+              type="text"
+              autoComplete="off"
+              value={values.nome}
+              onChange={handleChange}
+              placeholder="Ex.: Produto e backlog"
+              aria-invalid={Boolean(errors.nome)}
+              aria-describedby={errors.nome ? "quadro-form-nome-erro" : undefined}
+            />
+            {errors.nome ? (
+              <p id="quadro-form-nome-erro" className="quadro-form__field-error" role="alert">
+                {errors.nome}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="quadro-form__field quadro-form__field--full">
+            <label
+              htmlFor="quadro-form-descricao"
+              className="quadro-form__label"
+            >
+              Descrição
+            </label>
+            <textarea
+              id="quadro-form-descricao"
+              name="descricao"
+              rows={5}
+              value={values.descricao}
+              onChange={handleChange}
+              placeholder="Contexto e objetivo do quadro"
+              aria-invalid={Boolean(errors.descricao)}
+              aria-describedby={
+                errors.descricao
+                  ? "quadro-form-descricao-erro"
+                  : "quadro-form-descricao-ajuda"
+              }
+            />
+            <div className="quadro-form__desc-footer">
+              {errors.descricao ? (
+                <p
+                  id="quadro-form-descricao-erro"
+                  className="quadro-form__desc-hint quadro-form__desc-hint--error"
+                  role="alert"
+                >
+                  {errors.descricao}
+                </p>
+              ) : (
+                <p id="quadro-form-descricao-ajuda" className="quadro-form__desc-hint">
+                  Campo opcional. Máximo de {DESCRICAO_MAX} caracteres.
+                </p>
+              )}
+              <span className="quadro-form__desc-count" aria-live="polite">
+                {descricaoLength}/{DESCRICAO_MAX}
+              </span>
+            </div>
+          </div>
+
+          <div className="quadro-form__field quadro-form__field--full">
+            <label
+              htmlFor="quadro-form-visibilidade"
+              className="quadro-form__label"
+            >
+              Visibilidade
+            </label>
+            <select
+              id="quadro-form-visibilidade"
+              name="visibilidade"
+              value={values.visibilidade}
+              onChange={handleChange}
+            >
+              <option value="privado">Privado (membros da organização)</option>
+              <option value="interno">Interno</option>
+              <option value="publico">Público na organização</option>
+            </select>
+          </div>
+
+          {showArquivado ? (
+            <fieldset className="quadro-form__status-fieldset quadro-form__field--full">
+              <legend className="quadro-form__status-legend">
+                Estado do quadro
+              </legend>
+              <label htmlFor="quadro-form-arquivado" className="quadro-form__status-card">
+                <input
+                  id="quadro-form-arquivado"
+                  name="arquivado"
+                  type="checkbox"
+                  checked={values.arquivado}
+                  onChange={handleChange}
+                  className="quadro-form__checkbox"
+                />
+                <span className="min-w-0">
+                  <span className="quadro-form__status-title">Arquivar quadro</span>
+                  <span className="quadro-form__status-help">
+                    Quadros arquivados ficam fora do fluxo principal, mas preservam
+                    dados.
+                  </span>
+                </span>
+              </label>
+            </fieldset>
+          ) : null}
+
+          {errors.organizacaoId ? (
+            <p
+              className="quadro-form__field-error quadro-form__field--full"
+              role="alert"
+            >
+              {errors.organizacaoId}
+            </p>
+          ) : null}
+        </div>
       </div>
-
-      <div>
-        <label
-          htmlFor="quadro-form-descricao"
-          className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
-        >
-          Descrição
-        </label>
-        <textarea
-          id="quadro-form-descricao"
-          name="descricao"
-          rows={4}
-          value={values.descricao}
-          onChange={handleChange}
-          className="w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--input-text)] focus:border-[var(--input-border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
-          placeholder="Contexto e objetivo do quadro"
-          aria-invalid={Boolean(errors.descricao)}
-        />
-        {errors.descricao ? (
-          <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-danger-text)]">
-            {errors.descricao}
-          </p>
-        ) : null}
-      </div>
-
-      <div>
-        <label
-          htmlFor="quadro-form-visibilidade"
-          className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
-        >
-          Visibilidade
-        </label>
-        <select
-          id="quadro-form-visibilidade"
-          name="visibilidade"
-          value={values.visibilidade}
-          onChange={handleChange}
-          className="w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--input-text)]"
-        >
-          <option value="privado">Privado (membros da organização)</option>
-          <option value="interno">Interno</option>
-          <option value="publico">Público na organização</option>
-        </select>
-      </div>
-
-      {showArquivado ? (
-        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-3">
-          <input
-            name="arquivado"
-            type="checkbox"
-            checked={values.arquivado}
-            onChange={handleChange}
-            className="mt-1 h-4 w-4 rounded border-[var(--color-border)]"
-          />
-          <span>
-            <span className="block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]">
-              Arquivar quadro
-            </span>
-            <span className="mt-0.5 block text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
-              Quadros arquivados ficam fora do fluxo principal, mas preservam
-              dados.
-            </span>
-          </span>
-        </label>
-      ) : null}
-
-      {errors.organizacaoId ? (
-        <p className="text-[var(--font-size-sm)] text-[var(--color-danger-text)]">
-          {errors.organizacaoId}
-        </p>
-      ) : null}
 
       {submitError ? (
-        <p
-          className="rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
-          role="alert"
-        >
+        <div className="quadro-form__alert" role="alert">
           {submitError}
-        </p>
+        </div>
       ) : null}
 
-      <div className="flex flex-wrap justify-end gap-2 pt-2">
-        {typeof onCancel === "function" ? (
-          <Button type="button" variant="ghost" onClick={onCancel}>
-            {cancelLabel}
-          </Button>
-        ) : null}
+      <div className="quadro-form__actions">
         <Button type="submit" variant="primary" loading={loading}>
           {labelPrincipal}
         </Button>
+        {typeof onCancel === "function" ? (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onCancel}
+            disabled={loading}
+          >
+            {cancelLabel}
+          </Button>
+        ) : null}
       </div>
     </form>
   );

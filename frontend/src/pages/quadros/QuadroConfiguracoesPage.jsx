@@ -243,17 +243,15 @@ export default function QuadroConfiguracoesPage() {
               </p>
             </div>
 
-            <div className="quadro-configuracoes-page__card">
-              <QuadroForm
-                modo="editar"
-                formId="quadro-configuracoes-form"
-                initialValues={initialFormValues}
-                loading={salvando}
-                showArquivado
-                submitLabel="Salvar alterações"
-                onSubmit={handleSubmitForm}
-              />
-            </div>
+            <QuadroForm
+              modo="editar"
+              formId="quadro-configuracoes-form"
+              initialValues={initialFormValues}
+              loading={salvando}
+              showArquivado
+              submitLabel="Salvar alterações"
+              onSubmit={handleSubmitForm}
+            />
           </section>
 
           <section className="quadro-configuracoes-page__section">
