@@ -6,24 +6,28 @@ function Spinner() {
   return <span className="button__spinner" aria-hidden="true" />;
 }
 
-export default function Button({
-  children,
-  type = "button",
-  variant = "primary",
-  size = "md",
-  fullWidth = false,
-  loading = false,
-  disabled = false,
-  leftIcon = null,
-  rightIcon = null,
-  className = "",
-  onClick,
-  ...props
-}) {
+const Button = React.forwardRef(function Button(
+  {
+    children,
+    type = "button",
+    variant = "primary",
+    size = "md",
+    fullWidth = false,
+    loading = false,
+    disabled = false,
+    leftIcon = null,
+    rightIcon = null,
+    className = "",
+    onClick,
+    ...props
+  },
+  ref
+) {
   const isDisabled = disabled || loading;
 
   return (
     <button
+      ref={ref}
       type={type}
       className={clsx(
         "button",
@@ -56,4 +60,6 @@ export default function Button({
       </span>
     </button>
   );
-}
+});
+
+export default Button;

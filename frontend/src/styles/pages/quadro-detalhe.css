@@ -1,9 +1,10 @@
 .quadro-detalhe-page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-4);
+  min-height: min(70vh, 100%);
   color: var(--color-text);
-  animation: quadro-detalhe-fade-in-up 0.45s ease-out;
+  animation: quadro-detalhe-fade-in-up 0.35s ease-out;
 }
 
 @keyframes quadro-detalhe-fade-in-up {
@@ -18,285 +19,282 @@
   }
 }
 
-/* =========================================================
-   HERO
-   ========================================================= */
+/* --- Cabeçalho compacto do quadro --- */
 
-.quadro-detalhe-page__hero {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  padding: var(--space-6);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-2xl);
-  background:
-    linear-gradient(
-      135deg,
-      var(--color-surface) 0%,
-      var(--color-surface-alt) 100%
-    );
-  box-shadow: var(--shadow-sm);
-}
-
-.quadro-detalhe-page__hero-main {
+.quadro-detalhe-page__board-header {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.quadro-detalhe-page__board-header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.quadro-detalhe-page__board-title-block {
   min-width: 0;
+  flex: 1;
 }
 
-.quadro-detalhe-page__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  width: fit-content;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.quadro-detalhe-page__hero-title {
+.quadro-detalhe-page__board-title {
   margin: 0;
-  font-size: clamp(1.5rem, 4vw, 2.15rem);
-  line-height: var(--line-height-tight);
+  font-size: var(--font-size-heading-2);
   font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
   color: var(--color-text);
   text-wrap: balance;
 }
 
-.quadro-detalhe-page__hero-description {
-  margin: 0;
-  max-width: 48rem;
-  font-size: var(--font-size-md);
-  line-height: 1.7;
+.quadro-detalhe-page__board-desc {
+  margin: var(--space-2) 0 0;
+  max-width: 42rem;
+  font-size: var(--font-size-sm);
+  line-height: 1.55;
   color: var(--color-text-muted);
 }
 
-.quadro-detalhe-page__hero-meta {
+.quadro-detalhe-page__board-toolbar {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.quadro-detalhe-page__board-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.quadro-detalhe-page__metrics {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.quadro-detalhe-page__metrics-sep {
+  color: var(--color-text-soft);
+  margin: 0 var(--space-1);
 }
 
 .quadro-detalhe-page__hero-meta-item {
+  margin: 0;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--font-size-sm);
+}
+
+/* --- Canvas horizontal (listas) --- */
+
+.quadro-detalhe-page__canvas {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+.quadro-detalhe-page__columns-scroller {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  gap: var(--space-4);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: var(--space-2);
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Coluna (lista) */
+
+.lista-column {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 min(18.5rem, 86vw);
+  max-height: min(70vh, 42rem);
+  min-height: 12rem;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-alt);
+  box-shadow: var(--shadow-xs);
+  scroll-snap-align: start;
+}
+
+.lista-column__descricao {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
   color: var(--color-text-muted);
 }
 
-/* =========================================================
-   STATS
-   ========================================================= */
-
-.quadro-detalhe-page__stats {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-4);
-}
-
-.quadro-detalhe-page__stat-card {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-4);
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-.quadro-detalhe-page__stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-border-strong, var(--color-border));
-}
-
-.quadro-detalhe-page__stat-icon {
-  width: 3rem;
-  height: 3rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-alt);
-  color: var(--color-primary);
-}
-
-.quadro-detalhe-page__stat-body {
+.lista-column__cards {
   display: flex;
   flex: 1;
-  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: var(--space-1);
+}
+
+.lista-column__menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 30;
+  display: flex;
   flex-direction: column;
   gap: var(--space-1);
-}
-
-.quadro-detalhe-page__stat-label {
-  margin: 0;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-text-soft);
-}
-
-.quadro-detalhe-page__stat-value {
-  display: block;
-  font-size: clamp(1.75rem, 3vw, 2.15rem);
-  line-height: 1.05;
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text);
-}
-
-/* =========================================================
-   CONTENT GRID
-   ========================================================= */
-
-.quadro-detalhe-page__content-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-5);
-}
-
-.quadro-detalhe-page__panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  padding: var(--space-5);
+  min-width: 12.5rem;
+  margin-top: var(--space-1);
+  padding: var(--space-2);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
-.quadro-detalhe-page__panel--main {
-  min-width: 0;
+.lista-column__menu-item {
+  justify-content: flex-start !important;
+  width: 100%;
 }
 
-.quadro-detalhe-page__panel--side {
-  min-width: 0;
-}
+/* Cartões */
 
-/* =========================================================
-   PANEL HEADER
-   ========================================================= */
-
-.quadro-detalhe-page__panel-header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.quadro-detalhe-page__panel-title {
-  margin: 0;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text);
-}
-
-.quadro-detalhe-page__panel-description {
-  margin: var(--space-1) 0 0;
-  font-size: var(--font-size-sm);
-  line-height: 1.6;
-  color: var(--color-text-muted);
-}
-
-/* =========================================================
-   LISTAS
-   ========================================================= */
-
-.quadro-detalhe-page__listas {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-4);
-}
-
-.quadro-detalhe-page__lista-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface-alt);
+.cartao-card-kanban {
   transition:
     border-color var(--transition-fast),
     box-shadow var(--transition-fast),
-    transform var(--transition-fast);
+    background-color var(--transition-fast);
 }
 
-.quadro-detalhe-page__lista-card:hover {
-  transform: translateY(-2px);
+.cartao-card-kanban:hover {
   border-color: var(--color-border-strong, var(--color-border));
   box-shadow: var(--shadow-sm);
 }
 
-.quadro-detalhe-page__lista-header {
+.cartao-card-kanban:focus-within {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Criação rápida (modo Kanban) */
+
+.criacao-rapida-cartao-kanban {
+  flex-shrink: 0;
+}
+
+.criacao-rapida-cartao-kanban__trigger {
+  width: 100%;
+  justify-content: flex-start !important;
+  color: var(--color-text-muted) !important;
+  font-weight: var(--font-weight-medium);
+}
+
+.criacao-rapida-cartao-kanban__trigger:hover,
+.criacao-rapida-cartao-kanban__trigger:focus-visible {
+  color: var(--color-text) !important;
+  background: var(--color-surface) !important;
+}
+
+.criacao-rapida-cartao-kanban--expanded {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-}
-
-.quadro-detalhe-page__lista-title {
-  margin: 0;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text);
-}
-
-.quadro-detalhe-page__lista-total {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-pill);
+  padding: var(--space-2);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-muted);
 }
 
-.quadro-detalhe-page__lista-meta {
+.criacao-rapida-cartao-kanban__input {
+  width: 100%;
+  min-height: 2.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: var(--font-size-sm);
+  padding: var(--space-2) var(--space-3);
+}
+
+.criacao-rapida-cartao-kanban__input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+.criacao-rapida-cartao-kanban__actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
 }
 
-.quadro-detalhe-page__lista-meta-item {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-}
+/* Coluna “+ Nova lista” */
 
-.quadro-detalhe-page__lista-footer {
+.quadro-detalhe-page__nova-lista {
+  flex: 0 0 min(18.5rem, 86vw);
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
   justify-content: flex-start;
+  min-height: 8rem;
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-alt);
+  scroll-snap-align: start;
 }
 
-/* =========================================================
-   SIDE SECTIONS
-   ========================================================= */
+.quadro-detalhe-page__nova-lista-btn {
+  width: 100%;
+}
+
+/* Empty state no canvas */
+
+.quadro-detalhe-page__canvas-empty {
+  flex: 1;
+  min-height: 16rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+
+.quadro-detalhe-page__canvas-empty .empty-state {
+  width: 100%;
+  max-width: 28rem;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+/* Seções reutilizadas no drawer */
 
 .quadro-detalhe-page__section {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+.quadro-detalhe-page__section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
 }
 
 .quadro-detalhe-page__section-title {
@@ -318,9 +316,12 @@
   flex-shrink: 0;
 }
 
-/* =========================================================
-   MEMBROS
-   ========================================================= */
+.quadro-detalhe-page__section-text {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
 
 .quadro-detalhe-page__membros {
   display: flex;
@@ -372,10 +373,6 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
 }
-
-/* =========================================================
-   ATIVIDADES
-   ========================================================= */
 
 .quadro-detalhe-page__atividades {
   display: flex;
@@ -432,71 +429,12 @@
   color: var(--color-text-muted);
 }
 
-/* =========================================================
-   EMPTY STATE INSIDE MAIN PANEL
-   ========================================================= */
-
-.quadro-detalhe-page__panel--main .empty-state {
-  width: 100%;
-  min-height: 100%;
-  background: transparent;
-  box-shadow: none;
-  border-style: dashed;
-}
-
-.quadro-detalhe-page__panel--main .empty-state__icon {
-  background: var(--color-surface);
-  border-color: var(--color-border);
-}
-
-/* =========================================================
-   ACCESSIBILITY / REDUCED MOTION
-   ========================================================= */
-
 @media (prefers-reduced-motion: reduce) {
   .quadro-detalhe-page {
     animation: none;
   }
 
-  .quadro-detalhe-page__stat-card,
-  .quadro-detalhe-page__lista-card {
+  .cartao-card-kanban {
     transition: none;
-    transform: none;
-  }
-
-  .quadro-detalhe-page__stat-card:hover,
-  .quadro-detalhe-page__lista-card:hover {
-    transform: none;
-  }
-}
-
-/* =========================================================
-   RESPONSIVIDADE
-   ========================================================= */
-
-@media (min-width: 768px) {
-  .quadro-detalhe-page__stats {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .quadro-detalhe-page__panel-header {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-  }
-
-  .quadro-detalhe-page__listas {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .quadro-detalhe-page__hero-meta {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-}
-
-@media (min-width: 1200px) {
-  .quadro-detalhe-page__content-grid {
-    grid-template-columns: minmax(0, 1.5fr) minmax(20rem, 0.85fr);
   }
 }

@@ -41,6 +41,12 @@
   min-height: 0;
 }
 
+/* Quadro Kanban: usa largura útil da área principal */
+.app-layout__content--quadro-kanban {
+  max-width: none;
+  width: 100%;
+}
+
 @media (min-width: 768px) {
   .app-layout__main {
     padding: var(--space-6);

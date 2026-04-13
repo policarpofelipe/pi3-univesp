@@ -2,12 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import AppLayout from "../../components/layout/AppLayout";
-import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/Button";
 import EmptyState from "../../components/ui/EmptyState";
 import LoadingState from "../../components/ui/LoadingState";
 import ErrorState from "../../components/ui/ErrorState";
-import QuadroHeader from "../../components/quadros/QuadroHeader";
 
 import quadroService from "../../services/quadroService";
 import quadroMembroService from "../../services/quadroMembroService";
@@ -16,27 +14,21 @@ import cartaoService from "../../services/cartaoService";
 import tagService from "../../services/tagService";
 import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 import ListaForm from "../../components/listas/ListaForm";
-import ListaHeader from "../../components/listas/ListaHeader";
-import ReordenacaoListas from "../../components/listas/ReordenacaoListas";
+import ListaColumn from "../../components/listas/ListaColumn";
 import CartaoCard from "../../components/cartoes/CartaoCard";
 import CartaoModal from "../../components/cartoes/CartaoModal";
 import CriacaoRapidaCartao from "../../components/cartoes/CriacaoRapidaCartao";
-import TagList from "../../components/quadros/TagList";
-import TagForm from "../../components/quadros/TagForm";
+import QuadroManagementDrawer from "../../components/quadros/QuadroManagementDrawer";
 import { extractList, extractObject } from "../../utils/apiData";
 import useAuth from "../../hooks/useAuth";
 
 import {
   Building2,
   ListTodo,
-  CheckSquare,
   Plus,
-  ArrowRight,
-  Clock3,
-  Users,
+  Settings,
   Eye,
-  SlidersHorizontal,
-  Bot,
+  LayoutList,
 } from "lucide-react";
 
 import "../../styles/pages/quadro-detalhe.css";
@@ -91,6 +83,8 @@ export default function QuadroDetalhePage() {
   const [tags, setTags] = useState([]);
   const [removendoTagId, setRemovendoTagId] = useState(null);
   const [criandoTag, setCriandoTag] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerSection, setDrawerSection] = useState("geral");
 
   const carregar = useCallback(async () => {
     if (!quadroId) return;
@@ -379,29 +373,47 @@ export default function QuadroDetalhePage() {
     }
   }
 
-  function handleConfigurarQuadro() {
+  function openDrawer(section = "geral") {
+    setDrawerSection(section);
+    setDrawerOpen(true);
+  }
+
+  function closeDrawer() {
+    setDrawerOpen(false);
+  }
+
+  function goConfiguracoesCompleto() {
+    closeDrawer();
     navigate(`/quadros/${quadroId}/configuracoes`);
   }
 
-  function handleAbrirMembros() {
+  function goMembros() {
+    closeDrawer();
     navigate(`/quadros/${quadroId}/membros`);
   }
 
-  function handleAbrirPapeis() {
+  function goPapeis() {
+    closeDrawer();
     navigate(`/quadros/${quadroId}/papeis`);
   }
 
-  function handleAbrirVisoes() {
+  function goVisoes() {
+    closeDrawer();
     navigate(`/quadros/${quadroId}/visoes`);
   }
 
-  function handleAbrirCamposPersonalizados() {
+  function goCamposPersonalizados() {
+    closeDrawer();
     navigate(`/quadros/${quadroId}/campos-personalizados`);
   }
 
-  function handleAbrirAutomacoes() {
+  function goAutomacoes() {
+    closeDrawer();
     navigate(`/quadros/${quadroId}/automacoes`);
   }
+
+  const orgNome =
+    quadro?.organizacao?.nome || quadro?.organizacaoNome || "";
 
   if (loading && !quadro) {
     return (
@@ -446,388 +458,191 @@ export default function QuadroDetalhePage() {
   return (
     <AppLayout
       title={quadro.nome}
-      subtitle="Detalhes e visão geral do quadro"
+      subtitle={orgNome || "Quadro"}
       breadcrumbItems={[
         { label: "Início", href: "/home" },
         { label: "Quadros", href: "/quadros" },
         { label: quadro.nome },
       ]}
       user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
+      contentClassName="app-layout__content--quadro-kanban"
     >
       <div className="quadro-detalhe-page">
-        <PageHeader
-          title={quadro.nome}
-          description={quadro.descricao || "Sem descrição cadastrada."}
-          actions={
-            <>
+        <header className="quadro-detalhe-page__board-header">
+          <div className="quadro-detalhe-page__board-header-row">
+            <div className="quadro-detalhe-page__board-title-block">
+              <h1 className="quadro-detalhe-page__board-title">{quadro.nome}</h1>
+              {quadro.descricao ? (
+                <p className="quadro-detalhe-page__board-desc">
+                  {quadro.descricao}
+                </p>
+              ) : null}
+            </div>
+            <nav
+              className="quadro-detalhe-page__board-toolbar"
+              aria-label="Ações do quadro"
+            >
               <Button
-                variant="secondary"
-                onClick={handleConfigurarQuadro}
-              >
-                Configurar
-              </Button>
-              <Button
+                type="button"
                 variant="primary"
-                leftIcon={<Plus size={16} />}
+                leftIcon={<Plus size={16} aria-hidden="true" />}
                 onClick={handleNovoCartao}
               >
                 Novo cartão
               </Button>
-            </>
-          }
-        />
-
-        <div className="mt-6">
-          <QuadroHeader
-            quadro={quadro}
-            onConfigurar={handleConfigurarQuadro}
-            onMembros={handleAbrirMembros}
-            onPapeis={handleAbrirPapeis}
-          />
-        </div>
-
-        <section
-          className="quadro-detalhe-page__stats"
-          aria-label="Indicadores do quadro"
-        >
-          <article className="quadro-detalhe-page__stat-card">
-            <div className="quadro-detalhe-page__stat-icon" aria-hidden="true">
-              <ListTodo size={20} />
-            </div>
-            <div className="quadro-detalhe-page__stat-body">
-              <p className="quadro-detalhe-page__stat-label">Listas</p>
-              <strong className="quadro-detalhe-page__stat-value">
-                {listas.length}
-              </strong>
-            </div>
-          </article>
-
-          <article className="quadro-detalhe-page__stat-card">
-            <div className="quadro-detalhe-page__stat-icon" aria-hidden="true">
-              <CheckSquare size={20} />
-            </div>
-            <div className="quadro-detalhe-page__stat-body">
-              <p className="quadro-detalhe-page__stat-label">Cartões</p>
-              <strong className="quadro-detalhe-page__stat-value">
-                {totalCartoes}
-              </strong>
-            </div>
-          </article>
-
-          <article className="quadro-detalhe-page__stat-card">
-            <div className="quadro-detalhe-page__stat-icon" aria-hidden="true">
-              <Users size={20} />
-            </div>
-            <div className="quadro-detalhe-page__stat-body">
-              <p className="quadro-detalhe-page__stat-label">Membros</p>
-              <strong className="quadro-detalhe-page__stat-value">
-                {membros.length}
-              </strong>
-            </div>
-          </article>
-        </section>
-
-        <p className="quadro-detalhe-page__hero-meta-item mt-4 flex items-center gap-2 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-          <Building2 size={16} aria-hidden="true" />
-          <span>
-            {quadro.organizacao?.nome || quadro.organizacaoNome || "Organização"}
-          </span>
-          <span className="text-[var(--color-text-soft)]">·</span>
-          <span>Atualizado em {formatarData(quadro.atualizadoEm)}</span>
-        </p>
-
-        <section
-          className="quadro-detalhe-page__content-grid mt-8"
-          aria-label="Detalhamento do quadro"
-        >
-          <div className="quadro-detalhe-page__panel quadro-detalhe-page__panel--main">
-            <div className="quadro-detalhe-page__panel-header">
-              <div>
-                <h3 className="quadro-detalhe-page__panel-title">
-                  Listas do quadro
-                </h3>
-                <p className="quadro-detalhe-page__panel-description">
-                  Estrutura das listas e distribuição dos cartões.
-                </p>
-              </div>
-
               <Button
+                type="button"
                 variant="secondary"
-                leftIcon={<Plus size={16} />}
+                leftIcon={<LayoutList size={16} aria-hidden="true" />}
                 onClick={handleNovaLista}
               >
                 Nova lista
               </Button>
-            </div>
+              <Button
+                type="button"
+                variant="secondary"
+                leftIcon={<Eye size={16} aria-hidden="true" />}
+                onClick={() => openDrawer("visoes")}
+                aria-expanded={drawerOpen && drawerSection === "visoes"}
+                aria-label="Visões e filtros salvos do quadro"
+              >
+                Visões
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                leftIcon={<Settings size={16} aria-hidden="true" />}
+                onClick={() => openDrawer("geral")}
+                aria-expanded={drawerOpen && drawerSection === "geral"}
+              >
+                Gerenciar quadro
+              </Button>
+            </nav>
+          </div>
+          <div className="quadro-detalhe-page__board-meta-row">
+            <p
+              className="quadro-detalhe-page__metrics"
+              aria-label="Resumo do quadro"
+            >
+              <span>{listas.length} listas</span>
+              <span className="quadro-detalhe-page__metrics-sep" aria-hidden="true">
+                •
+              </span>
+              <span>{totalCartoes} cartões</span>
+              <span className="quadro-detalhe-page__metrics-sep" aria-hidden="true">
+                •
+              </span>
+              <span>{membros.length} membros</span>
+            </p>
+            <p className="quadro-detalhe-page__hero-meta-item">
+              <Building2 size={16} aria-hidden="true" />
+              <span>{orgNome || "Organização"}</span>
+              <span className="text-[var(--color-text-soft)]" aria-hidden="true">
+                ·
+              </span>
+              <span>Atualizado em {formatarData(quadro.atualizadoEm)}</span>
+            </p>
+          </div>
+        </header>
 
-            {listas.length === 0 ? (
+        <section
+          className="quadro-detalhe-page__canvas"
+          aria-label="Listas e cartões do quadro"
+        >
+          {listas.length === 0 ? (
+            <div className="quadro-detalhe-page__canvas-empty">
               <EmptyState
-                icon={<ListTodo size={36} />}
+                icon={<ListTodo size={36} aria-hidden="true" />}
                 title="Nenhuma lista criada"
                 description="Crie colunas para organizar o fluxo de cartões neste quadro."
                 action={
                   <Button
                     variant="primary"
-                    leftIcon={<Plus size={16} />}
+                    leftIcon={<Plus size={16} aria-hidden="true" />}
                     onClick={handleNovaLista}
                   >
                     Nova lista
                   </Button>
                 }
               />
-            ) : (
-              <div className="quadro-detalhe-page__listas">
-                {listas.map((lista, index) => (
-                  <article
-                    key={lista.id}
-                    className="quadro-detalhe-page__lista-card"
-                  >
-                    <ListaHeader
-                      nome={lista.nome}
-                      totalCartoes={lista.totalCartoes}
-                      limiteWip={lista.limiteWip}
-                      actions={
-                        <>
-                          <ReordenacaoListas
-                            index={index}
-                            total={listas.length}
-                            onMoveUp={() => moverLista(index, -1)}
-                            onMoveDown={() => moverLista(index, 1)}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              setListaModal({ mode: "editar", lista })
-                            }
-                          >
-                            Editar
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleExcluirLista(lista)}
-                          >
-                            Excluir
-                          </Button>
-                        </>
+            </div>
+          ) : (
+            <div
+              className="quadro-detalhe-page__columns-scroller"
+              role="region"
+              aria-label="Listas em rolagem horizontal"
+            >
+              {listas.map((lista, index) => (
+                <ListaColumn
+                  key={lista.id}
+                  lista={lista}
+                  boardMenu={{
+                    onEditar: () =>
+                      setListaModal({ mode: "editar", lista }),
+                    onExcluir: () => handleExcluirLista(lista),
+                    onMoverEsquerda: () => moverLista(index, -1),
+                    onMoverDireita: () => moverLista(index, 1),
+                    podeMoverEsquerda: index > 0,
+                    podeMoverDireita: index < listas.length - 1,
+                  }}
+                >
+                  <CriacaoRapidaCartao
+                    listaId={lista.id}
+                    onCriar={handleCriacaoRapidaCartao}
+                    variant="kanban"
+                  />
+                  {(cartoesPorLista.get(String(lista.id)) || []).map((c) => (
+                    <CartaoCard
+                      key={c.id}
+                      quadroId={quadroId}
+                      cartao={c}
+                      tagsDisponiveis={tags}
+                      listas={listas}
+                      movendo={movendoCartaoId === c.id}
+                      onEdit={(cc) =>
+                        setCartaoModal({ mode: "editar", cartao: cc })
                       }
+                      onDelete={handleExcluirCartao}
+                      onMoverLista={handleMoverCartaoLista}
                     />
-
-                    {lista.descricao ? (
-                      <p className="mb-3 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-                        {lista.descricao}
-                      </p>
-                    ) : null}
-
-                    <div className="flex flex-col gap-2">
-                      <CriacaoRapidaCartao
-                        listaId={lista.id}
-                        onCriar={handleCriacaoRapidaCartao}
-                      />
-                      {(cartoesPorLista.get(String(lista.id)) || []).map(
-                        (c) => (
-                          <CartaoCard
-                            key={c.id}
-                            quadroId={quadroId}
-                            cartao={c}
-                            tagsDisponiveis={tags}
-                            listas={listas}
-                            movendo={movendoCartaoId === c.id}
-                            onEdit={(cc) =>
-                              setCartaoModal({ mode: "editar", cartao: cc })
-                            }
-                            onDelete={handleExcluirCartao}
-                            onMoverLista={handleMoverCartaoLista}
-                          />
-                        )
-                      )}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <aside className="quadro-detalhe-page__panel quadro-detalhe-page__panel--side">
-            <section className="quadro-detalhe-page__section">
-              <div className="quadro-detalhe-page__section-header">
-                <h3 className="quadro-detalhe-page__section-title">
-                  Membros do quadro
-                </h3>
-
-                <Button variant="ghost" onClick={handleAbrirMembros}>
-                  Ver todos
-                </Button>
-              </div>
-
-              {membros.length === 0 ? (
-                <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-                  Nenhum membro listado.
-                </p>
-              ) : (
-                <ul className="quadro-detalhe-page__membros">
-                  {membros.slice(0, 6).map((membro) => (
-                    <li
-                      key={membro.id}
-                      className="quadro-detalhe-page__membro-item"
-                    >
-                      <div
-                        className="quadro-detalhe-page__membro-avatar"
-                        aria-hidden="true"
-                      >
-                        {(membro.nome || "?").slice(0, 1).toUpperCase()}
-                      </div>
-
-                      <div className="quadro-detalhe-page__membro-body">
-                        <strong className="quadro-detalhe-page__membro-nome">
-                          {membro.nome}
-                        </strong>
-                        <span className="quadro-detalhe-page__membro-papel">
-                          {membro.papeis.length
-                            ? membro.papeis.join(", ")
-                            : "Sem papel"}
-                        </span>
-                      </div>
-                    </li>
                   ))}
-                </ul>
-              )}
-            </section>
-
-            <section className="quadro-detalhe-page__section">
-              <h3 className="quadro-detalhe-page__section-title">
-                Tags do quadro
-              </h3>
-              <p className="quadro-detalhe-page__section-text mb-3">
-                Use tags nos cartões para classificar o trabalho. Remover uma tag
-                aqui tira a etiqueta de todos os cartões.
-              </p>
-              <TagList
-                tags={tags}
-                onRemover={handleRemoverTagQuadro}
-                removendoId={removendoTagId}
-              />
-              <div className="mt-4 border-t border-[var(--color-border)] pt-4">
-                <TagForm
-                  loading={criandoTag}
-                  submitLabel="Adicionar tag"
-                  onSubmit={handleCriarTagQuadro}
-                />
-              </div>
-            </section>
-
-            <section className="quadro-detalhe-page__section">
-              <div className="quadro-detalhe-page__section-header">
-                <h3 className="quadro-detalhe-page__section-title">Visões</h3>
+                </ListaColumn>
+              ))}
+              <div className="quadro-detalhe-page__nova-lista">
                 <Button
-                  variant="ghost"
-                  leftIcon={<Eye size={14} />}
-                  onClick={handleAbrirVisoes}
+                  type="button"
+                  variant="secondary"
+                  className="quadro-detalhe-page__nova-lista-btn"
+                  leftIcon={<Plus size={18} aria-hidden="true" />}
+                  onClick={handleNovaLista}
                 >
-                  Gerenciar
+                  Nova lista
                 </Button>
               </div>
-              <p className="quadro-detalhe-page__section-text">
-                Crie visões salvas para aplicar filtros recorrentes e acelerar a
-                análise do quadro.
-              </p>
-            </section>
-
-            <section className="quadro-detalhe-page__section">
-              <div className="quadro-detalhe-page__section-header">
-                <h3 className="quadro-detalhe-page__section-title">
-                  Campos personalizados
-                </h3>
-                <Button
-                  variant="ghost"
-                  leftIcon={<SlidersHorizontal size={14} />}
-                  onClick={handleAbrirCamposPersonalizados}
-                >
-                  Gerenciar
-                </Button>
-              </div>
-              <p className="quadro-detalhe-page__section-text">
-                Defina metadados extras dos cartões para adaptar o quadro ao seu
-                processo.
-              </p>
-            </section>
-
-            <section className="quadro-detalhe-page__section">
-              <div className="quadro-detalhe-page__section-header">
-                <h3 className="quadro-detalhe-page__section-title">Automações</h3>
-                <Button
-                  variant="ghost"
-                  leftIcon={<Bot size={14} />}
-                  onClick={handleAbrirAutomacoes}
-                >
-                  Gerenciar
-                </Button>
-              </div>
-              <p className="quadro-detalhe-page__section-text">
-                Automatize tarefas recorrentes com gatilhos e condições do fluxo.
-              </p>
-            </section>
-
-            <section className="quadro-detalhe-page__section">
-              <div className="quadro-detalhe-page__section-header">
-                <h3 className="quadro-detalhe-page__section-title">
-                  Papéis do quadro
-                </h3>
-
-                <Button variant="ghost" onClick={handleAbrirPapeis}>
-                  Gerenciar
-                </Button>
-              </div>
-
-              <p className="quadro-detalhe-page__section-text">
-                Os papéis controlam permissões de visualização, edição, listas,
-                cartões e membros.
-              </p>
-            </section>
-
-            <section className="quadro-detalhe-page__section">
-              <h3 className="quadro-detalhe-page__section-title">
-                Atividade recente
-              </h3>
-
-              {atividades.length === 0 ? (
-                <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-                  Sem eventos recentes.
-                </p>
-              ) : (
-                <ol className="quadro-detalhe-page__atividades">
-                  {atividades.map((atividade) => (
-                    <li
-                      key={atividade.id}
-                      className="quadro-detalhe-page__atividade-item"
-                    >
-                      <span
-                        className="quadro-detalhe-page__atividade-icon"
-                        aria-hidden="true"
-                      >
-                        <ArrowRight size={14} />
-                      </span>
-
-                      <div className="quadro-detalhe-page__atividade-body">
-                        <p className="quadro-detalhe-page__atividade-texto">
-                          {atividade.descricao}
-                        </p>
-                        <p className="quadro-detalhe-page__atividade-data">
-                          <Clock3 size={13} aria-hidden="true" />
-                          <span>{atividade.data}</span>
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </section>
-          </aside>
+            </div>
+          )}
         </section>
       </div>
+
+      <QuadroManagementDrawer
+        open={drawerOpen}
+        onClose={closeDrawer}
+        defaultSection={drawerSection}
+        quadro={quadro}
+        membros={membros}
+        tags={tags}
+        atividades={atividades}
+        removendoTagId={removendoTagId}
+        criandoTag={criandoTag}
+        onCriarTag={handleCriarTagQuadro}
+        onRemoverTag={handleRemoverTagQuadro}
+        onNavigateConfiguracoes={goConfiguracoesCompleto}
+        onNavigateMembros={goMembros}
+        onNavigateVisoes={goVisoes}
+        onNavigateCamposPersonalizados={goCamposPersonalizados}
+        onNavigateAutomacoes={goAutomacoes}
+        onNavigatePapeis={goPapeis}
+      />
 
       <CartaoModal
         open={Boolean(cartaoModal)}

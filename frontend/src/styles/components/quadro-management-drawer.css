@@ -1,0 +1,148 @@
+/* Painel lateral de gestão do quadro (membros, tags, etc.) */
+
+.quadro-management-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.quadro-management-drawer--open {
+  pointer-events: auto;
+}
+
+.quadro-management-drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: var(--color-scrim);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.quadro-management-drawer--open .quadro-management-drawer__backdrop {
+  opacity: 1;
+}
+
+.quadro-management-drawer__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(28rem, 100vw);
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-left: 1px solid var(--color-border);
+  border-radius: 0;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(100%);
+  transition: transform var(--transition-fast);
+}
+
+.quadro-management-drawer--open .quadro-management-drawer__panel {
+  transform: translateX(0);
+}
+
+.quadro-management-drawer__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.quadro-management-drawer__title {
+  margin: 0;
+  font-size: var(--font-size-heading-3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  line-height: var(--line-height-tight);
+}
+
+.quadro-management-drawer__subtitle {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.quadro-management-drawer__tablist-wrap {
+  flex-shrink: 0;
+  padding: 0 var(--space-3) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+
+.quadro-management-drawer__tablist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-width: min-content;
+}
+
+.quadro-management-drawer__tab {
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.quadro-management-drawer__tab:hover {
+  border-color: var(--color-border-strong, var(--color-border));
+  color: var(--color-text);
+}
+
+.quadro-management-drawer__tab:focus {
+  outline: none;
+}
+
+.quadro-management-drawer__tab:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.quadro-management-drawer__tab[aria-selected="true"] {
+  border-color: var(--color-primary);
+  background: var(--color-info-surface);
+  color: var(--color-primary);
+}
+
+.quadro-management-drawer__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.quadro-management-drawer__panel:focus {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quadro-management-drawer__backdrop,
+  .quadro-management-drawer__panel {
+    transition: none;
+  }
+
+  .quadro-management-drawer--open .quadro-management-drawer__panel {
+    transform: translateX(0);
+  }
+}

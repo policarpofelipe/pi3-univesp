@@ -21,6 +21,7 @@ export default function CartaoCard({
   onDelete,
   onMoverLista,
   movendo = false,
+  className = "",
 }) {
   const idsTag = Array.isArray(cartao.tagIds) ? cartao.tagIds.map(String) : [];
   const tagsNoCartao = idsTag
@@ -29,10 +30,15 @@ export default function CartaoCard({
 
   return (
     <article
-      className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-[var(--shadow-xs)]"
+      className={[
+        "cartao-card-kanban rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-[var(--shadow-xs)]",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       aria-label={`Cartão ${cartao.titulo}`}
     >
-      <h5 className="text-[var(--font-size-sm)] font-semibold text-[var(--color-text)]">
+      <h3 className="text-[var(--font-size-sm)] font-semibold text-[var(--color-text)]">
         {quadroId ? (
           <Link
             to={`/quadros/${quadroId}/cartoes/${cartao.id}`}
@@ -43,7 +49,7 @@ export default function CartaoCard({
         ) : (
           cartao.titulo
         )}
-      </h5>
+      </h3>
       {cartao.prioridade ? (
         <p className="mt-1">
           <span

@@ -1,35 +1,168 @@
-import React from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
+import { MoreHorizontal } from "lucide-react";
+
+import Button from "../ui/Button";
 import ListaHeader from "./ListaHeader";
 
 /**
- * Coluna visual para futuro quadro Kanban; hoje o conteúdo é livre (ex.: cartões).
+ * Coluna Kanban: cabeçalho, área de cartões e menu de ações da lista.
  */
 export default function ListaColumn({
   lista,
   children = null,
-  headerActions = null,
   className = "",
+  boardMenu = null,
 }) {
+  const [menuAberto, setMenuAberto] = useState(false);
+  const menuWrapRef = useRef(null);
+  const botaoMenuRef = useRef(null);
+  const menuId = useId();
+
+  useEffect(() => {
+    if (!menuAberto) return undefined;
+    function handlePointerDown(event) {
+      const root = menuWrapRef.current;
+      if (!root || root.contains(event.target)) return;
+      setMenuAberto(false);
+    }
+    function handleEscape(event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMenuAberto(false);
+        botaoMenuRef.current?.focus();
+      }
+    }
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [menuAberto]);
+
   if (!lista) {
     return null;
   }
 
+  const {
+    onEditar,
+    onExcluir,
+    onMoverEsquerda,
+    onMoverDireita,
+    podeMoverEsquerda = false,
+    podeMoverDireita = false,
+  } = boardMenu || {};
+
+  const temMenu =
+    boardMenu &&
+    (typeof onEditar === "function" ||
+      typeof onExcluir === "function" ||
+      typeof onMoverEsquerda === "function" ||
+      typeof onMoverDireita === "function");
+
+  function fecharMenuEFocarBotao() {
+    setMenuAberto(false);
+    botaoMenuRef.current?.focus();
+  }
+
+  function runItem(fn) {
+    if (typeof fn !== "function") return;
+    fn();
+    fecharMenuEFocarBotao();
+  }
+
   return (
-    <section
-      className={[
-        "flex min-h-[200px] min-w-[260px] max-w-[320px] flex-col rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-3",
-        className,
-      ].join(" ")}
-      aria-label={`Lista ${lista.nome}`}
-    >
+    <section className={["lista-column", className].filter(Boolean).join(" ")}>
       <ListaHeader
         nome={lista.nome}
         totalCartoes={lista.totalCartoes}
         limiteWip={lista.limiteWip}
-        actions={headerActions}
-        className="border-[var(--color-border)]"
+        titleTag="h2"
+        actions={
+          temMenu ? (
+            <div className="relative flex items-center gap-1" ref={menuWrapRef}>
+              <Button
+                ref={botaoMenuRef}
+                type="button"
+                variant="ghost"
+                size="sm"
+                aria-haspopup="true"
+                aria-expanded={menuAberto}
+                aria-controls={menuId}
+                onClick={() => setMenuAberto((v) => !v)}
+                leftIcon={<MoreHorizontal size={16} aria-hidden="true" />}
+              >
+                Ações
+              </Button>
+              {menuAberto ? (
+                <div
+                  id={menuId}
+                  role="menu"
+                  aria-label={`Ações da lista ${lista.nome}`}
+                  className="lista-column__menu"
+                >
+                  {typeof onMoverEsquerda === "function" ? (
+                    <Button
+                      type="button"
+                      role="menuitem"
+                      variant="ghost"
+                      size="sm"
+                      className="lista-column__menu-item"
+                      disabled={!podeMoverEsquerda}
+                      onClick={() => runItem(onMoverEsquerda)}
+                    >
+                      Mover para a esquerda
+                    </Button>
+                  ) : null}
+                  {typeof onMoverDireita === "function" ? (
+                    <Button
+                      type="button"
+                      role="menuitem"
+                      variant="ghost"
+                      size="sm"
+                      className="lista-column__menu-item"
+                      disabled={!podeMoverDireita}
+                      onClick={() => runItem(onMoverDireita)}
+                    >
+                      Mover para a direita
+                    </Button>
+                  ) : null}
+                  {typeof onEditar === "function" ? (
+                    <Button
+                      type="button"
+                      role="menuitem"
+                      variant="ghost"
+                      size="sm"
+                      className="lista-column__menu-item"
+                      onClick={() => runItem(onEditar)}
+                    >
+                      Editar lista
+                    </Button>
+                  ) : null}
+                  {typeof onExcluir === "function" ? (
+                    <Button
+                      type="button"
+                      role="menuitem"
+                      variant="ghost"
+                      size="sm"
+                      className="lista-column__menu-item"
+                      onClick={() => runItem(onExcluir)}
+                    >
+                      Excluir lista
+                    </Button>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          ) : null
+        }
       />
-      <div className="mt-3 flex flex-1 flex-col gap-2">{children}</div>
+
+      {lista.descricao ? (
+        <p className="lista-column__descricao">{lista.descricao}</p>
+      ) : null}
+
+      <div className="lista-column__cards">{children}</div>
     </section>
   );
 }

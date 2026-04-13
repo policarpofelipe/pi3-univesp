@@ -7,6 +7,7 @@ export default function ListaHeader({
   limiteWip = null,
   actions = null,
   className = "",
+  titleTag: TitleTag = "h4",
 }) {
   return (
     <div
@@ -16,9 +17,9 @@ export default function ListaHeader({
       ].join(" ")}
     >
       <div className="min-w-0 flex-1">
-        <h4 className="text-[var(--font-size-md)] font-semibold text-[var(--color-text)]">
+        <TitleTag className="text-[var(--font-size-md)] font-semibold text-[var(--color-text)]">
           {nome}
-        </h4>
+        </TitleTag>
         <div className="mt-1 flex flex-wrap items-center gap-3 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
           <span>{totalCartoes ?? 0} cartões</span>
           <span className="inline-flex items-center gap-1">
