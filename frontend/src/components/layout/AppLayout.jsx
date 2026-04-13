@@ -26,7 +26,7 @@ export default function AppLayout({
   searchValue = "",
   onSearchChange,
   notificationCount = 0,
-  sidebarBrand = "Projeto Integrador 3 UNIVESP 2026",
+  sidebarBrand = "Projeto Integrador 3",
   sidebarFooter = null,
   defaultSidebarCollapsed = false,
   mainClassName = "",

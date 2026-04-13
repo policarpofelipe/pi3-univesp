@@ -165,6 +165,15 @@
   overflow: hidden;
 }
 
+button.sidebar__link {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .sidebar__link::before {
   content: "";
   position: absolute;

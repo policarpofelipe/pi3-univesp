@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
+import { useNavigate } from "react-router-dom";
 import {
   ChevronDown,
   ChevronRight,
@@ -7,9 +8,11 @@ import {
   Settings,
   Briefcase,
   ListTodo,
+  LogOut,
   X,
 } from "lucide-react";
 
+import useAuth from "../../hooks/useAuth";
 import "../../styles/components/sidebar.css";
 
 function isItemActive(item, currentPath) {
@@ -21,6 +24,36 @@ function isGroupActive(group, currentPath) {
   return Array.isArray(group?.items)
     ? group.items.some((item) => isItemActive(item, currentPath))
     : false;
+}
+
+function SidebarLogout({ collapsed = false, onNavigate }) {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleClick() {
+    await logout();
+    navigate("/login", { replace: true });
+    if (typeof onNavigate === "function") {
+      onNavigate();
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      className={clsx(
+        "sidebar__link",
+        collapsed && "sidebar__link--collapsed"
+      )}
+      onClick={handleClick}
+      title={collapsed ? "Sair" : undefined}
+    >
+      <span className="sidebar__link-icon" aria-hidden="true">
+        <LogOut size={18} />
+      </span>
+      {!collapsed && <span className="sidebar__link-label">Sair</span>}
+    </button>
+  );
 }
 
 function SidebarLink({
@@ -172,8 +205,6 @@ function SidebarInner({
       <nav className="sidebar__nav" aria-label="Gestão de Tarefas">
         {items.length > 0 && (
           <div className="sidebar__section">
-            {!collapsed && <p className="sidebar__section-label">Geral</p>}
-
             <div className="sidebar__section-links">
               {items.map((item) => (
                 <SidebarLink
@@ -184,6 +215,7 @@ function SidebarInner({
                   onNavigate={onNavigate}
                 />
               ))}
+              <SidebarLogout collapsed={collapsed} onNavigate={onNavigate} />
             </div>
           </div>
         )}

@@ -19,22 +19,6 @@ tratar como "lista simples". Não é.
 Aqui começa o escopo multi-tenant (várias organizações por usuário).
 */
 
-const sidebarItems = [
-  { key: "home", label: "Início", href: "/home", icon: Building2 },
-];
-
-const sidebarGroups = [
-  {
-    key: "estrutura",
-    label: "Estrutura",
-    sectionLabel: "Workspace",
-    items: [
-      { key: "organizacoes", label: "Organizações", href: "/organizacoes", icon: Building2 },
-      { key: "quadros", label: "Quadros", href: "/quadros", icon: Building2 },
-    ],
-  },
-];
-
 export default function SelecaoOrganizacaoPage() {
   // simulação (substituir por API depois)
   const organizacoes = [];
@@ -46,8 +30,6 @@ export default function SelecaoOrganizacaoPage() {
       title="Organizações"
       subtitle="Selecione uma organização para continuar"
       currentPath="/organizacoes"
-      sidebarItems={sidebarItems}
-      sidebarGroups={sidebarGroups}
       breadcrumbItems={[
         { label: "Início", href: "/home" },
         { label: "Organizações" }

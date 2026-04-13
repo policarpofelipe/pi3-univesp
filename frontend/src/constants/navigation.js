@@ -1,11 +1,8 @@
-import {
-  LayoutDashboard,
-  Building2,
-  KanbanSquare,
-  ListTodo,
-  CheckSquare,
-} from "lucide-react";
+import { LayoutDashboard, Building2, KanbanSquare } from "lucide-react";
 
+/**
+ * Itens principais da barra lateral (lista única, sem grupos/submenus).
+ */
 export const sidebarItems = [
   {
     key: "home",
@@ -13,47 +10,19 @@ export const sidebarItems = [
     href: "/home",
     icon: LayoutDashboard,
   },
+  {
+    key: "organizacoes",
+    label: "Organizações",
+    href: "/organizacoes",
+    icon: Building2,
+  },
+  {
+    key: "quadros",
+    label: "Quadros",
+    href: "/quadros",
+    icon: KanbanSquare,
+  },
 ];
 
-export const sidebarGroups = [
-  {
-    key: "estrutura",
-    label: "Estrutura",
-    sectionLabel: "Workspace",
-    icon: Building2,
-    items: [
-      {
-        key: "organizacoes",
-        label: "Organizações",
-        href: "/organizacoes",
-        icon: Building2,
-      },
-      {
-        key: "quadros",
-        label: "Quadros",
-        href: "/quadros",
-        icon: KanbanSquare,
-      },
-    ],
-  },
-  {
-    key: "gestao",
-    label: "Gestão",
-    sectionLabel: "Operacional",
-    icon: ListTodo,
-    items: [
-      {
-        key: "listas",
-        label: "Listas",
-        href: "/listas",
-        icon: ListTodo,
-      },
-      {
-        key: "cartoes",
-        label: "Cartões",
-        href: "/cartoes",
-        icon: CheckSquare,
-      },
-    ],
-  },
-];
+/** Grupos expansíveis desativados por ora — manter array vazio. */
+export const sidebarGroups = [];

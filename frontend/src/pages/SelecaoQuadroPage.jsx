@@ -3,7 +3,7 @@ import AppLayout from "../components/layout/AppLayout";
 import PageHeader from "../components/ui/PageHeader";
 import EmptyState from "../components/ui/EmptyState";
 import Button from "../components/ui/Button";
-import { KanbanSquare, Plus, Building2, LayoutDashboard } from "lucide-react";
+import { KanbanSquare, Plus } from "lucide-react";
 
 /*
 Contexto:
@@ -15,22 +15,6 @@ tratar quadro como detalhe visual.
 Não. Quadro é a unidade operacional central do sistema.
 É aqui que o usuário entra no domínio real de listas, cartões, permissões e automações.
 */
-
-const sidebarItems = [
-  { key: "home", label: "Início", href: "/home", icon: LayoutDashboard },
-];
-
-const sidebarGroups = [
-  {
-    key: "estrutura",
-    label: "Estrutura",
-    sectionLabel: "Workspace",
-    items: [
-      { key: "organizacoes", label: "Organizações", href: "/organizacoes", icon: Building2 },
-      { key: "quadros", label: "Quadros", href: "/quadros", icon: KanbanSquare },
-    ],
-  },
-];
 
 export default function SelecaoQuadroPage() {
   // simulação inicial; substituir por dados da API filtrados pela organização ativa
@@ -55,8 +39,6 @@ export default function SelecaoQuadroPage() {
       title="Quadros"
       subtitle="Selecione um quadro para continuar"
       currentPath="/quadros"
-      sidebarItems={sidebarItems}
-      sidebarGroups={sidebarGroups}
       breadcrumbItems={[
         { label: "Início", href: "/home" },
         { label: "Organizações", href: "/organizacoes" },
