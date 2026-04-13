@@ -384,7 +384,7 @@ components/cartoes/CartaoRelacoes.jsx
 
 ✅services/cartaoService.js
 ✅services/cartaoComentarioService.js
-services/cartaoChecklistService.js
+✅services/cartaoChecklistService.js
 ✅services/cartaoAnexoService.js
 services/cartaoAtribuicaoService.js
 ✅services/cartaoHistoricoService.js
@@ -505,11 +505,11 @@ constants/tiposEvento.js
 ✅src/routes/quadroMembroRoutes.js
 ✅src/routes/quadroPapelRoutes.js
 ✅src/routes/listaRoutes.js
-src/routes/listaPermissaoRoutes.js
-src/routes/listaTransicaoRoutes.js
-src/routes/visaoRoutes.js
+✅src/routes/listaPermissaoRoutes.js
+✅src/routes/listaTransicaoRoutes.js
+✅src/routes/visaoRoutes.js
 ✅src/routes/tagRoutes.js
-src/routes/campoPersonalizadoRoutes.js
+✅src/routes/campoPersonalizadoRoutes.js
 ✅src/routes/cartaoRoutes.js
 ✅src/routes/cartaoComentarioRoutes.js
 ✅src/routes/cartaoChecklistRoutes.js
@@ -517,7 +517,7 @@ src/routes/campoPersonalizadoRoutes.js
 ✅src/routes/cartaoHistoricoRoutes.js
 src/routes/cartaoAtribuicaoRoutes.js
 src/routes/cartaoRelacaoRoutes.js
-src/routes/automacaoRoutes.js
+✅src/routes/automacaoRoutes.js
 
 --------------------------------------------------
 
@@ -532,11 +532,11 @@ src/controllers/OrganizacaoController.js
 ✅src/controllers/listaController.js
 ✅src/controllers/cartaoController.js
 ✅src/controllers/cartaoComentarioController.js
-src/controllers/ListaPermissaoController.js
-src/controllers/ListaTransicaoController.js
-src/controllers/VisaoController.js
+✅src/controllers/ListaPermissaoController.js
+✅src/controllers/ListaTransicaoController.js
+✅src/controllers/VisaoController.js
 ✅src/controllers/tagController.js
-src/controllers/CampoPersonalizadoController.js
+✅src/controllers/CampoPersonalizadoController.js
 src/controllers/CartaoController.js
 src/controllers/CartaoComentarioController.js
 ✅src/controllers/cartaoChecklistController.js
@@ -544,7 +544,7 @@ src/controllers/CartaoComentarioController.js
 ✅src/controllers/cartaoHistoricoController.js
 src/controllers/CartaoAtribuicaoController.js
 src/controllers/CartaoRelacaoController.js
-src/controllers/AutomacaoController.js
+✅src/controllers/AutomacaoController.js
 
 --------------------------------------------------
 
@@ -556,21 +556,21 @@ src/services/OrganizacaoService.js
 ✅src/services/QuadroService.js
 ✅src/services/QuadroMembroService.js
 ✅src/services/QuadroPapelService.js
-src/services/ListaService.js
-src/services/ListaPermissaoService.js
-src/services/ListaTransicaoService.js
-src/services/VisaoService.js
+✅src/services/ListaService.js
+✅src/services/ListaPermissaoService.js
+✅src/services/ListaTransicaoService.js
+✅src/services/VisaoService.js
 src/services/TagService.js
-src/services/CampoPersonalizadoService.js
-src/services/CartaoService.js
-src/services/CartaoComentarioService.js
-src/services/CartaoChecklistService.js
-src/services/CartaoAnexoService.js
+✅src/services/CampoPersonalizadoService.js
+✅src/services/CartaoService.js
+✅src/services/CartaoComentarioService.js
+✅src/services/CartaoChecklistService.js
+✅src/services/CartaoAnexoService.js
 src/services/CartaoAtribuicaoService.js
 src/services/CartaoRelacaoService.js
 src/services/CartaoEventoService.js
 src/services/CartaoVisualizacaoService.js
-src/services/AutomacaoService.js
+✅src/services/AutomacaoService.js
 src/services/AutomacaoExecutorService.js
 src/services/HandoffService.js
 src/services/PermissaoService.js
@@ -583,27 +583,27 @@ src/services/BuscaService.js
 4.5. Repositories
 
 ✅src/repositories/UsuarioRepository.js - Felipe Policarpo 09/03/2026
-src/repositories/OrganizacaoRepository.js
+✅src/repositories/OrganizacaoRepository.js
 ✅src/repositories/QuadroRepository.js
 ✅src/repositories/QuadroMembroRepository.js
 ✅src/repositories/QuadroPapelRepository.js
-src/repositories/ListaRepository.js
-src/repositories/ListaPermissaoRepository.js
-src/repositories/ListaTransicaoRepository.js
-src/repositories/VisaoRepository.js
+✅src/repositories/ListaRepository.js
+✅src/repositories/ListaPermissaoRepository.js
+✅src/repositories/ListaTransicaoRepository.js
+✅src/repositories/VisaoRepository.js
 src/repositories/TagRepository.js
-src/repositories/CampoPersonalizadoRepository.js
+✅src/repositories/CampoPersonalizadoRepository.js
 src/repositories/CampoOpcaoRepository.js
-src/repositories/CartaoRepository.js
-src/repositories/CartaoComentarioRepository.js
-src/repositories/CartaoChecklistRepository.js
+✅src/repositories/CartaoRepository.js
+✅src/repositories/CartaoComentarioRepository.js
+✅src/repositories/CartaoChecklistRepository.js
 src/repositories/CartaoChecklistItemRepository.js
-src/repositories/CartaoAnexoRepository.js
+✅src/repositories/CartaoAnexoRepository.js
 src/repositories/CartaoAtribuicaoRepository.js
 src/repositories/CartaoRelacaoRepository.js
 src/repositories/CartaoEventoRepository.js
 src/repositories/CartaoVisualizacaoRepository.js
-src/repositories/AutomacaoRepository.js
+✅src/repositories/AutomacaoRepository.js
 src/repositories/AutomacaoAcaoRepository.js
 src/repositories/AutomacaoExecucaoRepository.js
 
