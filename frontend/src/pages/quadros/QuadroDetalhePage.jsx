@@ -35,6 +35,7 @@ import {
   Clock3,
   Users,
   Eye,
+  SlidersHorizontal,
 } from "lucide-react";
 
 import "../../styles/pages/quadro-detalhe.css";
@@ -393,6 +394,10 @@ export default function QuadroDetalhePage() {
     navigate(`/quadros/${quadroId}/visoes`);
   }
 
+  function handleAbrirCamposPersonalizados() {
+    navigate(`/quadros/${quadroId}/campos-personalizados`);
+  }
+
   if (loading && !quadro) {
     return (
       <AppLayout
@@ -732,6 +737,25 @@ export default function QuadroDetalhePage() {
               <p className="quadro-detalhe-page__section-text">
                 Crie visões salvas para aplicar filtros recorrentes e acelerar a
                 análise do quadro.
+              </p>
+            </section>
+
+            <section className="quadro-detalhe-page__section">
+              <div className="quadro-detalhe-page__section-header">
+                <h3 className="quadro-detalhe-page__section-title">
+                  Campos personalizados
+                </h3>
+                <Button
+                  variant="ghost"
+                  leftIcon={<SlidersHorizontal size={14} />}
+                  onClick={handleAbrirCamposPersonalizados}
+                >
+                  Gerenciar
+                </Button>
+              </div>
+              <p className="quadro-detalhe-page__section-text">
+                Defina metadados extras dos cartões para adaptar o quadro ao seu
+                processo.
               </p>
             </section>
 

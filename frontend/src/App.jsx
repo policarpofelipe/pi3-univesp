@@ -29,6 +29,7 @@ import ListaPermissoesPage from "./pages/listas/ListaPermissoesPage";
 import ListaTransicoesPage from "./pages/listas/ListaTransicoesPage";
 import VisoesPage from "./pages/visoes/VisoesPage";
 import VisaoFormPage from "./pages/visoes/VisaoFormPage";
+import CamposPersonalizadosPage from "./pages/configuracoes/CamposPersonalizadosPage";
 
 // Cartões
 import CartaoDetalhePage from "./pages/cartoes/CartaoDetalhePage";
@@ -98,6 +99,10 @@ export default function App() {
             <Route
               path="/quadros/:quadroId/visoes/:visaoId/editar"
               element={<VisaoFormPage />}
+            />
+            <Route
+              path="/quadros/:quadroId/campos-personalizados"
+              element={<CamposPersonalizadosPage />}
             />
           </Route>
 

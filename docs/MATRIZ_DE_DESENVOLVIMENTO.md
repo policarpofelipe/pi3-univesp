@@ -419,20 +419,20 @@ services/cartaoRelacaoService.js
 
 3.9. Campos personalizados
 
-pages/configuracoes/CamposPersonalizadosPage.jsx
+✅pages/configuracoes/CamposPersonalizadosPage.jsx
 
-components/camposPersonalizados/CampoPersonalizadoForm.jsx
-components/camposPersonalizados/CampoPersonalizadoList.jsx
-components/camposPersonalizados/CampoOpcaoForm.jsx
-components/camposPersonalizados/RenderCampoTexto.jsx
-components/camposPersonalizados/RenderCampoNumero.jsx
-components/camposPersonalizados/RenderCampoData.jsx
-components/camposPersonalizados/RenderCampoDataHora.jsx
-components/camposPersonalizados/RenderCampoBooleano.jsx
-components/camposPersonalizados/RenderCampoSelecao.jsx
-components/camposPersonalizados/RenderCampoUsuario.jsx
+✅components/camposPersonalizados/CampoPersonalizadoForm.jsx
+✅components/camposPersonalizados/CampoPersonalizadoList.jsx
+✅components/camposPersonalizados/CampoOpcaoForm.jsx
+✅components/camposPersonalizados/RenderCampoTexto.jsx
+✅components/camposPersonalizados/RenderCampoNumero.jsx
+✅components/camposPersonalizados/RenderCampoData.jsx
+✅components/camposPersonalizados/RenderCampoDataHora.jsx
+✅components/camposPersonalizados/RenderCampoBooleano.jsx
+✅components/camposPersonalizados/RenderCampoSelecao.jsx
+✅components/camposPersonalizados/RenderCampoUsuario.jsx
 
-services/campoPersonalizadoService.js
+✅services/campoPersonalizadoService.js
 
 --------------------------------------------------
 
