@@ -128,15 +128,6 @@ export default function OrganizacoesPage() {
         { label: "Organizações" },
       ]}
       user={currentUser}
-      topbarActions={
-        <Button
-          variant="primary"
-          leftIcon={<Plus size={16} />}
-          onClick={handleNovaOrganizacao}
-        >
-          Nova organização
-        </Button>
-      }
     >
       <div className="organizacoes-page">
         <PageHeader

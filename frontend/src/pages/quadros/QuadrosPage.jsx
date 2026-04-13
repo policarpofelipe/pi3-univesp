@@ -191,16 +191,6 @@ export default function QuadrosPage() {
       subtitle="Gerencie os quadros disponíveis no sistema"
       breadcrumbItems={breadcrumbItems}
       user={currentUser}
-      topbarActions={
-        <Button
-          variant="primary"
-          leftIcon={<Plus size={16} />}
-          onClick={handleCriarQuadro}
-          disabled={!organizacaoId}
-        >
-          Novo quadro
-        </Button>
-      }
     >
       <div className="quadros-page">
         <PageHeader

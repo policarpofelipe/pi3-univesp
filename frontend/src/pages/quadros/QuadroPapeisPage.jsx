@@ -251,15 +251,6 @@ export default function QuadroPapeisPage() {
         { label: "Papéis" },
       ]}
       user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
-      topbarActions={
-        <Button
-          variant="primary"
-          leftIcon={<Plus size={16} />}
-          onClick={() => setModal({ mode: "criar", papel: null })}
-        >
-          Novo papel
-        </Button>
-      }
     >
       <div className="quadro-papeis-page">
         <PageHeader

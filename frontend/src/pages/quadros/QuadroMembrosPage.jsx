@@ -257,15 +257,6 @@ export default function QuadroMembrosPage() {
         { label: "Membros" },
       ]}
       user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
-      topbarActions={
-        <Button
-          variant="primary"
-          leftIcon={<UserPlus size={16} />}
-          onClick={() => setModalConvite(true)}
-        >
-          Convidar membro
-        </Button>
-      }
     >
       <div className="quadro-membros-page">
         <PageHeader

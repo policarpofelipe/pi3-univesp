@@ -179,17 +179,6 @@ export default function QuadroConfiguracoesPage() {
         { label: "Configurações" },
       ]}
       user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
-      topbarActions={
-        <Button
-          type="submit"
-          form="quadro-configuracoes-form"
-          variant="primary"
-          leftIcon={<Save size={16} />}
-          loading={salvando}
-        >
-          Salvar alterações
-        </Button>
-      }
     >
       <div className="quadro-configuracoes-page">
         <PageHeader

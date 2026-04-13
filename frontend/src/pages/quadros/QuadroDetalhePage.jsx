@@ -453,15 +453,6 @@ export default function QuadroDetalhePage() {
         { label: quadro.nome },
       ]}
       user={{ name: usuario?.nomeExibicao || usuario?.nome || "Usuário" }}
-      topbarActions={
-        <Button
-          variant="primary"
-          leftIcon={<Plus size={16} />}
-          onClick={handleNovoCartao}
-        >
-          Novo cartão
-        </Button>
-      }
     >
       <div className="quadro-detalhe-page">
         <PageHeader
