@@ -95,7 +95,8 @@ const cartaoChecklistController = {
         req.params.quadroId,
         req.params.cartaoId,
         req.params.checklistId,
-        req.body?.titulo
+        req.body?.titulo,
+        req.usuario?.id || null
       );
       if (!item) {
         return res.status(404).json({

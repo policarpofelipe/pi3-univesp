@@ -1,5 +1,6 @@
 const CartaoRepository = require("../repositories/CartaoRepository");
 const CartaoChecklistRepository = require("../repositories/CartaoChecklistRepository");
+const CartaoHistoricoService = require("./cartaoHistoricoService");
 
 function toPositiveInt(value) {
   const num = Number(value);
@@ -49,6 +50,12 @@ class CartaoChecklistService {
       titulo: txt,
       usuarioId: usuarioId || null,
     });
+    await CartaoHistoricoService.registrar({
+      cartaoId: cId,
+      usuarioId: usuarioId || null,
+      tipoEvento: "CHECKLIST_CRIADA",
+      dados: { checklistId: id, titulo: txt },
+    });
     const lista = await this.listar(qId, cId);
     return lista.find((c) => c.id === id) || null;
   }
@@ -75,7 +82,7 @@ class CartaoChecklistService {
     return CartaoChecklistRepository.removerChecklist(Number(checklistId));
   }
 
-  async criarItem(quadroId, cartaoId, checklistId, titulo) {
+  async criarItem(quadroId, cartaoId, checklistId, titulo, usuarioId = null) {
     const checklist = await CartaoChecklistRepository.obterChecklist(
       Number(cartaoId),
       Number(checklistId)
@@ -84,12 +91,19 @@ class CartaoChecklistService {
     const txt = String(titulo || "").trim();
     if (!txt) throw Object.assign(new Error("O título do item é obrigatório."), { statusCode: 400 });
     const id = await CartaoChecklistRepository.criarItem(Number(checklistId), txt);
+    await CartaoHistoricoService.registrar({
+      cartaoId: Number(cartaoId),
+      usuarioId: usuarioId || null,
+      tipoEvento: "CHECKLIST_ITEM_CRIADO",
+      dados: { checklistId: Number(checklistId), itemId: id, titulo: txt },
+    });
     return CartaoChecklistRepository.obterItem(Number(checklistId), id);
   }
 
   async atualizarItem(quadroId, cartaoId, checklistId, itemId, payload, usuarioId) {
     const item = await CartaoChecklistRepository.obterItem(Number(checklistId), Number(itemId));
     if (!item) return null;
+    const concluidoAnterior = Boolean(item.concluido);
     const dados = {};
     if (payload.titulo !== undefined) {
       const txt = String(payload.titulo).trim();
@@ -102,6 +116,34 @@ class CartaoChecklistService {
     }
     await CartaoChecklistRepository.atualizarItem(Number(itemId), dados);
     const updated = await CartaoChecklistRepository.obterItem(Number(checklistId), Number(itemId));
+
+    if (payload.concluido !== undefined) {
+      const concluidoAtual = Boolean(updated.concluido);
+      if (!concluidoAnterior && concluidoAtual) {
+        await CartaoHistoricoService.registrar({
+          cartaoId: Number(cartaoId),
+          usuarioId: usuarioId || null,
+          tipoEvento: "CHECKLIST_ITEM_CONCLUIDO",
+          dados: {
+            checklistId: Number(checklistId),
+            itemId: Number(itemId),
+            titulo: updated.titulo,
+          },
+        });
+      } else if (concluidoAnterior && !concluidoAtual) {
+        await CartaoHistoricoService.registrar({
+          cartaoId: Number(cartaoId),
+          usuarioId: usuarioId || null,
+          tipoEvento: "CHECKLIST_ITEM_REABERTO",
+          dados: {
+            checklistId: Number(checklistId),
+            itemId: Number(itemId),
+            titulo: updated.titulo,
+          },
+        });
+      }
+    }
+
     return {
       id: updated.id,
       titulo: updated.titulo,

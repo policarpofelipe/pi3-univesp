@@ -84,7 +84,12 @@ class CartaoAnexoService {
       cartaoId: cId,
       usuarioId,
       tipoEvento: "ANEXO_ADICIONADO",
-      dados: { anexoId: id, nomeArquivo: safeName },
+      dados: {
+        anexoId: id,
+        nomeArquivo: safeName,
+        tipoMime: payload.tipoMime || "application/octet-stream",
+        tamanhoBytes: buffer.length,
+      },
     });
 
     return CartaoAnexoRepository.obterPorId(cId, id);
@@ -106,7 +111,11 @@ class CartaoAnexoService {
         cartaoId: cId,
         usuarioId,
         tipoEvento: "ANEXO_REMOVIDO",
-        dados: { anexoId: aId, nomeArquivo: anexo.nomeArquivo },
+        dados: {
+          anexoId: aId,
+          nomeArquivo: anexo.nomeArquivo,
+          tamanhoBytes: anexo.tamanhoBytes,
+        },
       });
     }
     return removed;

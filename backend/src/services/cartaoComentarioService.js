@@ -48,7 +48,7 @@ class CartaoComentarioService {
       cartaoId: cId,
       usuarioId: usuario?.id || null,
       tipoEvento: "COMENTARIO_ADICIONADO",
-      dados: { comentarioId },
+      dados: { comentarioId, texto: String(texto).trim() },
     });
 
     return CartaoComentarioRepository.obterPorId(cId, comentarioId);
@@ -82,7 +82,7 @@ class CartaoComentarioService {
         cartaoId: cId,
         usuarioId: usuario?.id || null,
         tipoEvento: "COMENTARIO_REMOVIDO",
-        dados: { comentarioId: comId },
+        dados: { comentarioId: comId, texto: comentario.texto },
       });
     }
     return removed;
