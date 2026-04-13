@@ -346,17 +346,17 @@ docs/
 ✅components/listas/ListaColumn.jsx
 ✅components/listas/ListaHeader.jsx
 ✅components/listas/ListaForm.jsx
-components/listas/ListaPermissoesForm.jsx
-components/listas/ListaTransicoesForm.jsx
+✅components/listas/ListaPermissoesForm.jsx
+✅components/listas/ListaTransicoesForm.jsx
 ✅components/listas/ReordenacaoListas.jsx
 
-pages/listas/ListaConfiguracoesPage.jsx
-pages/listas/ListaPermissoesPage.jsx
-pages/listas/ListaTransicoesPage.jsx
+✅pages/listas/ListaConfiguracoesPage.jsx
+✅pages/listas/ListaPermissoesPage.jsx
+✅pages/listas/ListaTransicoesPage.jsx
 
 ✅services/listaService.js
-services/listaPermissaoService.js
-services/listaTransicaoService.js
+✅services/listaPermissaoService.js
+✅services/listaTransicaoService.js
 
 --------------------------------------------------
 
