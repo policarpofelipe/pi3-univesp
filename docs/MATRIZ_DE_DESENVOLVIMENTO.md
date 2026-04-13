@@ -527,7 +527,7 @@ components/ui/Button.jsx
 
 ✅ src/controllers/AuthController.js - Felipe Policarpo 09/03/2026
 ✅src/controllers/UsuarioController.js
-src/controllers/OrganizacaoController.js
+✅src/controllers/organizacaoController.js
 ✅src/controllers/QuadroController.js
 ✅src/controllers/QuadroMembroController.js
 ✅src/controllers/QuadroPapelController.js
@@ -538,9 +538,9 @@ src/controllers/OrganizacaoController.js
 ✅src/controllers/ListaTransicaoController.js
 ✅src/controllers/VisaoController.js
 ✅src/controllers/tagController.js
-✅src/controllers/CampoPersonalizadoController.js
-src/controllers/CartaoController.js
-src/controllers/CartaoComentarioController.js
+✅src/controllers/campoPersonalizadoController.js
+✅src/controllers/cartaoController.js
+✅src/controllers/cartaoComentarioController.js
 ✅src/controllers/cartaoChecklistController.js
 ✅src/controllers/cartaoAnexoController.js
 ✅src/controllers/cartaoHistoricoController.js
