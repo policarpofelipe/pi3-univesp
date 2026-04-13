@@ -1,5 +1,6 @@
 const express = require("express");
 const authMiddleware = require("../middlewares/authMiddleware");
+const { ensureQuadroMemberParam } = require("../middlewares/permissionMiddleware");
 const quadroPapelController = require("../controllers/quadroPapelController");
 
 const router = express.Router();
@@ -16,6 +17,7 @@ const router = express.Router();
 */
 
 router.use(authMiddleware);
+router.param("quadroId", ensureQuadroMemberParam);
 
 // Papéis do quadro
 router.get("/:quadroId/papeis", quadroPapelController.listar);

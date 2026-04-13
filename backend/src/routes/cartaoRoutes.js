@@ -1,11 +1,13 @@
 const express = require("express");
 const authMiddleware = require("../middlewares/authMiddleware");
+const { ensureQuadroMemberParam } = require("../middlewares/permissionMiddleware");
 const cartaoController = require("../controllers/cartaoController");
 const { validarMovimentacaoCartao } = require("../middlewares/listaGateMiddleware");
 
 const router = express.Router();
 
 router.use(authMiddleware);
+router.param("quadroId", ensureQuadroMemberParam);
 
 router.get("/:quadroId/cartoes", cartaoController.listar);
 router.post("/:quadroId/cartoes", cartaoController.criar);

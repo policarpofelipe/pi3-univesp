@@ -1,10 +1,12 @@
 const express = require("express");
 const authMiddleware = require("../middlewares/authMiddleware");
+const { ensureQuadroMemberParam } = require("../middlewares/permissionMiddleware");
 const cartaoChecklistController = require("../controllers/cartaoChecklistController");
 
 const router = express.Router();
 
 router.use(authMiddleware);
+router.param("quadroId", ensureQuadroMemberParam);
 
 router.patch(
   "/:quadroId/cartoes/:cartaoId/checklists/:checklistId/itens/:itemId",

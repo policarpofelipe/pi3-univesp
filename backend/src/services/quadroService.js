@@ -1,5 +1,7 @@
 const QuadroRepository = require("../repositories/QuadroRepository");
 const OrganizacaoRepository = require("../repositories/OrganizacaoRepository");
+const QuadroPapelRepository = require("../repositories/QuadroPapelRepository");
+const QuadroMembroRepository = require("../repositories/QuadroMembroRepository");
 
 function toPositiveInt(value) {
   const num = Number(value);
@@ -49,15 +51,54 @@ class QuadroService {
       throw error;
     }
 
-    return QuadroRepository.criar({
+    const criadorId = toPositiveInt(dados.criadoPorUsuarioId);
+    if (!criadorId) {
+      const error = new Error("Não foi possível identificar o usuário criador do quadro.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const membroOrg = await OrganizacaoRepository.obterMembroPorUsuarioId(
+      organizacaoId,
+      criadorId
+    );
+    if (!membroOrg || membroOrg.status !== "ativo") {
+      const error = new Error("Você não tem permissão para criar quadros nesta organização.");
+      error.statusCode = 403;
+      throw error;
+    }
+
+    const quadro = await QuadroRepository.criar({
       organizacaoId,
       nome,
       descricao:
         dados.descricao === undefined || dados.descricao === null
           ? null
           : String(dados.descricao).trim(),
-      criadoPorUsuarioId: dados.criadoPorUsuarioId || null,
+      criadoPorUsuarioId: criadorId,
     });
+
+    const papelAdmin = await QuadroPapelRepository.criar({
+      quadroId: quadro.id,
+      nome: "Administrador",
+      descricao: "Papel padrão com permissões totais no quadro.",
+      podeGerenciarQuadro: true,
+      podeGerenciarListas: true,
+      podeGerenciarAutomacoes: true,
+      podeGerenciarCampos: true,
+      podeConvidarMembros: true,
+      podeCriarCartao: true,
+      ativo: true,
+    });
+
+    await QuadroMembroRepository.adicionar({
+      quadroId: quadro.id,
+      usuarioId: criadorId,
+      status: "ativo",
+      papelIds: [papelAdmin.id],
+    });
+
+    return QuadroRepository.obterPorId(quadro.id);
   }
 
   async atualizar(quadroId, dados = {}) {

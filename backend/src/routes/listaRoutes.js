@@ -1,5 +1,6 @@
 const express = require("express");
 const authMiddleware = require("../middlewares/authMiddleware");
+const { ensureQuadroMemberParam } = require("../middlewares/permissionMiddleware");
 const listaController = require("../controllers/listaController");
 
 const router = express.Router();
@@ -12,6 +13,7 @@ const router = express.Router();
 */
 
 router.use(authMiddleware);
+router.param("quadroId", ensureQuadroMemberParam);
 
 router.patch(
   "/:quadroId/listas/reordenar",

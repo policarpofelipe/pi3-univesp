@@ -618,9 +618,9 @@ components/ui/Button.jsx
 
 ✅src/middlewares/authMiddleware.js - Felipe Policarpo 09/03/2026
 ✅ src/middlewares/errorMiddleware.js - Felipe Policarpo 09/03/2026
-src/middlewares/permissionMiddleware.js
-src/middlewares/validateRequestMiddleware.js
-src/middlewares/uploadMiddleware.js
+✅src/middlewares/permissionMiddleware.js
+✅src/middlewares/validateRequestMiddleware.js
+✅src/middlewares/uploadMiddleware.js
 
 --------------------------------------------------
 

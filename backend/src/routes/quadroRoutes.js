@@ -1,5 +1,6 @@
 const express = require("express");
 const authMiddleware = require("../middlewares/authMiddleware");
+const { ensureQuadroMemberParam } = require("../middlewares/permissionMiddleware");
 const quadroController = require("../controllers/quadroController");
 
 const router = express.Router();
@@ -19,6 +20,7 @@ const router = express.Router();
 */
 
 router.use(authMiddleware);
+router.param("quadroId", ensureQuadroMemberParam);
 
 // CRUD
 router.get("/", quadroController.listar);

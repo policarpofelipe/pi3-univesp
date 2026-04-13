@@ -1,10 +1,12 @@
 const express = require("express");
 const authMiddleware = require("../middlewares/authMiddleware");
+const { ensureOrganizacaoMemberParam } = require("../middlewares/permissionMiddleware");
 const organizacaoController = require("../controllers/organizacaoController");
 
 const router = express.Router();
 
 router.use(authMiddleware);
+router.param("organizacaoId", ensureOrganizacaoMemberParam);
 
 router.get("/", organizacaoController.listar);
 router.get("/:organizacaoId", organizacaoController.obterPorId);
