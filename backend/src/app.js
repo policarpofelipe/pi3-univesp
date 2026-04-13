@@ -15,6 +15,9 @@ const cartaoChecklistRoutes = require("./routes/cartaoChecklistRoutes");
 const tagRoutes = require("./routes/tagRoutes");
 const cartaoAnexoRoutes = require("./routes/cartaoAnexoRoutes");
 const cartaoHistoricoRoutes = require("./routes/cartaoHistoricoRoutes");
+const visaoRoutes = require("./routes/visaoRoutes");
+const campoPersonalizadoRoutes = require("./routes/campoPersonalizadoRoutes");
+const automacaoRoutes = require("./routes/automacaoRoutes");
 const errorMiddleware = require("./middlewares/errorMiddleware");
 
 const app = express();
@@ -51,6 +54,9 @@ app.use("/api/quadros", cartaoChecklistRoutes);
 app.use("/api/quadros", cartaoAnexoRoutes);
 app.use("/api/quadros", cartaoHistoricoRoutes);
 app.use("/api/quadros", cartaoRoutes);
+app.use("/api/quadros", visaoRoutes);
+app.use("/api/quadros", campoPersonalizadoRoutes);
+app.use("/api/quadros", automacaoRoutes);
 
 app.use((req, res) => {
   return res.status(404).json({
