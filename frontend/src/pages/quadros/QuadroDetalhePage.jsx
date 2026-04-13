@@ -36,6 +36,7 @@ import {
   Users,
   Eye,
   SlidersHorizontal,
+  Bot,
 } from "lucide-react";
 
 import "../../styles/pages/quadro-detalhe.css";
@@ -398,6 +399,10 @@ export default function QuadroDetalhePage() {
     navigate(`/quadros/${quadroId}/campos-personalizados`);
   }
 
+  function handleAbrirAutomacoes() {
+    navigate(`/quadros/${quadroId}/automacoes`);
+  }
+
   if (loading && !quadro) {
     return (
       <AppLayout
@@ -756,6 +761,22 @@ export default function QuadroDetalhePage() {
               <p className="quadro-detalhe-page__section-text">
                 Defina metadados extras dos cartões para adaptar o quadro ao seu
                 processo.
+              </p>
+            </section>
+
+            <section className="quadro-detalhe-page__section">
+              <div className="quadro-detalhe-page__section-header">
+                <h3 className="quadro-detalhe-page__section-title">Automações</h3>
+                <Button
+                  variant="ghost"
+                  leftIcon={<Bot size={14} />}
+                  onClick={handleAbrirAutomacoes}
+                >
+                  Gerenciar
+                </Button>
+              </div>
+              <p className="quadro-detalhe-page__section-text">
+                Automatize tarefas recorrentes com gatilhos e condições do fluxo.
               </p>
             </section>
 

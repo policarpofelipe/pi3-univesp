@@ -30,6 +30,8 @@ import ListaTransicoesPage from "./pages/listas/ListaTransicoesPage";
 import VisoesPage from "./pages/visoes/VisoesPage";
 import VisaoFormPage from "./pages/visoes/VisaoFormPage";
 import CamposPersonalizadosPage from "./pages/configuracoes/CamposPersonalizadosPage";
+import AutomacoesPage from "./pages/automacoes/AutomacoesPage";
+import AutomacaoFormPage from "./pages/automacoes/AutomacaoFormPage";
 
 // Cartões
 import CartaoDetalhePage from "./pages/cartoes/CartaoDetalhePage";
@@ -103,6 +105,18 @@ export default function App() {
             <Route
               path="/quadros/:quadroId/campos-personalizados"
               element={<CamposPersonalizadosPage />}
+            />
+            <Route
+              path="/quadros/:quadroId/automacoes"
+              element={<AutomacoesPage />}
+            />
+            <Route
+              path="/quadros/:quadroId/automacoes/nova"
+              element={<AutomacaoFormPage />}
+            />
+            <Route
+              path="/quadros/:quadroId/automacoes/:automacaoId/editar"
+              element={<AutomacaoFormPage />}
             />
           </Route>
 

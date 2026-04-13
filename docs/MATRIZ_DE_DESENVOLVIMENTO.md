@@ -438,18 +438,18 @@ services/cartaoRelacaoService.js
 
 3.10. Automações
 
-pages/automacoes/AutomacoesPage.jsx
-pages/automacoes/AutomacaoFormPage.jsx
+✅pages/automacoes/AutomacoesPage.jsx
+✅pages/automacoes/AutomacaoFormPage.jsx
 
-components/automacoes/AutomacaoForm.jsx
-components/automacoes/AutomacaoList.jsx
-components/automacoes/GatilhoSelector.jsx
-components/automacoes/CondicaoBuilder.jsx
-components/automacoes/AcaoBuilder.jsx
-components/automacoes/HandoffConfigForm.jsx
-components/automacoes/ExecucaoAutomacaoList.jsx
+✅components/automacoes/AutomacaoForm.jsx
+✅components/automacoes/AutomacaoList.jsx
+✅components/automacoes/GatilhoSelector.jsx
+✅components/automacoes/CondicaoBuilder.jsx
+✅components/automacoes/AcaoBuilder.jsx
+✅components/automacoes/HandoffConfigForm.jsx
+✅components/automacoes/ExecucaoAutomacaoList.jsx
 
-services/automacaoService.js
+✅services/automacaoService.js
 
 --------------------------------------------------
 
