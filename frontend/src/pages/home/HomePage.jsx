@@ -1,73 +1,172 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 import AppLayout from "../../components/layout/AppLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import EmptyState from "../../components/ui/EmptyState";
 import Button from "../../components/ui/Button";
+import useAuth from "../../hooks/useAuth";
 
-import {
-  Plus,
-  Building2,
-  KanbanSquare,
-  ListTodo,
-  CheckSquare,
-  TrendingUp,
-  Sparkles,
-} from "lucide-react";
+import organizacaoService from "../../services/organizacaoService";
+import quadroService from "../../services/quadroService";
+import listaService from "../../services/listaService";
+import cartaoService from "../../services/cartaoService";
+import { extractList } from "../../utils/apiData";
+
+import { Plus, Building2, KanbanSquare, ListTodo, CheckSquare } from "lucide-react";
 
 import "../../styles/pages/home.css";
 
-const stats = [
-  {
-    key: "organizacoes",
-    label: "Organizações",
-    value: "0",
-    helper: "Nenhuma organização criada",
-    icon: Building2,
-    trend: "+0 este mês",
-  },
-  {
-    key: "quadros",
-    label: "Quadros",
-    value: "0",
-    helper: "Nenhum quadro disponível",
-    icon: KanbanSquare,
-    trend: "Comece criando um",
-  },
-  {
-    key: "listas",
-    label: "Listas",
-    value: "0",
-    helper: "Sem listas em andamento",
-    icon: ListTodo,
-    trend: "Adicione sua primeira lista",
-  },
-  {
-    key: "cartoes",
-    label: "Cartões",
-    value: "0",
-    helper: "Sem cartões ativos",
-    icon: CheckSquare,
-    trend: "Crie cartões para organizar",
-  },
-];
-
-const currentUser = {
-  name: "Usuário",
+const initialCounts = {
+  organizacoes: 0,
+  quadros: 0,
+  listas: 0,
+  cartoes: 0,
 };
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { usuario } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+  const [quadros, setQuadros] = useState([]);
+  const [counts, setCounts] = useState(initialCounts);
+
+  const currentUser = useMemo(() => {
+    const nome =
+      usuario?.nome ||
+      usuario?.name ||
+      usuario?.email ||
+      "Usuário";
+    return { name: nome };
+  }, [usuario]);
+
+  const carregarPainel = useCallback(async (signal) => {
+    setIsLoading(true);
+
+    try {
+      const [resOrgs, resQuadros] = await Promise.all([
+        organizacaoService.listar().catch(() => ({ data: [] })),
+        quadroService.listar().catch(() => ({ data: [] })),
+      ]);
+
+      if (signal.aborted) return;
+
+      const organizacoes = extractList(resOrgs);
+      const listaQuadros = extractList(resQuadros);
+
+      let totalListas = 0;
+      let totalCartoes = 0;
+
+      if (listaQuadros.length > 0) {
+        const porQuadro = await Promise.all(
+          listaQuadros.map(async (q) => {
+            const qid = q.id;
+            if (!qid) return { listas: 0, cartoes: 0 };
+
+            const [resListas, resCartoes] = await Promise.all([
+              listaService.listar(qid).catch(() => ({ data: [] })),
+              cartaoService.listar(qid).catch(() => ({ data: [] })),
+            ]);
+
+            return {
+              listas: extractList(resListas).length,
+              cartoes: extractList(resCartoes).length,
+            };
+          })
+        );
+
+        for (const t of porQuadro) {
+          totalListas += t.listas;
+          totalCartoes += t.cartoes;
+        }
+      }
+
+      if (signal.aborted) return;
+
+      setQuadros(listaQuadros);
+      setCounts({
+        organizacoes: organizacoes.length,
+        quadros: listaQuadros.length,
+        listas: totalListas,
+        cartoes: totalCartoes,
+      });
+    } catch {
+      if (!signal.aborted) {
+        setQuadros([]);
+        setCounts(initialCounts);
+      }
+    } finally {
+      if (!signal.aborted) {
+        setIsLoading(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
+    const ac = new AbortController();
+    carregarPainel(ac.signal);
+    return () => ac.abort();
+  }, [carregarPainel]);
 
-    return () => window.clearTimeout(timer);
-  }, []);
+  const stats = useMemo(() => {
+    const { organizacoes: nOrg, quadros: nQuad, listas: nLista, cartoes: nCard } =
+      counts;
+
+    return [
+      {
+        key: "organizacoes",
+        label: "Organizações",
+        value: String(nOrg),
+        helper:
+          nOrg === 0
+            ? "Nenhuma organização — crie uma para começar."
+            : nOrg === 1
+              ? "1 organização à qual você tem acesso."
+              : `${nOrg} organizações às quais você tem acesso.`,
+        icon: Building2,
+      },
+      {
+        key: "quadros",
+        label: "Quadros",
+        value: String(nQuad),
+        helper:
+          nQuad === 0
+            ? "Nenhum quadro nos workspaces acessíveis."
+            : nQuad === 1
+              ? "1 quadro disponível para você."
+              : `${nQuad} quadros disponíveis para você.`,
+        icon: KanbanSquare,
+      },
+      {
+        key: "listas",
+        label: "Listas",
+        value: String(nLista),
+        helper:
+          nQuad === 0
+            ? "Crie um quadro para adicionar listas."
+            : nLista === 0
+              ? "Nenhuma lista nos quadros acessíveis."
+              : nLista === 1
+                ? "1 lista no total dos seus quadros."
+                : `${nLista} listas no total dos seus quadros.`,
+        icon: ListTodo,
+      },
+      {
+        key: "cartoes",
+        label: "Cartões",
+        value: String(nCard),
+        helper:
+          nQuad === 0
+            ? "Crie um quadro para adicionar cartões."
+            : nCard === 0
+              ? "Nenhum cartão nos quadros acessíveis."
+              : nCard === 1
+                ? "1 cartão no total dos seus quadros."
+                : `${nCard} cartões no total dos seus quadros.`,
+        icon: CheckSquare,
+      },
+    ];
+  }, [counts]);
 
   function handleCreateOrganization() {
     navigate("/organizacoes");
@@ -75,10 +174,6 @@ export default function HomePage() {
 
   function handleCreateBoard() {
     navigate("/quadros");
-  }
-
-  function handleViewOrganizations() {
-    navigate("/organizacoes");
   }
 
   if (isLoading) {
@@ -93,7 +188,6 @@ export default function HomePage() {
         <div className="home-page" aria-busy="true" aria-live="polite">
           <section className="home-page__loading" aria-label="Carregando painel">
             <div className="home-page__skeleton home-page__skeleton--header" />
-            <div className="home-page__skeleton home-page__skeleton--hero" />
 
             <div className="home-page__stats">
               {[1, 2, 3, 4].map((item) => (
@@ -138,45 +232,6 @@ export default function HomePage() {
         />
 
         <section
-          className="home-page__hero"
-          aria-labelledby="home-hero-title"
-        >
-          <div className="home-page__hero-content">
-            <div className="home-page__hero-badge">
-              <Sparkles size={14} aria-hidden="true" />
-              <span>Painel inicial</span>
-            </div>
-
-            <h2 id="home-hero-title" className="home-page__hero-title">
-              Bem-vindo ao ambiente principal do sistema.
-            </h2>
-
-            <p className="home-page__hero-description">
-              Este painel concentra os pontos de entrada da aplicação. A partir
-              daqui, organize suas organizações, gerencie quadros e inicie o fluxo
-              principal de trabalho com clareza e eficiência.
-            </p>
-          </div>
-
-          <div className="home-page__hero-actions">
-            <Button
-              variant="primary"
-              leftIcon={<Plus size={16} />}
-              onClick={handleCreateOrganization}
-            >
-              Nova organização
-            </Button>
-
-            <Button
-              variant="secondary"
-              onClick={handleViewOrganizations}
-            >
-              Ver organizações
-            </Button>
-          </div>
-        </section>
-
-        <section
           className="home-page__stats"
           aria-labelledby="home-stats-title"
         >
@@ -197,13 +252,6 @@ export default function HomePage() {
                   <p className="home-page__stat-label">{item.label}</p>
                   <strong className="home-page__stat-value">{item.value}</strong>
                   <p className="home-page__stat-helper">{item.helper}</p>
-
-                  {item.trend ? (
-                    <div className="home-page__stat-trend">
-                      <TrendingUp size={12} aria-hidden="true" />
-                      <span>{item.trend}</span>
-                    </div>
-                  ) : null}
                 </div>
               </article>
             );
@@ -215,20 +263,65 @@ export default function HomePage() {
           aria-label="Conteúdo principal"
         >
           <div className="home-page__panel home-page__panel--main">
-            <EmptyState
-              icon={<KanbanSquare size={40} />}
-              title="Nenhum quadro encontrado"
-              description="Você ainda não criou ou não tem acesso a nenhum quadro. O próximo passo natural é cadastrar uma organização e criar o primeiro quadro para começar a organizar suas tarefas."
-              action={
-                <Button
-                  variant="primary"
-                  leftIcon={<Plus size={16} />}
-                  onClick={handleCreateBoard}
-                >
-                  Criar primeiro quadro
+            {quadros.length === 0 ? (
+              <EmptyState
+                icon={<KanbanSquare size={40} />}
+                title="Nenhum quadro encontrado"
+                description="Você ainda não criou ou não tem acesso a nenhum quadro. O próximo passo natural é cadastrar uma organização e criar o primeiro quadro para começar a organizar suas tarefas."
+                action={
+                  <Button
+                    variant="primary"
+                    leftIcon={<Plus size={16} />}
+                    onClick={handleCreateBoard}
+                  >
+                    Criar primeiro quadro
+                  </Button>
+                }
+              />
+            ) : (
+              <section
+                className="home-page__section"
+                aria-labelledby="home-quadros-title"
+              >
+                <h3 id="home-quadros-title" className="home-page__section-title">
+                  Seus quadros
+                </h3>
+                <ul className="home-page__quadro-list">
+                  {quadros.map((q) => {
+                    const id = q.id;
+                    const nome = q.nome || "Quadro sem nome";
+                    const org =
+                      q.organizacaoNome ||
+                      q.organizacao?.nome ||
+                      (q.organizacaoId ? `Organização #${q.organizacaoId}` : "");
+
+                    return (
+                      <li key={id} className="home-page__quadro-row">
+                        <Link
+                          to={`/quadros/${id}`}
+                          className="home-page__quadro-link"
+                        >
+                          <span className="home-page__quadro-link-text">
+                            {nome}
+                            {org ? (
+                              <span className="home-page__quadro-org">{org}</span>
+                            ) : null}
+                          </span>
+                          <KanbanSquare
+                            size={18}
+                            className="home-page__quadro-link-icon"
+                            aria-hidden="true"
+                          />
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <Button variant="secondary" onClick={() => navigate("/quadros")}>
+                  Ver todos os quadros
                 </Button>
-              }
-            />
+              </section>
+            )}
           </div>
 
           <aside className="home-page__panel home-page__panel--side">
