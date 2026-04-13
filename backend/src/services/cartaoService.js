@@ -4,6 +4,7 @@ const QuadroRepository = require("../repositories/QuadroRepository");
 const CartaoHistoricoService = require("./cartaoHistoricoService");
 const cartaoCriadoEvent = require("../events/cartaoCriadoEvent");
 const cartaoMovidoEvent = require("../events/cartaoMovidoEvent");
+const { normalizeOptionalDateTimeInput } = require("../utils/dateUtils");
 
 const PRIORIDADES = new Set(["baixa", "media", "alta", "urgente"]);
 
@@ -18,14 +19,6 @@ function normalizarPrioridade(val) {
   const v = String(val).trim().toLowerCase();
   if (!PRIORIDADES.has(v)) return { invalid: true };
   return { value: v };
-}
-
-function normalizarPrazoEm(val) {
-  if (val === undefined) return { skip: true };
-  if (val === null || val === "") return { value: null };
-  const d = new Date(val);
-  if (Number.isNaN(d.getTime())) return { invalid: true };
-  return { value: d.toISOString().slice(0, 19).replace("T", " ") };
 }
 
 class CartaoService {
@@ -87,7 +80,7 @@ class CartaoService {
       error.statusCode = 400;
       throw error;
     }
-    const prazoEm = normalizarPrazoEm(dados.prazoEm);
+    const prazoEm = normalizeOptionalDateTimeInput(dados.prazoEm);
     if (prazoEm.invalid) {
       const error = new Error("Data de prazo inválida.");
       error.statusCode = 400;
@@ -157,7 +150,7 @@ class CartaoService {
     }
     if (!prioridade.skip) payload.prioridade = prioridade.value;
 
-    const prazoEm = normalizarPrazoEm(dados.prazoEm);
+    const prazoEm = normalizeOptionalDateTimeInput(dados.prazoEm);
     if (prazoEm.invalid) {
       const error = new Error("Data de prazo inválida.");
       error.statusCode = 400;

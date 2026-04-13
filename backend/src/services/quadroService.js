@@ -2,6 +2,7 @@ const QuadroRepository = require("../repositories/QuadroRepository");
 const OrganizacaoRepository = require("../repositories/OrganizacaoRepository");
 const QuadroPapelRepository = require("../repositories/QuadroPapelRepository");
 const QuadroMembroRepository = require("../repositories/QuadroMembroRepository");
+const { parseLimitOffset } = require("../utils/paginationUtils");
 
 function toPositiveInt(value) {
   const num = Number(value);
@@ -18,10 +19,23 @@ class QuadroService {
         ? undefined
         : String(filtros.arquivado) === "true";
 
+    let limit;
+    let offset;
+    if (filtros.limit !== undefined || filtros.offset !== undefined) {
+      const parsed = parseLimitOffset(
+        { limit: filtros.limit, offset: filtros.offset },
+        { defaultLimit: 50, maxLimit: 200 }
+      );
+      limit = parsed.limit;
+      offset = parsed.offset;
+    }
+
     return QuadroRepository.listar({
       organizacaoId,
       busca: filtros.busca || "",
       arquivado,
+      limit,
+      offset,
     });
   }
 

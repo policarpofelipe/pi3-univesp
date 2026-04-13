@@ -1,4 +1,5 @@
 const connectionModule = require("../database/connection");
+const { nextAfterMax, clampInsertIndex } = require("../utils/positionUtils");
 
 const db = connectionModule.pool || connectionModule.db || connectionModule;
 
@@ -94,7 +95,7 @@ class CartaoRepository {
       "SELECT COALESCE(MAX(posicao), 0) AS maxPos FROM cartoes WHERE lista_id = ? AND arquivado_em IS NULL",
       [listaId]
     );
-    const nextPos = Number(maxPosRows[0]?.maxPos || 0) + 1;
+    const nextPos = nextAfterMax(maxPosRows[0]?.maxPos);
 
     const [result] = await db.query(
       `
@@ -299,7 +300,10 @@ class CartaoRepository {
     const ids = rows.map((r) => Number(r.id));
     if (cartaoPrioritarioId && ids.includes(Number(cartaoPrioritarioId))) {
       const sem = ids.filter((id) => id !== Number(cartaoPrioritarioId));
-      const idx = posicaoDestino == null ? sem.length : Math.max(0, Math.min(Number(posicaoDestino), sem.length));
+      const idx =
+        posicaoDestino == null
+          ? sem.length
+          : clampInsertIndex(posicaoDestino, sem.length);
       sem.splice(idx, 0, Number(cartaoPrioritarioId));
       for (let i = 0; i < sem.length; i += 1) {
         await conn.query("UPDATE cartoes SET posicao = ?, atualizado_em = NOW() WHERE id = ?", [

@@ -1,20 +1,16 @@
 const fs = require("fs/promises");
 const path = require("path");
-const crypto = require("crypto");
 const CartaoRepository = require("../repositories/CartaoRepository");
 const CartaoAnexoRepository = require("../repositories/CartaoAnexoRepository");
 const CartaoHistoricoService = require("./cartaoHistoricoService");
+const { MAX_UPLOAD_BYTES, sanitizeFilename } = require("../utils/fileUtils");
+const { sha256Buffer } = require("../utils/hashUtils");
 
-const MAX_BYTES = 5 * 1024 * 1024;
 const UPLOAD_DIR = path.resolve(__dirname, "../../uploads/cartoes");
 
 function toPositiveInt(value) {
   const num = Number(value);
   return Number.isInteger(num) && num > 0 ? num : null;
-}
-
-function sanitizeFilename(name) {
-  return String(name).replace(/[<>:"/\\|?*\x00-\x1F]/g, "_");
 }
 
 class CartaoAnexoService {
@@ -55,14 +51,17 @@ class CartaoAnexoService {
 
     const buffer = Buffer.from(b64, "base64");
     if (!buffer.length) throw Object.assign(new Error("O arquivo está vazio."), { statusCode: 400 });
-    if (buffer.length > MAX_BYTES) {
-      throw Object.assign(new Error(`Arquivo excede o limite de ${MAX_BYTES / (1024 * 1024)} MB.`), {
-        statusCode: 400,
-      });
+    if (buffer.length > MAX_UPLOAD_BYTES) {
+      throw Object.assign(
+        new Error(`Arquivo excede o limite de ${MAX_UPLOAD_BYTES / (1024 * 1024)} MB.`),
+        {
+          statusCode: 400,
+        }
+      );
     }
 
     const safeName = sanitizeFilename(nomeArquivo);
-    const sha256 = crypto.createHash("sha256").update(buffer).digest("hex");
+    const sha256 = sha256Buffer(buffer);
     const relDir = path.join(String(cId));
     const relFile = path.join(relDir, `${Date.now()}_${safeName}`);
     const fullDir = path.resolve(UPLOAD_DIR, relDir);

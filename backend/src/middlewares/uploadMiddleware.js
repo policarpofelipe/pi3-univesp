@@ -1,6 +1,5 @@
 const multer = require("multer");
-
-const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;
+const { MAX_UPLOAD_BYTES } = require("../utils/fileUtils");
 
 /**
  * Upload em memória para anexos de cartão (multipart).
@@ -15,7 +14,7 @@ function createMemorySingleUpload(options = {}) {
   const fieldName = options.fieldName || "arquivo";
   const maxBytes = Number.isInteger(options.maxBytes) && options.maxBytes > 0
     ? options.maxBytes
-    : DEFAULT_MAX_BYTES;
+    : MAX_UPLOAD_BYTES;
 
   const upload = multer({
     storage: multer.memoryStorage(),
@@ -48,7 +47,7 @@ module.exports = {
   createMemorySingleUpload,
   cartaoAnexoUpload: createMemorySingleUpload({
     fieldName: "arquivo",
-    maxBytes: DEFAULT_MAX_BYTES,
+    maxBytes: MAX_UPLOAD_BYTES,
   }),
   handleMulterError,
 };

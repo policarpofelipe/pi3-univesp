@@ -1,4 +1,5 @@
 const { pool } = require("../database/connection");
+const { parsePositiveIntCapped } = require("../utils/paginationUtils");
 
 class BuscaService {
   async buscarNoQuadro(quadroId, termo, limit = 20) {
@@ -9,7 +10,7 @@ class BuscaService {
     const busca = String(termo || "").trim();
     if (!busca) return { cartoes: [], listas: [] };
 
-    const max = Math.min(Number(limit) || 20, 100);
+    const max = parsePositiveIntCapped(limit, 20, 100);
 
     const [cartoes] = await pool.query(
       `

@@ -640,7 +640,6 @@ components/ui/Button.jsx
 
 ✅src/jobs/automacaoJob.js
 ✅src/jobs/prazoJob.js
-
 ✅src/events/cartaoCriadoEvent.js
 ✅src/events/cartaoMovidoEvent.js
 ✅src/events/prazoVencidoEvent.js
@@ -649,12 +648,12 @@ components/ui/Button.jsx
 
 4.9. Utilitários
 
-src/utils/dateUtils.js
-src/utils/jsonFilterParser.js
-src/utils/positionUtils.js
-src/utils/hashUtils.js
-src/utils/fileUtils.js
-src/utils/paginationUtils.js
+✅src/utils/dateUtils.js
+✅src/utils/jsonFilterParser.js
+✅src/utils/positionUtils.js
+✅src/utils/hashUtils.js
+✅src/utils/fileUtils.js
+✅src/utils/paginationUtils.js
 
 ==================================================
 5. BANCO / MIGRAÇÕES / SEEDS

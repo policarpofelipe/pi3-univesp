@@ -12,6 +12,8 @@ const quadroController = {
         organizacaoId: req.query.organizacaoId,
         arquivado: req.query.arquivado,
         busca: req.query.busca,
+        limit: req.query.limit,
+        offset: req.query.offset,
       });
 
       return res.status(200).json({

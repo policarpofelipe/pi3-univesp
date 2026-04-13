@@ -1,5 +1,6 @@
 const QuadroRepository = require("../repositories/QuadroRepository");
 const VisaoRepository = require("../repositories/VisaoRepository");
+const { parseFiltroJson } = require("../utils/jsonFilterParser");
 
 function toId(v) {
   const n = Number(v);
@@ -22,12 +23,18 @@ class VisaoService {
     if (!quadro) return null;
     const nome = String(dados.nome || "").trim();
     if (!nome) throw Object.assign(new Error("Nome da visão é obrigatório."), { statusCode: 400 });
+
+    const filtroParsed = parseFiltroJson(dados.filtroJson);
+    if (!filtroParsed.ok) {
+      throw Object.assign(new Error(filtroParsed.error), { statusCode: 400 });
+    }
+
     return VisaoRepository.criar({
       quadroId: qId,
       nome,
       tipo: dados.tipo || "personalizada",
       chaveSistema: dados.chaveSistema,
-      filtroJson: dados.filtroJson,
+      filtroJson: filtroParsed.value === undefined ? dados.filtroJson : filtroParsed.value,
       fixa: Boolean(dados.fixa),
       ativa: dados.ativa,
     });
@@ -39,7 +46,17 @@ class VisaoService {
     if (!qId || !vId) throw Object.assign(new Error("IDs inválidos."), { statusCode: 400 });
     const atual = await VisaoRepository.obterPorId(qId, vId);
     if (!atual) return null;
-    return VisaoRepository.atualizar(qId, vId, dados);
+
+    let payload = dados;
+    if (dados.filtroJson !== undefined) {
+      const filtroParsed = parseFiltroJson(dados.filtroJson);
+      if (!filtroParsed.ok) {
+        throw Object.assign(new Error(filtroParsed.error), { statusCode: 400 });
+      }
+      payload = { ...dados, filtroJson: filtroParsed.value };
+    }
+
+    return VisaoRepository.atualizar(qId, vId, payload);
   }
 
   async remover(quadroId, visaoId) {
