@@ -197,6 +197,8 @@ export default function OrganizacoesPage() {
           onClose={handleFecharModalCriar}
           closeLabel="Cancelar"
           closeOnBackdrop={!salvandoOrganizacao}
+          showHeaderCloseButton={false}
+          dismissDisabled={salvandoOrganizacao}
         >
           <OrganizacaoForm
             key={`nova-org-${modalCriarNonce}`}

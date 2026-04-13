@@ -380,6 +380,8 @@ export default function OrganizacaoDetalhePage() {
               onClose={handleFecharModalEditar}
               closeLabel="Cancelar"
               closeOnBackdrop={!salvandoEdicao}
+              showHeaderCloseButton={false}
+              dismissDisabled={salvandoEdicao}
             >
               {valoresIniciaisFormulario ? (
                 <OrganizacaoForm
