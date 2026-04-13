@@ -456,32 +456,32 @@ docs/
 
 3.11. Utilitários
 
-components/common/ConfirmDialog.jsx
-components/common/LoadingSpinner.jsx
-components/common/EmptyState.jsx
-components/common/ErrorMessage.jsx
+✅components/common/ConfirmDialog.jsx
+✅components/common/LoadingSpinner.jsx
+✅components/common/EmptyState.jsx
+✅components/common/ErrorMessage.jsx
 
 components/ui/Button.jsx
-components/ui/Input.jsx
-components/ui/Select.jsx
-components/ui/Modal.jsx
-components/ui/Badge.jsx
-components/ui/Tabs.jsx
-components/ui/Textarea.jsx
+✅components/ui/Input.jsx
+✅components/ui/Select.jsx
+✅components/ui/Modal.jsx
+✅components/ui/Badge.jsx
+✅components/ui/Tabs.jsx
+✅components/ui/Textarea.jsx
 
-hooks/useDebounce.js
-hooks/useModal.js
-hooks/useToast.js
+✅hooks/useDebounce.js
+✅hooks/useModal.js
+✅hooks/useToast.js
 
-utils/dateUtils.js
-utils/permissionUtils.js
-utils/positionUtils.js
-utils/filterUtils.js
+✅utils/dateUtils.js
+✅utils/permissionUtils.js
+✅utils/positionUtils.js
+✅utils/filterUtils.js
 
-constants/roles.js
+✅constants/roles.js
 ✅constants/prioridades.js
-constants/tiposCampo.js
-constants/tiposEvento.js
+✅constants/tiposCampo.js
+✅constants/tiposEvento.js
 
 ==================================================
 4. NOMES DE ARQUIVOS — BACKEND
