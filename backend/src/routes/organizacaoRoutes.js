@@ -1,6 +1,7 @@
 const express = require("express");
 const authMiddleware = require("../middlewares/authMiddleware");
 const { ensureOrganizacaoMemberParam } = require("../middlewares/permissionMiddleware");
+const organizacaoValidator = require("../validators/organizacaoValidator");
 const organizacaoController = require("../controllers/organizacaoController");
 
 const router = express.Router();
@@ -10,8 +11,12 @@ router.param("organizacaoId", ensureOrganizacaoMemberParam);
 
 router.get("/", organizacaoController.listar);
 router.get("/:organizacaoId", organizacaoController.obterPorId);
-router.post("/", organizacaoController.criar);
-router.put("/:organizacaoId", organizacaoController.atualizar);
+router.post("/", organizacaoValidator.criar(), organizacaoController.criar);
+router.put(
+  "/:organizacaoId",
+  organizacaoValidator.atualizar(),
+  organizacaoController.atualizar
+);
 router.delete("/:organizacaoId", organizacaoController.remover);
 
 router.get(

@@ -617,7 +617,7 @@ components/ui/Button.jsx
 4.6. Middlewares
 
 ✅src/middlewares/authMiddleware.js - Felipe Policarpo 09/03/2026
-✅ src/middlewares/errorMiddleware.js - Felipe Policarpo 09/03/2026
+✅src/middlewares/errorMiddleware.js - Felipe Policarpo 09/03/2026
 ✅src/middlewares/permissionMiddleware.js
 ✅src/middlewares/validateRequestMiddleware.js
 ✅src/middlewares/uploadMiddleware.js
@@ -626,13 +626,13 @@ components/ui/Button.jsx
 
 4.7. Validators
 
-src/validators/authValidator.js
-src/validators/organizacaoValidator.js
-src/validators/quadroValidator.js
-src/validators/listaValidator.js
-src/validators/cartaoValidator.js
-src/validators/campoPersonalizadoValidator.js
-src/validators/automacaoValidator.js
+✅src/validators/authValidator.js
+✅src/validators/organizacaoValidator.js
+✅src/validators/quadroValidator.js
+✅src/validators/listaValidator.js
+✅src/validators/cartaoValidator.js
+✅src/validators/campoPersonalizadoValidator.js
+✅src/validators/automacaoValidator.js
 
 --------------------------------------------------
 
