@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 
 import AppLayout from "../../components/layout/AppLayout";
 import PageHeader from "../../components/ui/PageHeader";
-import EmptyState from "../../components/ui/EmptyState";
 import Button from "../../components/ui/Button";
 import useAuth from "../../hooks/useAuth";
 
@@ -28,6 +27,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { usuario } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+  const [organizacoes, setOrganizacoes] = useState([]);
   const [quadros, setQuadros] = useState([]);
   const [counts, setCounts] = useState(initialCounts);
 
@@ -83,6 +83,7 @@ export default function HomePage() {
 
       if (signal.aborted) return;
 
+      setOrganizacoes(organizacoes);
       setQuadros(listaQuadros);
       setCounts({
         organizacoes: organizacoes.length,
@@ -92,6 +93,7 @@ export default function HomePage() {
       });
     } catch {
       if (!signal.aborted) {
+        setOrganizacoes([]);
         setQuadros([]);
         setCounts(initialCounts);
       }
@@ -220,15 +222,6 @@ export default function HomePage() {
         <PageHeader
           title="Dashboard"
           description="Acompanhe organizações, quadros e a estrutura inicial do sistema de gestão de tarefas."
-          actions={
-            <Button
-              variant="primary"
-              leftIcon={<Plus size={16} />}
-              onClick={handleCreateBoard}
-            >
-              Criar quadro
-            </Button>
-          }
         />
 
         <section
@@ -263,65 +256,137 @@ export default function HomePage() {
           aria-label="Conteúdo principal"
         >
           <div className="home-page__panel home-page__panel--main">
-            {quadros.length === 0 ? (
-              <EmptyState
-                icon={<KanbanSquare size={40} />}
-                title="Nenhum quadro encontrado"
-                description="Você ainda não criou ou não tem acesso a nenhum quadro. O próximo passo natural é cadastrar uma organização e criar o primeiro quadro para começar a organizar suas tarefas."
-                action={
-                  <Button
-                    variant="primary"
-                    leftIcon={<Plus size={16} />}
-                    onClick={handleCreateBoard}
-                  >
-                    Criar primeiro quadro
-                  </Button>
-                }
-              />
-            ) : (
+            <div className="home-page__main-stack">
+              <section
+                className="home-page__section"
+                aria-labelledby="home-orgs-title"
+              >
+                <h3 id="home-orgs-title" className="home-page__section-title">
+                  Suas Organizações
+                </h3>
+                {organizacoes.length === 0 ? (
+                  <>
+                    <p className="home-page__empty-hint">
+                      Você ainda não participa de nenhuma organização. Crie ou
+                      acesse uma organização para vincular quadros e equipes.
+                    </p>
+                    <Button
+                      variant="secondary"
+                      onClick={() => navigate("/organizacoes")}
+                    >
+                      Ir para organizações
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <ul className="home-page__quadro-list">
+                      {organizacoes.map((o) => {
+                        const id = o.id;
+                        const nome = o.nome || "Organização sem nome";
+                        const slug = o.slug ? String(o.slug) : "";
+
+                        return (
+                          <li key={id} className="home-page__quadro-row">
+                            <Link
+                              to={`/organizacoes/${id}`}
+                              className="home-page__quadro-link"
+                            >
+                              <span className="home-page__quadro-link-text">
+                                {nome}
+                                {slug ? (
+                                  <span className="home-page__quadro-org">
+                                    {slug}
+                                  </span>
+                                ) : null}
+                              </span>
+                              <Building2
+                                size={18}
+                                className="home-page__quadro-link-icon"
+                                aria-hidden="true"
+                              />
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    <Button
+                      variant="secondary"
+                      onClick={() => navigate("/organizacoes")}
+                    >
+                      Ver todas as organizações
+                    </Button>
+                  </>
+                )}
+              </section>
+
               <section
                 className="home-page__section"
                 aria-labelledby="home-quadros-title"
               >
                 <h3 id="home-quadros-title" className="home-page__section-title">
-                  Seus quadros
+                  Seus Quadros
                 </h3>
-                <ul className="home-page__quadro-list">
-                  {quadros.map((q) => {
-                    const id = q.id;
-                    const nome = q.nome || "Quadro sem nome";
-                    const org =
-                      q.organizacaoNome ||
-                      q.organizacao?.nome ||
-                      (q.organizacaoId ? `Organização #${q.organizacaoId}` : "");
+                {quadros.length === 0 ? (
+                  <>
+                    <p className="home-page__empty-hint">
+                      Nenhum quadro ainda. Crie um quadro no contexto de uma
+                      organização para começar a organizar tarefas.
+                    </p>
+                    <Button
+                      variant="primary"
+                      leftIcon={<Plus size={16} />}
+                      onClick={handleCreateBoard}
+                    >
+                      Ver quadros
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <ul className="home-page__quadro-list">
+                      {quadros.map((q) => {
+                        const id = q.id;
+                        const nome = q.nome || "Quadro sem nome";
+                        const org =
+                          q.organizacaoNome ||
+                          q.organizacao?.nome ||
+                          (q.organizacaoId
+                            ? `Organização #${q.organizacaoId}`
+                            : "");
 
-                    return (
-                      <li key={id} className="home-page__quadro-row">
-                        <Link
-                          to={`/quadros/${id}`}
-                          className="home-page__quadro-link"
-                        >
-                          <span className="home-page__quadro-link-text">
-                            {nome}
-                            {org ? (
-                              <span className="home-page__quadro-org">{org}</span>
-                            ) : null}
-                          </span>
-                          <KanbanSquare
-                            size={18}
-                            className="home-page__quadro-link-icon"
-                            aria-hidden="true"
-                          />
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-                <Button variant="secondary" onClick={() => navigate("/quadros")}>
-                  Ver todos os quadros
-                </Button>
+                        return (
+                          <li key={id} className="home-page__quadro-row">
+                            <Link
+                              to={`/quadros/${id}`}
+                              className="home-page__quadro-link"
+                            >
+                              <span className="home-page__quadro-link-text">
+                                {nome}
+                                {org ? (
+                                  <span className="home-page__quadro-org">
+                                    {org}
+                                  </span>
+                                ) : null}
+                              </span>
+                              <KanbanSquare
+                                size={18}
+                                className="home-page__quadro-link-icon"
+                                aria-hidden="true"
+                              />
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    <Button
+                      variant="secondary"
+                      onClick={() => navigate("/quadros")}
+                    >
+                      Ver todos os quadros
+                    </Button>
+                  </>
+                )}
               </section>
-            )}
+            </div>
           </div>
 
           <aside className="home-page__panel home-page__panel--side">
