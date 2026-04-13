@@ -188,6 +188,7 @@ frontend/
 │   │   ├── auth/
 │   │   ├── organizacoes/
 │   │   ├── quadros/
+│   │   │   └── board/          (canvas Kanban, filtros, DnD)
 │   │   ├── listas/
 │   │   ├── cartoes/
 │   │   ├── visoes/
@@ -285,7 +286,7 @@ docs/
 ✅components/layout/Sidebar.jsx
 ✅components/layout/Topbar.jsx
 ✅components/layout/Breadcrumb.jsx
-✅components/ui/Button.jsx
+✅components/ui/Button.jsx — ver também 3.11 (`forwardRef`, 13/04/2026)
 ✅components/ui/IconButton.jsx
 ✅components/ui/ThemeToggle.jsx
 ✅components/ui/FontSizeControl.jsx
@@ -323,7 +324,7 @@ docs/
 3.4. Quadros
 
 ✅pages/quadros/QuadrosPage.jsx
-✅pages/quadros/QuadroDetalhePage.jsx
+✅pages/quadros/QuadroDetalhePage.jsx — atualização 13/04/2026: layout Kanban, filtros rápidos na tela, integração com canvas DnD e drawer de gestão
 ✅pages/quadros/QuadroConfiguracoesPage.jsx
 ✅pages/quadros/QuadroMembrosPage.jsx
 ✅pages/quadros/QuadroPapeisPage.jsx
@@ -334,17 +335,31 @@ docs/
 ✅components/quadros/QuadroPreferenciasForm.jsx
 ✅components/quadros/QuadroMembrosTable.jsx
 ✅components/quadros/QuadroPapelForm.jsx
+✅components/quadros/QuadroManagementDrawer.jsx — drawer lateral de gestão (membros, tags, visões, campos, automações, papéis, atividade) — 13/04/2026
+✅components/quadros/board/QuadroBoardCanvas.jsx — listas horizontais, @dnd-kit, overlay de arraste — 13/04/2026
+✅components/quadros/board/BoardSortableCard.jsx — cartão sortável no quadro — 13/04/2026
+✅components/quadros/board/BoardQuickFilters.jsx — filtros rápidos (busca, tag, prioridade, prazo, situação, responsável) — 13/04/2026
+
+✅styles/pages/board-quadro.css — estilos do quadro Kanban (colunas, cartões, filtros, drop) — 13/04/2026
+✅styles/components/quadro-management-drawer.css — painel de gestão do quadro — 13/04/2026
+✅styles/pages/quadro-detalhe.css — base da página de quadro (evolução contínua) — 13/04/2026
+✅styles/components/app-layout.css — variante de largura útil para o quadro (`app-layout__content--quadro-kanban`) — 13/04/2026
+
+✅utils/boardFilterUtils.js — regras de filtros rápidos e constante de virtualização futura — 13/04/2026
+✅utils/boardItemIds.js — prefixos estáveis para itens/colunas no DnD — 13/04/2026
 
 ✅services/quadroService.js
 ✅services/quadroMembroService.js
 ✅services/quadroPapelService.js
 
+✅package.json (frontend) — dependências @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities (quadro Kanban) — 13/04/2026
+
 --------------------------------------------------
 
 3.5. Listas
 
-✅components/listas/ListaColumn.jsx
-✅components/listas/ListaHeader.jsx
+✅components/listas/ListaColumn.jsx — atualização 13/04/2026: cabeçalho de coluna Kanban, menu de ações da lista, corpo para canvas DnD
+✅components/listas/ListaHeader.jsx — atualização 13/04/2026: nível de título configurável (`titleTag`) para hierarquia acessível no quadro
 ✅components/listas/ListaForm.jsx
 ✅components/listas/ListaPermissoesForm.jsx
 ✅components/listas/ListaTransicoesForm.jsx
@@ -364,7 +379,8 @@ docs/
 
 ✅pages/cartoes/CartaoDetalhePage.jsx
 
-✅components/cartoes/CartaoCard.jsx
+✅components/cartoes/CartaoCard.jsx — atualização 13/04/2026: cartão tipo board (topo/corpo/rodapé), alça de arraste, menu de ações, metadados de responsáveis e checklist
+✅components/cartoes/CartaoCardMenu.jsx — menu contextual do cartão no quadro (detalhes, editar, mover, arquivar) — 13/04/2026
 ✅components/cartoes/CartaoModal.jsx
 ✅components/cartoes/CartaoForm.jsx
 ✅components/cartoes/CartaoHeader.jsx
@@ -380,7 +396,7 @@ docs/
 ✅components/cartoes/CartaoAnexos.jsx
 ✅components/cartoes/CartaoHistorico.jsx
 ✅components/cartoes/CartaoRelacoes.jsx
-✅components/cartoes/CriacaoRapidaCartao.jsx
+✅components/cartoes/CriacaoRapidaCartao.jsx — atualização 13/04/2026: modo Kanban expansível (“Adicionar cartão”)
 
 ✅services/cartaoService.js
 ✅services/cartaoComentarioService.js
@@ -461,7 +477,7 @@ docs/
 ✅components/common/EmptyState.jsx
 ✅components/common/ErrorMessage.jsx
 
-components/ui/Button.jsx
+✅components/ui/Button.jsx — atualização 13/04/2026: `forwardRef` (foco em drawers/menus)
 ✅components/ui/Input.jsx
 ✅components/ui/Select.jsx
 ✅components/ui/Modal.jsx
@@ -598,7 +614,7 @@ components/ui/Button.jsx
 ✅src/repositories/TagRepository.js
 ✅src/repositories/CampoPersonalizadoRepository.js
 ✅src/repositories/CampoOpcaoRepository.js
-✅src/repositories/CartaoRepository.js
+✅src/repositories/CartaoRepository.js — atualização 13/04/2026: `listar` agrega `atribuidoUsuarioIds` e `checklistItensPendentes` por cartão (suporte a filtros no quadro)
 ✅src/repositories/CartaoComentarioRepository.js
 ✅src/repositories/CartaoChecklistRepository.js
 ✅src/repositories/CartaoChecklistItemRepository.js
@@ -714,7 +730,7 @@ Sprint 1
 Sprint 2
 - listas
 - cartões básicos
-- movimentação de cartões
+- movimentação de cartões ✅ (detalhe do quadro: drag-and-drop entre listas/reordenação, API `mover` com `posicao`; fallback “Mover para” no menu — 13/04/2026)
 - membros e papéis
 
 Sprint 3
