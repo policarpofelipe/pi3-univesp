@@ -1,4 +1,6 @@
 import React, { useEffect, useId, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useCartaoOverlayReturnFocus } from "../../context/CartaoOverlayReturnFocusContext";
 import {
   ExternalLink,
   MoreHorizontal,
@@ -21,6 +23,8 @@ export default function CartaoCardMenu({
   onMoverParaLista,
   movendo = false,
 }) {
+  const location = useLocation();
+  const overlayFocus = useCartaoOverlayReturnFocus();
   const [aberto, setAberto] = useState(false);
   const wrapRef = useRef(null);
   const botaoRef = useRef(null);
@@ -58,8 +62,8 @@ export default function CartaoCardMenu({
     fechar();
   }
 
-  const detalhesHref =
-    quadroId && cartaoId ? `/quadros/${quadroId}/cartoes/${cartaoId}` : "";
+  const detalhesTo =
+    quadroId && cartaoId ? `cartoes/${cartaoId}` : "";
 
   return (
     <div className="cartao-card-menu" ref={wrapRef}>
@@ -84,16 +88,20 @@ export default function CartaoCardMenu({
           aria-label={`Ações do cartão ${cartaoTitulo}`}
           className="cartao-card-menu__panel"
         >
-          {detalhesHref ? (
-            <a
+          {detalhesTo ? (
+            <Link
               role="menuitem"
-              href={detalhesHref}
+              to={detalhesTo}
+              state={{ background: location }}
               className="cartao-card-menu__link"
-              onClick={() => fechar()}
+              onClick={() => {
+                overlayFocus?.setReturnFocusElement?.(document.activeElement);
+                setAberto(false);
+              }}
             >
               <ExternalLink size={14} aria-hidden="true" />
               Abrir detalhes
-            </a>
+            </Link>
           ) : null}
           {typeof onEditar === "function" ? (
             <Button

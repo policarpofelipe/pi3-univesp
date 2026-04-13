@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import AppLayout from "../../components/layout/AppLayout";
 import Button from "../../components/ui/Button";
@@ -69,10 +69,21 @@ function normalizarMembro(m) {
   };
 }
 
+function pathnameEhDetalheCartaoNoQuadro(pathname) {
+  return /\/quadros\/[^/]+\/cartoes\/[^/]+$/.test(pathname || "");
+}
+
+function pathnameEhSomenteQuadro(pathname) {
+  const p = String(pathname || "").replace(/\/+$/, "");
+  return /^\/quadros\/[^/]+$/.test(p) && !p.includes("/cartoes/");
+}
+
 export default function QuadroDetalhePage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { quadroId } = useParams();
   const { usuario } = useAuth();
+  const pathnameAnteriorRef = useRef(location.pathname);
 
   const [quadro, setQuadro] = useState(null);
   const [membros, setMembros] = useState([]);
@@ -220,6 +231,21 @@ export default function QuadroDetalhePage() {
       setTags([]);
     }
   }, [quadroId]);
+
+  useEffect(() => {
+    const anterior = pathnameAnteriorRef.current;
+    const atual = location.pathname;
+    pathnameAnteriorRef.current = atual;
+
+    if (
+      pathnameEhDetalheCartaoNoQuadro(anterior) &&
+      pathnameEhSomenteQuadro(atual) &&
+      String(quadroId) === (atual.match(/^\/quadros\/([^/]+)/)?.[1] ?? "")
+    ) {
+      void carregarCartoes();
+      void carregarTags();
+    }
+  }, [location.pathname, quadroId, carregarCartoes, carregarTags]);
 
   async function atualizarListasETotais() {
     await carregarListas();

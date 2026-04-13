@@ -1,0 +1,7 @@
+.cartao-detalhe-content--modal .cartao-detalhe-content__inner--modal {
+  max-width: none;
+}
+
+.cartao-detalhe-content--page .cartao-detalhe-content__inner {
+  width: 100%;
+}

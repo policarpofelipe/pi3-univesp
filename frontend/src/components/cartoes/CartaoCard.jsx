@@ -1,5 +1,6 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useCartaoOverlayReturnFocus } from "../../context/CartaoOverlayReturnFocusContext";
 import {
   CalendarDays,
   CheckSquare,
@@ -42,6 +43,9 @@ export default function CartaoCard({
   isDragging = false,
   dragDisabled = false,
 }) {
+  const location = useLocation();
+  const overlayFocus = useCartaoOverlayReturnFocus();
+
   const membrosMap =
     membrosPorUsuarioId instanceof Map ? membrosPorUsuarioId : new Map();
 
@@ -153,8 +157,12 @@ export default function CartaoCard({
         <h3 className="cartao-board-card__title">
           {quadroId ? (
             <Link
-              to={`/quadros/${quadroId}/cartoes/${cartao.id}`}
+              to={`cartoes/${cartao.id}`}
+              state={{ background: location }}
               className="cartao-board-card__title-link"
+              onClick={() =>
+                overlayFocus?.setReturnFocusElement?.(document.activeElement)
+              }
             >
               {cartao.titulo}
             </Link>
