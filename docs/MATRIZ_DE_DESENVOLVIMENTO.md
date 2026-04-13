@@ -595,22 +595,22 @@ components/ui/Button.jsx
 ✅src/repositories/ListaPermissaoRepository.js
 ✅src/repositories/ListaTransicaoRepository.js
 ✅src/repositories/VisaoRepository.js
-src/repositories/TagRepository.js
+✅src/repositories/TagRepository.js
 ✅src/repositories/CampoPersonalizadoRepository.js
-src/repositories/CampoOpcaoRepository.js
+✅src/repositories/CampoOpcaoRepository.js
 ✅src/repositories/CartaoRepository.js
 ✅src/repositories/CartaoComentarioRepository.js
 ✅src/repositories/CartaoChecklistRepository.js
-src/repositories/CartaoChecklistItemRepository.js
+✅src/repositories/CartaoChecklistItemRepository.js
 ✅src/repositories/CartaoAnexoRepository.js
 ✅src/repositories/CartaoAtribuicaoRepository.js
 ✅src/repositories/CartaoRelacaoRepository.js
 ✅src/repositories/CartaoCampoValorRepository.js
-src/repositories/CartaoEventoRepository.js
-src/repositories/CartaoVisualizacaoRepository.js
+✅src/repositories/CartaoEventoRepository.js
+✅src/repositories/CartaoVisualizacaoRepository.js
 ✅src/repositories/AutomacaoRepository.js
-src/repositories/AutomacaoAcaoRepository.js
-src/repositories/AutomacaoExecucaoRepository.js
+✅src/repositories/AutomacaoAcaoRepository.js
+✅src/repositories/AutomacaoExecucaoRepository.js
 
 --------------------------------------------------
 
