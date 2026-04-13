@@ -17,6 +17,8 @@ import HomePage from "./pages/home/HomePage";
 // Organizações
 import OrganizacoesPage from "./pages/organizacoes/OrganizacoesPage";
 import OrganizacaoDetalhePage from "./pages/organizacoes/OrganizacaoDetalhePage";
+import OrganizacaoMembrosPage from "./pages/organizacoes/OrganizacaoMembrosPage";
+import OrganizacaoConfiguracoesPage from "./pages/organizacoes/OrganizacaoConfiguracoesPage";
 
 // Quadros
 import QuadrosPage from "./pages/quadros/QuadrosPage";
@@ -53,16 +55,23 @@ export default function App() {
 
             <Route path="/organizacoes" element={<OrganizacoesPage />} />
             <Route
+              path="/organizacoes/:organizacaoId/membros"
+              element={<OrganizacaoMembrosPage />}
+            />
+            <Route
+              path="/organizacoes/:organizacaoId/configuracoes"
+              element={<OrganizacaoConfiguracoesPage />}
+            />
+            <Route
+              path="/organizacoes/:organizacaoId/quadros"
+              element={<QuadrosPage />}
+            />
+            <Route
               path="/organizacoes/:organizacaoId"
               element={<OrganizacaoDetalhePage />}
             />
 
             <Route path="/quadros" element={<QuadrosPage />} />
-
-            <Route
-              path="/organizacoes/:organizacaoId/quadros"
-              element={<QuadrosPage />}
-            />
 
             <Route
               path="/quadros/:quadroId/cartoes/:cartaoId"

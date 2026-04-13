@@ -231,31 +231,13 @@ export default function OrganizacaoDetalhePage() {
                 .filter(Boolean)
                 .join(" — ")}
               actions={
-                <>
-                  <Button
-                    variant="secondary"
-                    leftIcon={<Users size={16} />}
-                    onClick={handleAbrirMembros}
-                  >
-                    Membros
-                  </Button>
-
-                  <Button
-                    variant="secondary"
-                    leftIcon={<Settings size={16} />}
-                    onClick={handleAbrirConfiguracoes}
-                  >
-                    Configurações
-                  </Button>
-
-                  <Button
-                    variant="primary"
-                    leftIcon={<Pencil size={16} />}
-                    onClick={handleEditarOrganizacao}
-                  >
-                    Editar organização
-                  </Button>
-                </>
+                <Button
+                  variant="primary"
+                  leftIcon={<Pencil size={16} />}
+                  onClick={handleEditarOrganizacao}
+                >
+                  Editar organização
+                </Button>
               }
             />
 
