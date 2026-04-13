@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Building2, Pencil, Settings, Users } from "lucide-react";
 
 import AppLayout from "../../components/layout/AppLayout";
@@ -8,7 +8,12 @@ import LoadingState from "../../components/ui/LoadingState";
 import ErrorState from "../../components/ui/ErrorState";
 import EmptyState from "../../components/ui/EmptyState";
 import Button from "../../components/ui/Button";
-import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
+import Modal from "../../components/ui/Modal";
+import OrganizacaoForm from "../../components/organizacoes/OrganizacaoForm";
+import {
+  buscarOrganizacaoPorId,
+  atualizarOrganizacao,
+} from "../../services/organizacaoService";
 
 import "../../styles/pages/organizacao-detalhe.css";
 
@@ -37,11 +42,14 @@ function StatCard({ label, value }) {
 
 export default function OrganizacaoDetalhePage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { organizacaoId } = useParams();
 
   const [organizacao, setOrganizacao] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  const [modalEditarAberto, setModalEditarAberto] = useState(false);
+  const [salvandoEdicao, setSalvandoEdicao] = useState(false);
 
   const carregarOrganizacao = useCallback(async () => {
     if (!organizacaoId) {
@@ -82,6 +90,23 @@ export default function OrganizacaoDetalhePage() {
     carregarOrganizacao();
   }, [carregarOrganizacao]);
 
+  useEffect(() => {
+    if (!organizacao || loading) return;
+    if (!location.state?.editarOrganizacao) return;
+    setModalEditarAberto(true);
+    navigate(`/organizacoes/${organizacaoId}`, { replace: true });
+  }, [organizacao, loading, location.state, navigate, organizacaoId]);
+
+  const valoresIniciaisFormulario = useMemo(() => {
+    if (!organizacao) return null;
+    return {
+      nome: organizacao.nome ?? "",
+      slug: organizacao.slug ?? "",
+      descricao: organizacao.descricao ?? "",
+      ativo: organizacao.ativo !== false,
+    };
+  }, [organizacao]);
+
   function handleVoltar() {
     navigate(-1);
   }
@@ -111,7 +136,41 @@ export default function OrganizacaoDetalhePage() {
 
   function handleEditarOrganizacao() {
     if (!organizacao?.id) return;
-    console.log("Abrir edição da organização:", organizacao.id);
+    setModalEditarAberto(true);
+  }
+
+  function handleFecharModalEditar() {
+    if (salvandoEdicao) return;
+    setModalEditarAberto(false);
+  }
+
+  async function handleSalvarEdicaoOrganizacao(values) {
+    if (!organizacao?.id) return;
+    setSalvandoEdicao(true);
+    try {
+      const body = await atualizarOrganizacao(organizacao.id, {
+        nome: values.nome,
+        slug: values.slug,
+        descricao: values.descricao,
+        ativo: values.ativo,
+      });
+
+      const ok = body?.success !== false;
+      if (!ok && body?.message) {
+        throw new Error(body.message);
+      }
+
+      setModalEditarAberto(false);
+      await carregarOrganizacao();
+    } catch (error) {
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Não foi possível salvar a organização.";
+      throw new Error(msg);
+    } finally {
+      setSalvandoEdicao(false);
+    }
   }
 
   const breadcrumbItems = [
@@ -164,15 +223,13 @@ export default function OrganizacaoDetalhePage() {
           <>
             <PageHeader
               title={organizacao.nome}
-              subtitle={
-                organizacao.slug
-                  ? `Slug: ${organizacao.slug}`
-                  : "Organização ativa"
-              }
-              description={
+              description={[
+                organizacao.slug ? `Slug: ${organizacao.slug}` : null,
                 organizacao.descricao ||
-                "Visualize os dados principais da organização e acesse as áreas de gestão relacionadas."
-              }
+                  "Visualize os dados principais da organização e acesse as áreas de gestão relacionadas.",
+              ]
+                .filter(Boolean)
+                .join(" — ")}
               actions={
                 <>
                   <Button
@@ -184,7 +241,7 @@ export default function OrganizacaoDetalhePage() {
                   </Button>
 
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     leftIcon={<Settings size={16} />}
                     onClick={handleAbrirConfiguracoes}
                   >
@@ -297,7 +354,7 @@ export default function OrganizacaoDetalhePage() {
                   </Button>
 
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     fullWidth
                     leftIcon={<Settings size={16} />}
                     onClick={handleAbrirConfiguracoes}
@@ -316,6 +373,26 @@ export default function OrganizacaoDetalhePage() {
                 </div>
               </aside>
             </section>
+
+            <Modal
+              open={modalEditarAberto}
+              title="Editar organização"
+              onClose={handleFecharModalEditar}
+              closeLabel="Cancelar"
+              closeOnBackdrop={!salvandoEdicao}
+            >
+              {valoresIniciaisFormulario ? (
+                <OrganizacaoForm
+                  key={`editar-org-${organizacao.id}`}
+                  initialValues={valoresIniciaisFormulario}
+                  submitLabel="Salvar alterações"
+                  cancelLabel="Cancelar"
+                  loading={salvandoEdicao}
+                  onCancel={handleFecharModalEditar}
+                  onSubmit={handleSalvarEdicaoOrganizacao}
+                />
+              ) : null}
+            </Modal>
           </>
         )}
       </div>

@@ -23,3 +23,282 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* =========================================================
+   CARD DE ORGANIZAÇÃO (sem <button> aninhado — HTML válido)
+   ========================================================= */
+
+.organizacao-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.organizacao-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.organizacao-card--compact .organizacao-card__top {
+  padding: var(--space-4);
+  padding-bottom: var(--space-2);
+}
+
+.organizacao-card--compact .organizacao-card__body {
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+
+.organizacao-card--compact .organizacao-card__footer {
+  padding: var(--space-3) var(--space-4);
+}
+
+.organizacao-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  padding-bottom: var(--space-2);
+  flex-shrink: 0;
+}
+
+.organizacao-card__icon {
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-primary);
+}
+
+.organizacao-card__icon-svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.organizacao-card__top-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.organizacao-card__badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.organizacao-card__badge--active {
+  border: 1px solid var(--color-success-border);
+  background: var(--color-success-surface);
+  color: var(--color-success-text);
+}
+
+.organizacao-card__badge--inactive {
+  border: 1px solid var(--color-danger-border);
+  background: var(--color-danger-surface);
+  color: var(--color-danger-text);
+}
+
+.organizacao-card__edit {
+  display: inline-flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-strong, var(--color-border));
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.organizacao-card__edit:hover {
+  color: var(--color-primary);
+  border-color: var(--color-border-strong, var(--color-border));
+  background: var(--color-surface-hover, var(--color-surface-alt));
+}
+
+.organizacao-card__edit:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--color-focus-ring);
+}
+
+.organizacao-card__edit-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.organizacao-card__open {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+.organizacao-card__open-inner {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.organizacao-card__open:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--color-focus-ring);
+}
+
+.organizacao-card__body {
+  flex: 1 1 auto;
+  padding: 0 var(--space-5) var(--space-2);
+  min-width: 0;
+}
+
+.organizacao-card__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  line-height: var(--line-height-tight);
+  word-break: break-word;
+}
+
+.organizacao-card__slug {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-soft);
+  word-break: break-all;
+}
+
+.organizacao-card__desc {
+  margin: var(--space-3) 0 0;
+  min-height: 3rem;
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  word-break: break-word;
+}
+
+.organizacao-card__metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.organizacao-card__metric {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  padding: var(--space-3);
+  min-width: 0;
+}
+
+.organizacao-card__metric-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-soft);
+}
+
+.organizacao-card__metric-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.organizacao-card__metric-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.organizacao-card__metric-value {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.organizacao-card__date {
+  margin: var(--space-4) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-soft);
+}
+
+.organizacao-card__footer {
+  display: flex;
+  margin-top: auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-4) var(--space-5);
+}
+
+.organizacao-card__footer-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+}
+
+.organizacao-card__footer-arrow {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: var(--color-primary);
+  transition: transform var(--transition-fast);
+}
+
+.organizacao-card:hover .organizacao-card__footer-arrow {
+  transform: translateX(4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .organizacao-card__footer-arrow {
+    transition: none;
+  }
+
+  .organizacao-card:hover .organizacao-card__footer-arrow {
+    transform: none;
+  }
+}
+

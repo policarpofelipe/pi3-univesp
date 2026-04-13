@@ -116,7 +116,7 @@ export default function OrganizacoesPage() {
   }
 
   function handleEditarOrganizacao(id) {
-    navigate(`/organizacoes/${id}`);
+    navigate(`/organizacoes/${id}`, { state: { editarOrganizacao: true } });
   }
 
   return (
