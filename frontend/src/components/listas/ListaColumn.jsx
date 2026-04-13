@@ -73,12 +73,14 @@ export default function ListaColumn({
 
   return (
     <section className={["lista-column", className].filter(Boolean).join(" ")}>
-      <ListaHeader
-        nome={lista.nome}
-        totalCartoes={lista.totalCartoes}
-        limiteWip={lista.limiteWip}
-        titleTag="h2"
-        actions={
+      <div className="lista-column__header-shell">
+        <ListaHeader
+          nome={lista.nome}
+          totalCartoes={lista.totalCartoes}
+          limiteWip={lista.limiteWip}
+          titleTag="h2"
+          className="border-none pb-0"
+          actions={
           temMenu ? (
             <div className="relative flex items-center gap-1" ref={menuWrapRef}>
               <Button
@@ -156,13 +158,14 @@ export default function ListaColumn({
             </div>
           ) : null
         }
-      />
+        />
+      </div>
 
       {lista.descricao ? (
         <p className="lista-column__descricao">{lista.descricao}</p>
       ) : null}
 
-      <div className="lista-column__cards">{children}</div>
+      <div className="lista-column__body">{children}</div>
     </section>
   );
 }

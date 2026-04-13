@@ -1,8 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { CalendarDays } from "lucide-react";
+import {
+  CalendarDays,
+  CheckSquare,
+  GripVertical,
+} from "lucide-react";
 
-import Button from "../ui/Button";
 import CartaoDescricao from "./CartaoDescricao";
 import {
   formatarPrazoExibicao,
@@ -11,125 +14,180 @@ import {
 import { labelPrioridadeCartao } from "../../constants/prioridades";
 import { classePrioridadeCartao } from "./CartaoPrioridade";
 import TagBadge from "./TagBadge";
+import CartaoCardMenu from "./CartaoCardMenu";
+
+function iniciaisNome(nome) {
+  const t = String(nome || "").trim();
+  if (!t) return "?";
+  const parts = t.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return t.slice(0, 2).toUpperCase();
+}
 
 export default function CartaoCard({
   quadroId = "",
   cartao,
   tagsDisponiveis = [],
   listas = [],
+  membrosPorUsuarioId,
   onEdit,
-  onDelete,
+  onArquivar,
   onMoverLista,
   movendo = false,
   className = "",
+  dragActivatorRef = null,
+  dragListeners = null,
+  isDragging = false,
+  dragDisabled = false,
 }) {
+  const membrosMap =
+    membrosPorUsuarioId instanceof Map ? membrosPorUsuarioId : new Map();
+
   const idsTag = Array.isArray(cartao.tagIds) ? cartao.tagIds.map(String) : [];
   const tagsNoCartao = idsTag
     .map((id) => tagsDisponiveis.find((t) => String(t.id) === id))
     .filter(Boolean);
 
+  const atribIds = Array.isArray(cartao.atribuidoUsuarioIds)
+    ? cartao.atribuidoUsuarioIds
+    : [];
+  const atribDisplay = atribIds.slice(0, 3).map((uid) => {
+    const info = membrosMap.get(Number(uid));
+    return {
+      key: uid,
+      label: info?.nome || `Usuário ${uid}`,
+      iniciais: iniciaisNome(info?.nome || ""),
+    };
+  });
+
+  const pendentesChecklist = Number(cartao.checklistItensPendentes) || 0;
+
   return (
     <article
       className={[
-        "cartao-card-kanban rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-[var(--shadow-xs)]",
+        "cartao-board-card",
+        isDragging ? "cartao-board-card--is-dragging" : "",
         className,
       ]
         .filter(Boolean)
         .join(" ")}
       aria-label={`Cartão ${cartao.titulo}`}
     >
-      <h3 className="text-[var(--font-size-sm)] font-semibold text-[var(--color-text)]">
-        {quadroId ? (
-          <Link
-            to={`/quadros/${quadroId}/cartoes/${cartao.id}`}
-            className="text-[var(--color-text)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2"
+      <div
+        className={[
+          "cartao-board-card__top",
+          dragDisabled ? "cartao-board-card__top--no-grip" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {!dragDisabled ? (
+          <button
+            type="button"
+            ref={dragActivatorRef}
+            className="cartao-board-card__grip"
+            aria-label={`Arrastar cartão ${cartao.titulo}`}
+            {...(dragListeners || {})}
           >
-            {cartao.titulo}
-          </Link>
-        ) : (
-          cartao.titulo
-        )}
-      </h3>
-      {cartao.prioridade ? (
-        <p className="mt-1">
-          <span
-            className={[
-              "inline-flex rounded-full border px-2 py-0.5 text-[var(--font-size-xs)] font-medium",
-              classePrioridadeCartao(cartao.prioridade),
-            ].join(" ")}
-          >
-            {labelPrioridadeCartao(cartao.prioridade)}
-          </span>
-        </p>
-      ) : null}
+            <GripVertical size={16} aria-hidden="true" />
+          </button>
+        ) : null}
+        <div className="cartao-board-card__top-chips">
+          {cartao.prioridade ? (
+            <span
+              className={[
+                "cartao-board-card__chip cartao-board-card__chip--prio",
+                classePrioridadeCartao(cartao.prioridade),
+              ].join(" ")}
+            >
+              {labelPrioridadeCartao(cartao.prioridade)}
+            </span>
+          ) : null}
+          {cartao.prazoEm ? (
+            <span
+              className={[
+                "cartao-board-card__chip cartao-board-card__chip--date",
+                prazoEstaAtrasado(cartao.prazoEm)
+                  ? "cartao-board-card__chip--overdue"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              <CalendarDays size={12} aria-hidden="true" />
+              <time dateTime={cartao.prazoEm}>
+                {formatarPrazoExibicao(cartao.prazoEm)}
+              </time>
+            </span>
+          ) : null}
+        </div>
+        <CartaoCardMenu
+          cartaoTitulo={cartao.titulo}
+          quadroId={quadroId}
+          cartaoId={cartao.id}
+          listas={listas}
+          onEditar={typeof onEdit === "function" ? () => onEdit(cartao) : undefined}
+          onArquivar={
+            typeof onArquivar === "function" ? () => onArquivar(cartao) : undefined
+          }
+          onMoverParaLista={
+            typeof onMoverLista === "function"
+              ? (listaId) => onMoverLista(cartao, listaId)
+              : undefined
+          }
+          movendo={movendo}
+        />
+      </div>
+
       {tagsNoCartao.length ? (
-        <div className="mt-2 flex flex-wrap gap-1">
+        <div className="cartao-board-card__tags" aria-label="Tags">
           {tagsNoCartao.map((t) => (
             <TagBadge key={t.id} nome={t.nome} cor={t.cor} />
           ))}
         </div>
       ) : null}
-      <CartaoDescricao texto={cartao.descricao} variant="compact" />
 
-      {cartao.prazoEm ? (
-        <p
-          className={[
-            "mt-2 flex items-center gap-1 text-[var(--font-size-xs)]",
-            prazoEstaAtrasado(cartao.prazoEm)
-              ? "text-[var(--color-danger-text)]"
-              : "text-[var(--color-text-muted)]",
-          ].join(" ")}
-        >
-          <CalendarDays size={12} aria-hidden="true" />
-          <time dateTime={cartao.prazoEm}>
-            {formatarPrazoExibicao(cartao.prazoEm)}
-          </time>
-        </p>
-      ) : null}
+      <div className="cartao-board-card__body">
+        <h3 className="cartao-board-card__title">
+          {quadroId ? (
+            <Link
+              to={`/quadros/${quadroId}/cartoes/${cartao.id}`}
+              className="cartao-board-card__title-link"
+            >
+              {cartao.titulo}
+            </Link>
+          ) : (
+            cartao.titulo
+          )}
+        </h3>
+        <CartaoDescricao texto={cartao.descricao} variant="compact" />
+      </div>
 
-      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        {listas.length > 1 ? (
-          <label className="flex min-w-0 flex-1 flex-col gap-1 sm:max-w-[11rem]">
-            <span className="sr-only">Mover para lista</span>
-            <select
-              value={String(cartao.listaId)}
-              disabled={movendo}
-              onChange={(e) =>
-                onMoverLista?.(cartao, e.target.value)
-              }
-              className="rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-2 py-1.5 text-[var(--font-size-xs)]"
-            >
-              {listas.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.nome}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : null}
-
-        <div className="flex flex-wrap gap-1">
-          {typeof onEdit === "function" ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => onEdit(cartao)}
-            >
-              Editar
-            </Button>
-          ) : null}
-          {typeof onDelete === "function" ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(cartao)}
-            >
-              Excluir
-            </Button>
-          ) : null}
+      <div className="cartao-board-card__footer">
+        <div className="cartao-board-card__avatars" aria-label="Responsáveis">
+          {atribDisplay.length ? (
+            atribDisplay.map((a) => (
+              <span
+                key={a.key}
+                className="cartao-board-card__avatar"
+                title={a.label}
+              >
+                <span className="sr-only">{a.label}</span>
+                <span aria-hidden="true">{a.iniciais}</span>
+              </span>
+            ))
+          ) : (
+            <span className="cartao-board-card__meta-muted">Sem responsável</span>
+          )}
         </div>
+        {pendentesChecklist > 0 ? (
+          <span className="cartao-board-card__check-hint">
+            <CheckSquare size={14} aria-hidden="true" />
+            <span>{pendentesChecklist} pendente(s)</span>
+          </span>
+        ) : null}
       </div>
     </article>
   );

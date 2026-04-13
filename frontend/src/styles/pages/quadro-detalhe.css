@@ -137,17 +137,6 @@
   color: var(--color-text-muted);
 }
 
-.lista-column__cards {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-  min-height: 0;
-  overflow-y: auto;
-  padding-right: var(--space-1);
-}
-
 .lista-column__menu {
   position: absolute;
   right: 0;
@@ -168,25 +157,6 @@
 .lista-column__menu-item {
   justify-content: flex-start !important;
   width: 100%;
-}
-
-/* Cartões */
-
-.cartao-card-kanban {
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast),
-    background-color var(--transition-fast);
-}
-
-.cartao-card-kanban:hover {
-  border-color: var(--color-border-strong, var(--color-border));
-  box-shadow: var(--shadow-sm);
-}
-
-.cartao-card-kanban:focus-within {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
 }
 
 /* Criação rápida (modo Kanban) */
@@ -434,7 +404,4 @@
     animation: none;
   }
 
-  .cartao-card-kanban {
-    transition: none;
-  }
 }

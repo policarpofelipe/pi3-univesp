@@ -14,12 +14,15 @@ import cartaoService from "../../services/cartaoService";
 import tagService from "../../services/tagService";
 import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 import ListaForm from "../../components/listas/ListaForm";
-import ListaColumn from "../../components/listas/ListaColumn";
-import CartaoCard from "../../components/cartoes/CartaoCard";
 import CartaoModal from "../../components/cartoes/CartaoModal";
-import CriacaoRapidaCartao from "../../components/cartoes/CriacaoRapidaCartao";
 import QuadroManagementDrawer from "../../components/quadros/QuadroManagementDrawer";
+import BoardQuickFilters from "../../components/quadros/board/BoardQuickFilters";
+import QuadroBoardCanvas from "../../components/quadros/board/QuadroBoardCanvas";
 import { extractList, extractObject } from "../../utils/apiData";
+import {
+  aplicarFiltrosRapidos,
+  filtrosEstaoAtivos,
+} from "../../utils/boardFilterUtils";
 import useAuth from "../../hooks/useAuth";
 
 import {
@@ -32,6 +35,7 @@ import {
 } from "lucide-react";
 
 import "../../styles/pages/quadro-detalhe.css";
+import "../../styles/pages/board-quadro.css";
 
 function formatarData(data) {
   if (!data) return "Não informado";
@@ -59,6 +63,7 @@ function normalizarMembro(m) {
 
   return {
     id: m.id,
+    usuarioId: m.usuarioId ?? m.usuario_id ?? null,
     nome: m.nome,
     papeis: papeis.filter(Boolean),
   };
@@ -85,6 +90,14 @@ export default function QuadroDetalhePage() {
   const [criandoTag, setCriandoTag] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerSection, setDrawerSection] = useState("geral");
+  const [filters, setFilters] = useState({
+    busca: "",
+    tagId: "",
+    prioridade: "",
+    prazo: "",
+    situacao: "",
+    membroId: "",
+  });
 
   const carregar = useCallback(async () => {
     if (!quadroId) return;
@@ -161,17 +174,21 @@ export default function QuadroDetalhePage() {
     return listas.reduce((acc, lista) => acc + (lista.totalCartoes || 0), 0);
   }, [listas]);
 
-  const cartoesPorLista = useMemo(() => {
-    const map = new Map();
-    for (const l of listas) {
-      const key = String(l.id);
-      const arr = cartoes
-        .filter((c) => String(c.listaId) === key)
-        .sort((a, b) => (a.posicao ?? 0) - (b.posicao ?? 0));
-      map.set(key, arr);
+  const cartoesVisiveis = useMemo(
+    () => aplicarFiltrosRapidos(cartoes, filters),
+    [cartoes, filters]
+  );
+
+  const filtrosAtivos = filtrosEstaoAtivos(filters);
+
+  const membrosPorUsuarioId = useMemo(() => {
+    const m = new Map();
+    for (const mem of membros) {
+      const uid = mem.usuarioId ?? mem.id;
+      if (uid != null) m.set(Number(uid), { nome: mem.nome });
     }
-    return map;
-  }, [listas, cartoes]);
+    return m;
+  }, [membros]);
 
   const carregarListas = useCallback(async () => {
     if (!quadroId) return;
@@ -271,7 +288,11 @@ export default function QuadroDetalhePage() {
   }
 
   async function handleExcluirCartao(cartao) {
-    if (!window.confirm(`Excluir o cartão "${cartao.titulo}"?`)) return;
+    if (
+      !window.confirm(`Arquivar o cartão "${cartao.titulo}"? Ele sairá do quadro.`)
+    ) {
+      return;
+    }
     try {
       await cartaoService.remover(quadroId, cartao.id);
       await atualizarListasETotais();
@@ -415,6 +436,19 @@ export default function QuadroDetalhePage() {
   const orgNome =
     quadro?.organizacao?.nome || quadro?.organizacaoNome || "";
 
+  const listaMenusColuna = useMemo(
+    () =>
+      listas.map((lista, index) => ({
+        onEditar: () => setListaModal({ mode: "editar", lista }),
+        onExcluir: () => handleExcluirLista(lista),
+        onMoverEsquerda: () => moverLista(index, -1),
+        onMoverDireita: () => moverLista(index, 1),
+        podeMoverEsquerda: index > 0,
+        podeMoverDireita: index < listas.length - 1,
+      })),
+    [listas]
+  );
+
   if (loading && !quadro) {
     return (
       <AppLayout
@@ -528,7 +562,11 @@ export default function QuadroDetalhePage() {
               <span className="quadro-detalhe-page__metrics-sep" aria-hidden="true">
                 •
               </span>
-              <span>{totalCartoes} cartões</span>
+              <span>
+                {filtrosAtivos
+                  ? `${cartoesVisiveis.length} de ${totalCartoes} cartões`
+                  : `${totalCartoes} cartões`}
+              </span>
               <span className="quadro-detalhe-page__metrics-sep" aria-hidden="true">
                 •
               </span>
@@ -544,6 +582,15 @@ export default function QuadroDetalhePage() {
             </p>
           </div>
         </header>
+
+        {listas.length > 0 ? (
+          <BoardQuickFilters
+            filters={filters}
+            onChange={setFilters}
+            tags={tags}
+            membros={membros}
+          />
+        ) : null}
 
         <section
           className="quadro-detalhe-page__canvas"
@@ -567,59 +614,36 @@ export default function QuadroDetalhePage() {
               />
             </div>
           ) : (
-            <div
-              className="quadro-detalhe-page__columns-scroller"
-              role="region"
-              aria-label="Listas em rolagem horizontal"
-            >
-              {listas.map((lista, index) => (
-                <ListaColumn
-                  key={lista.id}
-                  lista={lista}
-                  boardMenu={{
-                    onEditar: () =>
-                      setListaModal({ mode: "editar", lista }),
-                    onExcluir: () => handleExcluirLista(lista),
-                    onMoverEsquerda: () => moverLista(index, -1),
-                    onMoverDireita: () => moverLista(index, 1),
-                    podeMoverEsquerda: index > 0,
-                    podeMoverDireita: index < listas.length - 1,
-                  }}
-                >
-                  <CriacaoRapidaCartao
-                    listaId={lista.id}
-                    onCriar={handleCriacaoRapidaCartao}
-                    variant="kanban"
-                  />
-                  {(cartoesPorLista.get(String(lista.id)) || []).map((c) => (
-                    <CartaoCard
-                      key={c.id}
-                      quadroId={quadroId}
-                      cartao={c}
-                      tagsDisponiveis={tags}
-                      listas={listas}
-                      movendo={movendoCartaoId === c.id}
-                      onEdit={(cc) =>
-                        setCartaoModal({ mode: "editar", cartao: cc })
-                      }
-                      onDelete={handleExcluirCartao}
-                      onMoverLista={handleMoverCartaoLista}
-                    />
-                  ))}
-                </ListaColumn>
-              ))}
-              <div className="quadro-detalhe-page__nova-lista">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="quadro-detalhe-page__nova-lista-btn"
-                  leftIcon={<Plus size={18} aria-hidden="true" />}
-                  onClick={handleNovaLista}
-                >
-                  Nova lista
-                </Button>
-              </div>
-            </div>
+            <QuadroBoardCanvas
+              quadroId={quadroId}
+              listas={listas}
+              cartoes={cartoesVisiveis}
+              tags={tags}
+              membrosPorUsuarioId={membrosPorUsuarioId}
+              dragDisabled={filtrosAtivos}
+              onCartoesUpdated={atualizarListasETotais}
+              onEditCartao={(cc) =>
+                setCartaoModal({ mode: "editar", cartao: cc })
+              }
+              onArquivarCartao={handleExcluirCartao}
+              onMoverCartaoLista={handleMoverCartaoLista}
+              movendoCartaoId={movendoCartaoId}
+              onCriacaoRapida={handleCriacaoRapidaCartao}
+              listaColumnMenuPropsByIndex={listaMenusColuna}
+              renderNovaListaColumn={() => (
+                <div className="quadro-detalhe-page__nova-lista">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="quadro-detalhe-page__nova-lista-btn"
+                    leftIcon={<Plus size={18} aria-hidden="true" />}
+                    onClick={handleNovaLista}
+                  >
+                    Nova lista
+                  </Button>
+                </div>
+              )}
+            />
           )}
         </section>
       </div>

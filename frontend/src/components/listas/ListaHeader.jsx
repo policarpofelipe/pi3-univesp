@@ -14,7 +14,9 @@ export default function ListaHeader({
       className={[
         "flex flex-wrap items-start justify-between gap-2 border-b border-[var(--color-border)] pb-3",
         className,
-      ].join(" ")}
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       <div className="min-w-0 flex-1">
         <TitleTag className="text-[var(--font-size-md)] font-semibold text-[var(--color-text)]">

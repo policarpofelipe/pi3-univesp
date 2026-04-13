@@ -57,8 +57,61 @@ class CartaoRepository {
     if (!rows.length) return [];
 
     const cards = rows.map((row) => this.mapRow(row));
-    const tagsByCard = await this.listarTagsPorCartoes(cards.map((c) => c.id));
-    return cards.map((c) => ({ ...c, tagIds: tagsByCard[c.id] || [] }));
+    const cardIds = cards.map((c) => c.id);
+    const tagsByCard = await this.listarTagsPorCartoes(cardIds);
+    const atribuidoPorCartao = await this.listarAtribuicoesUsuarioIdsPorCartoes(
+      cardIds
+    );
+    const checklistPendentesPorCartao =
+      await this.listarChecklistItensPendentesPorCartoes(cardIds);
+    return cards.map((c) => ({
+      ...c,
+      tagIds: tagsByCard[c.id] || [],
+      atribuidoUsuarioIds: atribuidoPorCartao[c.id] || [],
+      checklistItensPendentes: checklistPendentesPorCartao[c.id] || 0,
+    }));
+  }
+
+  async listarAtribuicoesUsuarioIdsPorCartoes(cartaoIds = []) {
+    if (!cartaoIds.length) return {};
+    const placeholders = cartaoIds.map(() => "?").join(",");
+    const [rows] = await db.query(
+      `
+      SELECT cartao_id AS cartaoId, usuario_id AS usuarioId
+      FROM cartao_atribuicoes
+      WHERE cartao_id IN (${placeholders})
+      `,
+      cartaoIds
+    );
+    return rows.reduce((acc, row) => {
+      const cid = row.cartaoId;
+      if (!acc[cid]) acc[cid] = [];
+      acc[cid].push(Number(row.usuarioId));
+      return acc;
+    }, {});
+  }
+
+  async listarChecklistItensPendentesPorCartoes(cartaoIds = []) {
+    if (!cartaoIds.length) return {};
+    const placeholders = cartaoIds.map(() => "?").join(",");
+    const [rows] = await db.query(
+      `
+      SELECT c.id AS cartaoId, COUNT(ci.id) AS pendentes
+      FROM cartoes c
+      INNER JOIN cartao_checklists cl
+        ON cl.cartao_id = c.id AND cl.removido_em IS NULL
+      INNER JOIN cartao_checklist_itens ci
+        ON ci.checklist_id = cl.id AND ci.removido_em IS NULL AND ci.concluido = 0
+      WHERE c.id IN (${placeholders})
+        AND c.arquivado_em IS NULL
+      GROUP BY c.id
+      `,
+      cartaoIds
+    );
+    return rows.reduce((acc, row) => {
+      acc[row.cartaoId] = Number(row.pendentes) || 0;
+      return acc;
+    }, {});
   }
 
   async obterPorId(quadroId, cartaoId) {
