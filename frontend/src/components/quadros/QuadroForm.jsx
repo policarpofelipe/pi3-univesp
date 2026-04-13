@@ -1,5 +1,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Button from "../ui/Button";
+import { listarOrganizacoes } from "../../services/organizacaoService";
+import { extractList } from "../../utils/apiData";
 import "../../styles/components/quadro-form.css";
 
 const DEFAULT_VALUES = {
@@ -42,6 +44,14 @@ function validate(values, modo) {
 
 const DESCRICAO_MAX = 2000;
 
+function organizacoesPermitemCriarQuadro(lista) {
+  return lista.filter(
+    (o) =>
+      !o.meuStatusNaOrganizacao ||
+      String(o.meuStatusNaOrganizacao) === "ativo"
+  );
+}
+
 export default function QuadroForm({
   modo = "editar",
   initialValues = DEFAULT_VALUES,
@@ -57,6 +67,12 @@ export default function QuadroForm({
   autoFocusNome = true,
 }) {
   const nomeInputRef = useRef(null);
+  const organizacaoContextoFixo = Boolean(
+    String(organizacaoId ?? "").trim()
+  );
+  const precisaEscolherOrganizacao =
+    modo === "criar" && !organizacaoContextoFixo;
+
   const mergedInitial = useMemo(
     () =>
       normalize({
@@ -69,6 +85,14 @@ export default function QuadroForm({
   const [values, setValues] = useState(mergedInitial);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
+  const [orgsRaw, setOrgsRaw] = useState([]);
+  const [orgsLoading, setOrgsLoading] = useState(false);
+  const [orgsError, setOrgsError] = useState("");
+
+  const organizacoesCriacao = useMemo(
+    () => organizacoesPermitemCriarQuadro(orgsRaw),
+    [orgsRaw]
+  );
 
   useEffect(() => {
     setValues(mergedInitial);
@@ -76,13 +100,73 @@ export default function QuadroForm({
     setSubmitError("");
   }, [mergedInitial]);
 
+  useEffect(() => {
+    if (!precisaEscolherOrganizacao) {
+      setOrgsRaw([]);
+      setOrgsLoading(false);
+      setOrgsError("");
+      return undefined;
+    }
+
+    const ac = new AbortController();
+
+    (async () => {
+      setOrgsLoading(true);
+      setOrgsError("");
+      try {
+        const res = await listarOrganizacoes({}, { signal: ac.signal });
+        const lista = extractList(res);
+        if (!ac.signal.aborted) {
+          setOrgsRaw(lista);
+        }
+      } catch (err) {
+        if (
+          err?.code === "ERR_CANCELED" ||
+          err?.name === "CanceledError" ||
+          ac.signal.aborted
+        ) {
+          return;
+        }
+        if (!ac.signal.aborted) {
+          setOrgsRaw([]);
+          setOrgsError(
+            err?.response?.data?.message ||
+              err?.message ||
+              "Não foi possível carregar as organizações."
+          );
+        }
+      } finally {
+        if (!ac.signal.aborted) {
+          setOrgsLoading(false);
+        }
+      }
+    })();
+
+    return () => ac.abort();
+  }, [precisaEscolherOrganizacao]);
+
+  useEffect(() => {
+    if (!precisaEscolherOrganizacao) return;
+    if (organizacoesCriacao.length !== 1) return;
+    setValues((prev) => {
+      if (String(prev.organizacaoId || "").trim()) return prev;
+      return {
+        ...prev,
+        organizacaoId: String(organizacoesCriacao[0].id),
+      };
+    });
+  }, [organizacoesCriacao, precisaEscolherOrganizacao]);
+
   useLayoutEffect(() => {
     if (!autoFocusNome) return;
+    if (precisaEscolherOrganizacao && !String(values.organizacaoId || "").trim()) {
+      return;
+    }
     const id = window.requestAnimationFrame(() => {
       nomeInputRef.current?.focus();
     });
     return () => window.cancelAnimationFrame(id);
-  }, [mergedInitial, autoFocusNome]);
+  }, [mergedInitial, autoFocusNome, precisaEscolherOrganizacao, values.organizacaoId]);
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
@@ -99,7 +183,9 @@ export default function QuadroForm({
     const next = {
       ...values,
       organizacaoId: String(
-        values.organizacaoId || organizacaoId || ""
+        values.organizacaoId ||
+          (organizacaoContextoFixo ? organizacaoId : "") ||
+          ""
       ).trim(),
     };
 
@@ -135,6 +221,12 @@ export default function QuadroForm({
 
   const descricaoLength = values.descricao.length;
 
+  const bloquearEnvioPorOrgs =
+    precisaEscolherOrganizacao &&
+    (orgsLoading ||
+      Boolean(orgsError) ||
+      organizacoesCriacao.length === 0);
+
   return (
     <form
       id={formId || undefined}
@@ -144,11 +236,72 @@ export default function QuadroForm({
     >
       <div className="quadro-form__panel">
         <div className="quadro-form__grid">
-          {organizacaoNome ? (
+          {organizacaoContextoFixo && organizacaoNome ? (
             <p className="quadro-form__meta quadro-form__field--full">
               Organização:{" "}
               <strong>{organizacaoNome}</strong>
             </p>
+          ) : null}
+
+          {precisaEscolherOrganizacao ? (
+            <div className="quadro-form__field quadro-form__field--full">
+              <label
+                htmlFor="quadro-form-organizacao"
+                className="quadro-form__label"
+              >
+                Organização
+              </label>
+              {orgsLoading ? (
+                <p className="quadro-form__meta" aria-live="polite">
+                  Carregando organizações…
+                </p>
+              ) : null}
+              {orgsError ? (
+                <p
+                  className="quadro-form__field-error"
+                  role="alert"
+                  aria-live="polite"
+                >
+                  {orgsError}
+                </p>
+              ) : null}
+              {!orgsLoading && !orgsError && organizacoesCriacao.length === 0 ? (
+                <p className="quadro-form__meta" role="status">
+                  Nenhuma organização disponível em que você possa criar quadros
+                  (é necessário ser membro ativo).
+                </p>
+              ) : null}
+              {!orgsLoading && organizacoesCriacao.length > 0 ? (
+                <select
+                  id="quadro-form-organizacao"
+                  name="organizacaoId"
+                  value={values.organizacaoId}
+                  onChange={handleChange}
+                  aria-invalid={Boolean(errors.organizacaoId)}
+                  aria-describedby={
+                    errors.organizacaoId
+                      ? "quadro-form-organizacao-erro"
+                      : undefined
+                  }
+                >
+                  <option value="">Selecione a organização</option>
+                  {organizacoesCriacao.map((o) => (
+                    <option key={o.id} value={String(o.id)}>
+                      {o.nome || `Organização #${o.id}`}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
+              {errors.organizacaoId ? (
+                <p
+                  id="quadro-form-organizacao-erro"
+                  className="quadro-form__field-error"
+                  role="alert"
+                >
+                  {errors.organizacaoId}
+                </p>
+              ) : null}
+            </div>
           ) : null}
 
           <div className="quadro-form__field quadro-form__field--full">
@@ -258,15 +411,6 @@ export default function QuadroForm({
               </label>
             </fieldset>
           ) : null}
-
-          {errors.organizacaoId ? (
-            <p
-              className="quadro-form__field-error quadro-form__field--full"
-              role="alert"
-            >
-              {errors.organizacaoId}
-            </p>
-          ) : null}
         </div>
       </div>
 
@@ -277,7 +421,12 @@ export default function QuadroForm({
       ) : null}
 
       <div className="quadro-form__actions">
-        <Button type="submit" variant="primary" loading={loading}>
+        <Button
+          type="submit"
+          variant="primary"
+          loading={loading}
+          disabled={bloquearEnvioPorOrgs}
+        >
           {labelPrincipal}
         </Button>
         {typeof onCancel === "function" ? (

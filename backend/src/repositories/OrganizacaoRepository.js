@@ -62,6 +62,10 @@ class OrganizacaoRepository {
         row.membrosCount !== undefined ? Number(row.membrosCount) : undefined,
       quadrosCount:
         row.quadrosCount !== undefined ? Number(row.quadrosCount) : undefined,
+      meuStatusNaOrganizacao:
+        row.meuStatusNaOrganizacao != null
+          ? String(row.meuStatusNaOrganizacao)
+          : undefined,
     };
   }
 
@@ -75,6 +79,10 @@ class OrganizacaoRepository {
     const where = [];
     const params = [];
 
+    const selectMeuStatus = usuarioId
+      ? ", MAX(omu.status) AS meuStatusNaOrganizacao"
+      : "";
+
     let sql = `
       SELECT
         o.id,
@@ -87,6 +95,7 @@ class OrganizacaoRepository {
         o.atualizado_em AS atualizadoEm,
         COUNT(DISTINCT CASE WHEN om.status = 'ativo' THEN om.id END) AS membrosCount,
         COUNT(DISTINCT q.id) AS quadrosCount
+        ${selectMeuStatus}
       FROM organizacoes o
       LEFT JOIN organizacao_membros om
         ON om.organizacao_id = o.id

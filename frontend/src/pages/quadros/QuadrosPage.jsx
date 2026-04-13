@@ -125,12 +125,6 @@ export default function QuadrosPage() {
   }, [busca, filtroStatus, organizacaoId, quadros]);
 
   function handleCriarQuadro() {
-    if (!organizacaoId) {
-      window.alert(
-        "Para criar um quadro, acesse antes uma organização e use o atalho de quadros no contexto dela."
-      );
-      return;
-    }
     setModalCriar(true);
   }
 
@@ -205,19 +199,11 @@ export default function QuadrosPage() {
               variant="primary"
               leftIcon={<Plus size={16} />}
               onClick={handleCriarQuadro}
-              disabled={!organizacaoId}
             >
               Novo quadro
             </Button>
           }
         />
-
-        {!organizacaoId ? (
-          <p className="mb-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-4 py-3 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-            Dica: abra uma organização e use &quot;Ver quadros&quot; para criar
-            quadros já vinculados a ela.
-          </p>
-        ) : null}
 
         {loading ? (
           <LoadingState title="Carregando quadros" />
@@ -313,13 +299,12 @@ export default function QuadrosPage() {
                 <EmptyState
                   icon={<KanbanSquare size={40} />}
                   title="Nenhum quadro encontrado"
-                  description="Não há quadros compatíveis com os filtros aplicados. Ajuste a busca ou crie um novo quadro no contexto de uma organização."
+                  description="Não há quadros compatíveis com os filtros aplicados. Ajuste a busca ou crie um novo quadro escolhendo a organização no formulário."
                   action={
                     <Button
                       variant="primary"
                       leftIcon={<Plus size={16} />}
                       onClick={handleCriarQuadro}
-                      disabled={!organizacaoId}
                     >
                       Criar quadro
                     </Button>

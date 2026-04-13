@@ -1,9 +1,10 @@
 import { api } from "./authService";
 
 const organizacaoService = {
-  async listar(params = {}) {
+  async listar(params = {}, axiosConfig = {}) {
     const response = await api.get("/organizacoes", {
       params,
+      ...axiosConfig,
     });
 
     return response.data;
@@ -144,8 +145,8 @@ const organizacaoService = {
   },
 };
 
-export function listarOrganizacoes(params = {}) {
-  return organizacaoService.listar(params);
+export function listarOrganizacoes(params = {}, axiosConfig = {}) {
+  return organizacaoService.listar(params, axiosConfig);
 }
 
 export function buscarOrganizacaoPorId(organizacaoId) {
