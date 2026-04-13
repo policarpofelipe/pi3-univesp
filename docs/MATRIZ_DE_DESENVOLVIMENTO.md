@@ -554,8 +554,8 @@ components/ui/Button.jsx
 4.4. Services
 
 ✅src/services/AuthService.js - Felipe Policarpo 09/03/2026
-src/services/UsuarioService.js
-src/services/OrganizacaoService.js
+✅src/services/UsuarioService.js
+✅src/services/OrganizacaoService.js
 ✅src/services/QuadroService.js
 ✅src/services/QuadroMembroService.js
 ✅src/services/QuadroPapelService.js
@@ -563,7 +563,7 @@ src/services/OrganizacaoService.js
 ✅src/services/ListaPermissaoService.js
 ✅src/services/ListaTransicaoService.js
 ✅src/services/VisaoService.js
-src/services/TagService.js
+✅src/services/TagService.js
 ✅src/services/CampoPersonalizadoService.js
 ✅src/services/CartaoService.js
 ✅src/services/CartaoComentarioService.js
@@ -571,16 +571,16 @@ src/services/TagService.js
 ✅src/services/CartaoAnexoService.js
 ✅src/services/cartaoAtribuicaoService.js
 ✅src/services/cartaoRelacaoService.js
-src/services/CartaoEventoService.js
-src/services/CartaoVisualizacaoService.js
+✅src/services/CartaoEventoService.js
+✅src/services/CartaoVisualizacaoService.js
 ✅src/services/AutomacaoService.js
 ✅src/services/cartaoCampoValorService.js
-src/services/AutomacaoExecutorService.js
-src/services/HandoffService.js
-src/services/PermissaoService.js
-src/services/TransicaoService.js
-src/services/UploadService.js
-src/services/BuscaService.js
+✅src/services/AutomacaoExecutorService.js
+✅src/services/HandoffService.js
+✅src/services/PermissaoService.js
+✅src/services/TransicaoService.js
+✅src/services/UploadService.js
+✅src/services/BuscaService.js
 
 --------------------------------------------------
 
