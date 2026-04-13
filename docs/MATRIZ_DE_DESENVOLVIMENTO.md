@@ -638,12 +638,12 @@ components/ui/Button.jsx
 
 4.8. Jobs e eventos internos
 
-src/jobs/automacaoJob.js
-src/jobs/prazoJob.js
+✅src/jobs/automacaoJob.js
+✅src/jobs/prazoJob.js
 
-src/events/cartaoCriadoEvent.js
-src/events/cartaoMovidoEvent.js
-src/events/prazoVencidoEvent.js
+✅src/events/cartaoCriadoEvent.js
+✅src/events/cartaoMovidoEvent.js
+✅src/events/prazoVencidoEvent.js
 
 --------------------------------------------------
 

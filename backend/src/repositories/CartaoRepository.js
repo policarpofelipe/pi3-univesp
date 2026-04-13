@@ -255,6 +255,33 @@ class CartaoRepository {
     }
   }
 
+  /**
+   * Cartões não concluídos nem arquivados com prazo_em <= agora (UTC no servidor).
+   */
+  async listarCartoesComPrazoVencido({ limit = 200 } = {}) {
+    const safeLimit = Number.isInteger(limit) && limit > 0 ? limit : 200;
+    const [rows] = await db.query(
+      `
+      SELECT
+        c.id AS cartaoId,
+        c.lista_id AS listaId,
+        l.quadro_id AS quadroId,
+        c.titulo,
+        c.prazo_em AS prazoEm
+      FROM cartoes c
+      INNER JOIN listas l ON l.id = c.lista_id
+      WHERE c.prazo_em IS NOT NULL
+        AND c.prazo_em <= NOW()
+        AND c.concluido_em IS NULL
+        AND c.arquivado_em IS NULL
+      ORDER BY c.prazo_em ASC, c.id ASC
+      LIMIT ?
+      `,
+      [safeLimit]
+    );
+    return rows;
+  }
+
   async recalcularPosicoesLista(listaId) {
     const conn = await db.getConnection();
     try {

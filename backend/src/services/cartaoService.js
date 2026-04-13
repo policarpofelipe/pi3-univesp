@@ -2,6 +2,8 @@ const CartaoRepository = require("../repositories/CartaoRepository");
 const ListaRepository = require("../repositories/ListaRepository");
 const QuadroRepository = require("../repositories/QuadroRepository");
 const CartaoHistoricoService = require("./cartaoHistoricoService");
+const cartaoCriadoEvent = require("../events/cartaoCriadoEvent");
+const cartaoMovidoEvent = require("../events/cartaoMovidoEvent");
 
 const PRIORIDADES = new Set(["baixa", "media", "alta", "urgente"]);
 
@@ -113,7 +115,14 @@ class CartaoService {
       tipoEvento: "CRIADO",
       dados: { listaId, titulo },
     });
-    return CartaoRepository.obterPorId(qId, id);
+    const criado = await CartaoRepository.obterPorId(qId, id);
+    await cartaoCriadoEvent.emit({
+      quadroId: qId,
+      listaId,
+      cartaoId: id,
+      usuarioId: criadoPorUsuarioId,
+    });
+    return criado;
   }
 
   async atualizar(quadroId, cartaoId, dados = {}, usuarioId = null) {
@@ -241,6 +250,13 @@ class CartaoService {
           listaOrigemId: atual.listaId,
           listaDestinoId: atualizado.listaId,
         },
+      });
+      await cartaoMovidoEvent.emit({
+        quadroId: qId,
+        cartaoId: cId,
+        listaOrigemId: atual.listaId,
+        listaDestinoId: atualizado.listaId,
+        usuarioId,
       });
     }
     return atualizado;
