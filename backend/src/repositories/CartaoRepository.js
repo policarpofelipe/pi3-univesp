@@ -205,7 +205,10 @@ class CartaoRepository {
     if (!rows.length) return false;
     const listaId = rows[0].listaId;
 
-    const [result] = await db.query("DELETE FROM cartoes WHERE id = ?", [cartaoId]);
+    const [result] = await db.query(
+      "UPDATE cartoes SET arquivado_em = NOW(), atualizado_em = NOW() WHERE id = ? AND arquivado_em IS NULL",
+      [cartaoId]
+    );
     if (result.affectedRows > 0) {
       await this.recalcularPosicoesLista(listaId);
       return true;

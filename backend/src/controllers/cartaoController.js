@@ -60,7 +60,8 @@ const cartaoController = {
       const cartao = await cartaoService.atualizar(
         req.params.quadroId,
         req.params.cartaoId,
-        req.body || {}
+        req.body || {},
+        req.usuario?.id || null
       );
 
       if (!cartao) {
@@ -85,7 +86,8 @@ const cartaoController = {
       const cartao = await cartaoService.mover(
         req.params.quadroId,
         req.params.cartaoId,
-        req.body || {}
+        req.body || {},
+        req.usuario?.id || null
       );
 
       if (!cartao) {
@@ -109,7 +111,8 @@ const cartaoController = {
     try {
       const removido = await cartaoService.remover(
         req.params.quadroId,
-        req.params.cartaoId
+        req.params.cartaoId,
+        req.usuario?.id || null
       );
       if (!removido) {
         return res.status(404).json({

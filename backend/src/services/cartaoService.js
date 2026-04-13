@@ -1,6 +1,7 @@
 const CartaoRepository = require("../repositories/CartaoRepository");
 const ListaRepository = require("../repositories/ListaRepository");
 const QuadroRepository = require("../repositories/QuadroRepository");
+const CartaoHistoricoService = require("./cartaoHistoricoService");
 
 const PRIORIDADES = new Set(["baixa", "media", "alta", "urgente"]);
 
@@ -106,10 +107,16 @@ class CartaoService {
       criadoPorUsuarioId,
       tagIds,
     });
+    await CartaoHistoricoService.registrar({
+      cartaoId: id,
+      usuarioId: criadoPorUsuarioId,
+      tipoEvento: "CRIADO",
+      dados: { listaId, titulo },
+    });
     return CartaoRepository.obterPorId(qId, id);
   }
 
-  async atualizar(quadroId, cartaoId, dados = {}) {
+  async atualizar(quadroId, cartaoId, dados = {}, usuarioId = null) {
     const qId = toPositiveInt(quadroId);
     const cId = toPositiveInt(cartaoId);
     if (!qId || !cId) {
@@ -158,10 +165,53 @@ class CartaoService {
     }
 
     await CartaoRepository.atualizar(cId, payload);
-    return CartaoRepository.obterPorId(qId, cId);
+    const atualizado = await CartaoRepository.obterPorId(qId, cId);
+
+    if (payload.titulo !== undefined && payload.titulo !== atual.titulo) {
+      await CartaoHistoricoService.registrar({
+        cartaoId: cId,
+        usuarioId,
+        tipoEvento: "EDITADO_TITULO",
+        dados: { de: atual.titulo, para: atualizado.titulo },
+      });
+    }
+    if (payload.descricao !== undefined && payload.descricao !== atual.descricao) {
+      await CartaoHistoricoService.registrar({
+        cartaoId: cId,
+        usuarioId,
+        tipoEvento: "EDITADO_DESCRICAO",
+        dados: { de: atual.descricao, para: atualizado.descricao },
+      });
+    }
+    if (payload.prioridade !== undefined && payload.prioridade !== atual.prioridade) {
+      await CartaoHistoricoService.registrar({
+        cartaoId: cId,
+        usuarioId,
+        tipoEvento: "PRIORIDADE_ALTERADA",
+        dados: { de: atual.prioridade, para: atualizado.prioridade },
+      });
+    }
+    if (payload.prazoEm !== undefined && String(payload.prazoEm || "") !== String(atual.prazoEm || "")) {
+      await CartaoHistoricoService.registrar({
+        cartaoId: cId,
+        usuarioId,
+        tipoEvento: "PRAZO_ALTERADO",
+        dados: { de: atual.prazoEm, para: atualizado.prazoEm },
+      });
+    }
+    if (payload.tagIds !== undefined) {
+      await CartaoHistoricoService.registrar({
+        cartaoId: cId,
+        usuarioId,
+        tipoEvento: "TAG_ADICIONADA",
+        dados: { tagIds: atualizado.tagIds || [] },
+      });
+    }
+
+    return atualizado;
   }
 
-  async mover(quadroId, cartaoId, dados = {}) {
+  async mover(quadroId, cartaoId, dados = {}, usuarioId = null) {
     const qId = toPositiveInt(quadroId);
     const cId = toPositiveInt(cartaoId);
     const listaId = toPositiveInt(dados.listaId);
@@ -171,6 +221,9 @@ class CartaoService {
       throw error;
     }
 
+    const atual = await CartaoRepository.obterPorId(qId, cId);
+    if (!atual) return null;
+
     const moved = await CartaoRepository.mover(qId, cId, listaId, dados.posicao);
     if (moved === null) {
       const error = new Error("Lista de destino não encontrada.");
@@ -178,10 +231,22 @@ class CartaoService {
       throw error;
     }
     if (moved === false) return null;
-    return CartaoRepository.obterPorId(qId, cId);
+    const atualizado = await CartaoRepository.obterPorId(qId, cId);
+    if (Number(atual.listaId) !== Number(atualizado.listaId)) {
+      await CartaoHistoricoService.registrar({
+        cartaoId: cId,
+        usuarioId,
+        tipoEvento: "MOVIDO_LISTA",
+        dados: {
+          listaOrigemId: atual.listaId,
+          listaDestinoId: atualizado.listaId,
+        },
+      });
+    }
+    return atualizado;
   }
 
-  async remover(quadroId, cartaoId) {
+  async remover(quadroId, cartaoId, usuarioId = null) {
     const qId = toPositiveInt(quadroId);
     const cId = toPositiveInt(cartaoId);
     if (!qId || !cId) {
@@ -189,7 +254,16 @@ class CartaoService {
       error.statusCode = 400;
       throw error;
     }
-    return CartaoRepository.remover(qId, cId);
+    const removed = await CartaoRepository.remover(qId, cId);
+    if (removed) {
+      await CartaoHistoricoService.registrar({
+        cartaoId: cId,
+        usuarioId,
+        tipoEvento: "ARQUIVADO",
+        dados: null,
+      });
+    }
+    return removed;
   }
 }
 
