@@ -60,7 +60,7 @@ const organizacaoController = {
 
   async criar(req, res, next) {
     try {
-      const { nome, slug, ativo } = req.body;
+      const { nome, slug, ativo, descricao } = req.body;
       const criadoPorUsuarioId = req.usuario?.id || req.user?.id || null;
 
       if (!nome || String(nome).trim() === "") {
@@ -82,6 +82,10 @@ const organizacaoController = {
         slug: String(slug).trim(),
         ativo: ativo === undefined ? true : Boolean(ativo),
         criadoPorUsuarioId,
+        descricao:
+          descricao === undefined || descricao === null
+            ? undefined
+            : String(descricao),
       });
 
       return res.status(201).json({
@@ -117,6 +121,13 @@ const organizacaoController = {
 
       if (req.body.ativo !== undefined) {
         payload.ativo = Boolean(req.body.ativo);
+      }
+
+      if (req.body.descricao !== undefined) {
+        payload.descricao =
+          req.body.descricao === null
+            ? null
+            : String(req.body.descricao);
       }
 
       const resultado = await organizacaoService.atualizar(

@@ -240,9 +240,9 @@ select:disabled {
 }
 
 /* =========================================================
-   BOTÃO NATIVO
+   BOTÃO NATIVO (não remove estilo de .button — ver components/button.css)
    ========================================================= */
-button {
+button:not(.button) {
   border: none;
   background: none;
   padding: 0;

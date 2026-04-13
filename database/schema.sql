@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS organizacoes (
   id                    INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nome                  VARCHAR(160) NOT NULL,
   slug                  VARCHAR(160) NOT NULL,
+  descricao             TEXT NULL,
   criado_por_usuario_id INT UNSIGNED NULL,
   ativo                 TINYINT(1) NOT NULL DEFAULT 1,
   criado_em             DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

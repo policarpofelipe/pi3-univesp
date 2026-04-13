@@ -20,6 +20,26 @@ function validarSlug(slug) {
   return typeof slug === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
 }
 
+const DESCRICAO_MAX_LEN = 500;
+
+function normalizarDescricaoOpcional(valor) {
+  if (valor === undefined) {
+    return undefined;
+  }
+  if (valor === null) {
+    return null;
+  }
+  const texto = String(valor).trim();
+  return texto.length ? texto : null;
+}
+
+function validarDescricaoOpcional(texto) {
+  if (texto === undefined || texto === null) {
+    return true;
+  }
+  return typeof texto === "string" && texto.length <= DESCRICAO_MAX_LEN;
+}
+
 class OrganizacaoService {
   async listar(filtros = {}) {
     const { usuarioId, busca = "", ativo } = filtros;
@@ -39,9 +59,20 @@ class OrganizacaoService {
     const {
       nome,
       slug,
+      descricao: descricaoBruta,
       ativo = true,
       criadoPorUsuarioId,
     } = dados;
+
+    const descricao = normalizarDescricaoOpcional(descricaoBruta);
+
+    if (!validarDescricaoOpcional(descricao)) {
+      const error = new Error(
+        `A descrição deve ter no máximo ${DESCRICAO_MAX_LEN} caracteres.`
+      );
+      error.statusCode = 400;
+      throw error;
+    }
 
     if (!validarNome(nome)) {
       const error = new Error(
@@ -87,6 +118,7 @@ class OrganizacaoService {
     const organizacao = await organizacaoRepository.criar({
       nome: nome.trim(),
       slug: slugNormalizado,
+      descricao: descricao ?? null,
       ativo: Boolean(ativo),
       criadoPorUsuarioId,
     });
@@ -156,6 +188,20 @@ class OrganizacaoService {
 
     if (dados.ativo !== undefined) {
       payload.ativo = Boolean(dados.ativo);
+    }
+
+    if (dados.descricao !== undefined) {
+      const descricao = normalizarDescricaoOpcional(dados.descricao);
+
+      if (!validarDescricaoOpcional(descricao)) {
+        const error = new Error(
+          `A descrição deve ter no máximo ${DESCRICAO_MAX_LEN} caracteres.`
+        );
+        error.statusCode = 400;
+        throw error;
+      }
+
+      payload.descricao = descricao;
     }
 
     return await organizacaoRepository.atualizar(organizacaoId, payload);

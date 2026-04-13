@@ -10,6 +10,7 @@ class OrganizacaoRepository {
       id: row.id,
       nome: row.nome,
       slug: row.slug,
+      descricao: row.descricao != null ? row.descricao : null,
       criadoPorUsuarioId: row.criadoPorUsuarioId,
       ativo: Boolean(row.ativo),
       criadoEm: row.criadoEm,
@@ -32,6 +33,7 @@ class OrganizacaoRepository {
         o.id,
         o.nome,
         o.slug,
+        o.descricao,
         o.criado_por_usuario_id AS criadoPorUsuarioId,
         o.ativo,
         o.criado_em AS criadoEm,
@@ -56,8 +58,10 @@ class OrganizacaoRepository {
     }
 
     if (busca) {
-      where.push("(o.nome LIKE ? OR o.slug LIKE ?)");
-      params.push(`%${busca}%`, `%${busca}%`);
+      where.push(
+        "(o.nome LIKE ? OR o.slug LIKE ? OR (o.descricao IS NOT NULL AND o.descricao LIKE ?))"
+      );
+      params.push(`%${busca}%`, `%${busca}%`, `%${busca}%`);
     }
 
     if (typeof ativo === "boolean") {
@@ -74,6 +78,7 @@ class OrganizacaoRepository {
         o.id,
         o.nome,
         o.slug,
+        o.descricao,
         o.criado_por_usuario_id,
         o.ativo,
         o.criado_em,
@@ -101,6 +106,7 @@ class OrganizacaoRepository {
         o.id,
         o.nome,
         o.slug,
+        o.descricao,
         o.criado_por_usuario_id AS criadoPorUsuarioId,
         o.ativo,
         o.criado_em AS criadoEm,
@@ -117,6 +123,7 @@ class OrganizacaoRepository {
         o.id,
         o.nome,
         o.slug,
+        o.descricao,
         o.criado_por_usuario_id,
         o.ativo,
         o.criado_em,
@@ -134,6 +141,7 @@ class OrganizacaoRepository {
         o.id,
         o.nome,
         o.slug,
+        o.descricao,
         o.criado_por_usuario_id AS criadoPorUsuarioId,
         o.ativo,
         o.criado_em AS criadoEm,
@@ -151,6 +159,7 @@ class OrganizacaoRepository {
     const {
       nome,
       slug,
+      descricao = null,
       criadoPorUsuarioId = null,
       ativo = true,
     } = dados;
@@ -159,17 +168,19 @@ class OrganizacaoRepository {
       INSERT INTO organizacoes (
         nome,
         slug,
+        descricao,
         criado_por_usuario_id,
         ativo,
         criado_em,
         atualizado_em
       )
-      VALUES (?, ?, ?, ?, NOW(), NOW())
+      VALUES (?, ?, ?, ?, ?, NOW(), NOW())
     `;
 
     const [result] = await db.query(sql, [
       nome,
       slug,
+      descricao,
       criadoPorUsuarioId,
       ativo ? 1 : 0,
     ]);
@@ -189,6 +200,11 @@ class OrganizacaoRepository {
     if (dados.slug !== undefined) {
       campos.push("slug = ?");
       params.push(dados.slug);
+    }
+
+    if (dados.descricao !== undefined) {
+      campos.push("descricao = ?");
+      params.push(dados.descricao);
     }
 
     if (dados.ativo !== undefined) {

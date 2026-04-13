@@ -20,6 +20,8 @@ function validarSlug(slug) {
   return typeof slug === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
 }
 
+const DESCRICAO_MAX_LEN = 500;
+
 function validateCriarBody(body = {}) {
   const errors = [];
   if (!validarNome(body.nome)) {
@@ -34,6 +36,14 @@ function validateCriarBody(body = {}) {
         "Slug inválido após normalização. Use letras minúsculas, números e hífen."
       );
     }
+  }
+  if (
+    body.descricao != null &&
+    String(body.descricao).length > DESCRICAO_MAX_LEN
+  ) {
+    errors.push(
+      `A descrição deve ter no máximo ${DESCRICAO_MAX_LEN} caracteres.`
+    );
   }
   return errors;
 }
@@ -54,6 +64,15 @@ function validateAtualizarBody(body = {}) {
         );
       }
     }
+  }
+  if (
+    body.descricao !== undefined &&
+    body.descricao !== null &&
+    String(body.descricao).length > DESCRICAO_MAX_LEN
+  ) {
+    errors.push(
+      `A descrição deve ter no máximo ${DESCRICAO_MAX_LEN} caracteres.`
+    );
   }
   return errors;
 }

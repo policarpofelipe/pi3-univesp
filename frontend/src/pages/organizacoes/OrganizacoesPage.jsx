@@ -86,6 +86,7 @@ export default function OrganizacoesPage() {
         nome: values.nome,
         slug: values.slug,
         ativo: values.ativo,
+        descricao: values.descricao,
       });
 
       const org = body?.data;
