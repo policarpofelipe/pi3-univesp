@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
+import Button from "../ui/Button";
 import campoPersonalizadoService from "../../services/campoPersonalizadoService";
+import cartaoCampoValorService from "../../services/cartaoCampoValorService";
 import { extractList } from "../../utils/apiData";
 import RenderCampoTexto from "../camposPersonalizados/RenderCampoTexto";
 import RenderCampoNumero from "../camposPersonalizados/RenderCampoNumero";
@@ -35,27 +37,70 @@ function renderByType(campo, value, onChange) {
   }
 }
 
-export default function CartaoCamposPersonalizados({ quadroId }) {
+export default function CartaoCamposPersonalizados({ quadroId, cartaoId }) {
   const [loading, setLoading] = useState(true);
   const [campos, setCampos] = useState([]);
   const [values, setValues] = useState({});
+  const [savingId, setSavingId] = useState(null);
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
 
   const carregar = useCallback(async () => {
-    if (!quadroId) return;
+    if (!quadroId || !cartaoId) return;
     setLoading(true);
+    setFeedback({ type: "", message: "" });
     try {
-      const res = await campoPersonalizadoService.listar(quadroId);
-      setCampos(extractList(res).filter((item) => item.ativo !== false));
+      const [resCampos, resValores] = await Promise.all([
+        campoPersonalizadoService.listar(quadroId),
+        cartaoCampoValorService.listar(quadroId, cartaoId),
+      ]);
+      const listaCampos = extractList(resCampos).filter((item) => item.ativo !== false);
+      const listaValores = extractList(resValores);
+      const valoresMap = {};
+      listaValores.forEach((item) => {
+        valoresMap[item.campoId] = item.valor;
+      });
+      setCampos(listaCampos);
+      setValues(valoresMap);
     } catch {
       setCampos([]);
+      setValues({});
     } finally {
       setLoading(false);
     }
-  }, [quadroId]);
+  }, [quadroId, cartaoId]);
 
   useEffect(() => {
     carregar();
   }, [carregar]);
+
+  async function salvarCampo(campo) {
+    setSavingId(campo.id);
+    setFeedback({ type: "", message: "" });
+    try {
+      const response = await cartaoCampoValorService.definir(
+        quadroId,
+        cartaoId,
+        campo.id,
+        { valor: values[campo.id] ?? null }
+      );
+      const atualizado = response?.data;
+      setValues((prev) => ({ ...prev, [campo.id]: atualizado?.valor ?? null }));
+      setFeedback({
+        type: "success",
+        message: response?.message || "Campo salvo com sucesso.",
+      });
+    } catch (error) {
+      setFeedback({
+        type: "error",
+        message:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível salvar o campo.",
+      });
+    } finally {
+      setSavingId(null);
+    }
+  }
 
   return (
     <section className="mt-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-xs)]">
@@ -76,6 +121,18 @@ export default function CartaoCamposPersonalizados({ quadroId }) {
         </p>
       ) : (
         <div className="space-y-3">
+          {feedback.message ? (
+            <p
+              className={
+                feedback.type === "error"
+                  ? "rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+                  : "rounded-lg border border-[var(--color-success-border)] bg-[var(--color-success-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-success-text)]"
+              }
+              role={feedback.type === "error" ? "alert" : "status"}
+            >
+              {feedback.message}
+            </p>
+          ) : null}
           {campos.map((campo) => (
             <div key={campo.id}>
               <label className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]">
@@ -84,12 +141,20 @@ export default function CartaoCamposPersonalizados({ quadroId }) {
               {renderByType(campo, values[campo.id], (next) =>
                 setValues((prev) => ({ ...prev, [campo.id]: next }))
               )}
+              <div className="mt-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  loading={savingId === campo.id}
+                  disabled={savingId != null}
+                  onClick={() => salvarCampo(campo)}
+                >
+                  Salvar campo
+                </Button>
+              </div>
             </div>
           ))}
-          <p className="text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
-            Estrutura pronta no frontend. Persistência de valores por cartão será ligada
-            quando o backend de valores de campo estiver disponível nesta API.
-          </p>
         </div>
       )}
     </section>
