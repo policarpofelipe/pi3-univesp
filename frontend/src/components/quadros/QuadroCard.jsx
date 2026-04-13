@@ -5,8 +5,12 @@ import {
   CalendarDays,
   Archive,
   FolderOpen,
+  Settings,
+  ArrowRight,
+  Users,
+  ListTodo,
+  Layers,
 } from "lucide-react";
-import Button from "../ui/Button";
 
 function formatarData(data) {
   if (!data) return "Não informado";
@@ -31,6 +35,8 @@ export default function QuadroCard({
   onOpen,
   onConfigure,
   compact = false,
+  /** Quando true, oculta a linha da organização (ex.: listagem já filtrada por organização). */
+  omitirNomeOrganizacao = false,
 }) {
   if (!quadro?.id) {
     return null;
@@ -42,6 +48,8 @@ export default function QuadroCard({
     quadro.organizacao?.nome ||
     "Organização não informada";
   const atualizado = quadro.atualizadoEm || quadro.atualizado_em;
+
+  const IconeStatus = arquivado ? Archive : FolderOpen;
 
   function handleOpen() {
     if (typeof onOpen === "function") {
@@ -56,103 +64,105 @@ export default function QuadroCard({
     }
   }
 
-  const IconeStatus = arquivado ? Archive : FolderOpen;
+  const membros = quadro.totalMembros ?? "—";
+  const listas = quadro.totalListas ?? "—";
+  const cartoes = quadro.totalCartoes ?? "—";
 
   return (
     <article
-      className={[
-        "flex h-full flex-col rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]",
-        "transition-all duration-150 hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-sm)]",
-      ].join(" ")}
+      className={`quadro-card group ${compact ? "quadro-card--compact" : ""}`.trim()}
       aria-labelledby={`quadro-card-${quadro.id}-titulo`}
     >
-      <div className={compact ? "p-4" : "p-5"}>
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] text-[var(--color-primary)]">
-            <KanbanSquare className="h-5 w-5" aria-hidden="true" />
-          </div>
+      <div className="quadro-card__top">
+        <div className="quadro-card__icon" aria-hidden="true">
+          <KanbanSquare className="quadro-card__icon-svg" />
+        </div>
 
+        <div className="quadro-card__top-actions">
           <span
-            className={[
-              "inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[var(--font-size-xs)] font-medium",
-              arquivado
-                ? "border-[var(--color-border)] bg-[var(--color-surface-alt)] text-[var(--color-text-muted)]"
-                : "border-[var(--color-success-border)] bg-[var(--color-success-surface)] text-[var(--color-success-text)]",
-            ].join(" ")}
+            className={`quadro-card__badge ${
+              arquivado ? "quadro-card__badge--arquivado" : "quadro-card__badge--ativo"
+            }`}
           >
             <IconeStatus size={12} aria-hidden="true" />
             {arquivado ? "Arquivado" : "Ativo"}
           </span>
+
+          {typeof onConfigure === "function" ? (
+            <button
+              type="button"
+              className="quadro-card__configure"
+              onClick={handleConfigure}
+              aria-label={`Configurar quadro ${quadro.nome}`}
+              title="Configurar quadro"
+            >
+              <Settings className="quadro-card__configure-icon" aria-hidden="true" />
+            </button>
+          ) : null}
         </div>
-
-        <h2
-          id={`quadro-card-${quadro.id}-titulo`}
-          className="mt-4 text-[var(--font-size-lg)] font-semibold text-[var(--color-text)]"
-        >
-          {quadro.nome}
-        </h2>
-
-        <p className="mt-1 flex items-center gap-1.5 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-          <Building2 size={14} aria-hidden="true" />
-          <span>{orgNome}</span>
-        </p>
-
-        <p className="mt-3 min-h-[2.75rem] text-[var(--font-size-sm)] leading-relaxed text-[var(--color-text-muted)]">
-          {quadro.descricao?.trim() || "Sem descrição cadastrada."}
-        </p>
-
-        <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-[var(--color-border)] pt-4 text-center">
-          <div>
-            <dt className="text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
-              Membros
-            </dt>
-            <dd className="text-[var(--font-size-sm)] font-semibold text-[var(--color-text)]">
-              {quadro.totalMembros ?? "—"}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
-              Listas
-            </dt>
-            <dd className="text-[var(--font-size-sm)] font-semibold text-[var(--color-text)]">
-              {quadro.totalListas ?? "—"}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
-              Cartões
-            </dt>
-            <dd className="text-[var(--font-size-sm)] font-semibold text-[var(--color-text)]">
-              {quadro.totalCartoes ?? "—"}
-            </dd>
-          </div>
-        </dl>
-
-        <p className="mt-3 flex items-center gap-1.5 text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
-          <CalendarDays size={12} aria-hidden="true" />
-          <span>Atualizado em {formatarData(atualizado)}</span>
-        </p>
       </div>
 
-      <div className="mt-auto flex flex-wrap gap-2 border-t border-[var(--color-border)] p-4">
-        <Button
-          type="button"
-          variant="primary"
-          className="flex-1 min-w-[8rem]"
-          onClick={handleOpen}
-        >
-          Abrir quadro
-        </Button>
-        {typeof onConfigure === "function" ? (
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleConfigure}
-          >
-            Configurar
-          </Button>
-        ) : null}
-      </div>
+      <button
+        type="button"
+        className="quadro-card__open"
+        onClick={handleOpen}
+        aria-label={`Abrir quadro ${quadro.nome}`}
+      >
+        <span className="quadro-card__open-inner" aria-hidden="true">
+          <div className="quadro-card__body">
+            <h3 id={`quadro-card-${quadro.id}-titulo`} className="quadro-card__title">
+              {quadro.nome}
+            </h3>
+
+            {!omitirNomeOrganizacao ? (
+              <p className="quadro-card__org">
+                <Building2 size={14} aria-hidden="true" />
+                <span>{orgNome}</span>
+              </p>
+            ) : null}
+
+            <p className="quadro-card__desc">
+              {quadro.descricao?.trim() || "Sem descrição cadastrada."}
+            </p>
+
+            <div className="quadro-card__metrics">
+              <div className="quadro-card__metric">
+                <div className="quadro-card__metric-head">
+                  <Users className="quadro-card__metric-icon" aria-hidden="true" />
+                  <span className="quadro-card__metric-label">Membros</span>
+                </div>
+                <p className="quadro-card__metric-value">{membros}</p>
+              </div>
+
+              <div className="quadro-card__metric">
+                <div className="quadro-card__metric-head">
+                  <ListTodo className="quadro-card__metric-icon" aria-hidden="true" />
+                  <span className="quadro-card__metric-label">Listas</span>
+                </div>
+                <p className="quadro-card__metric-value">{listas}</p>
+              </div>
+
+              <div className="quadro-card__metric">
+                <div className="quadro-card__metric-head">
+                  <Layers className="quadro-card__metric-icon" aria-hidden="true" />
+                  <span className="quadro-card__metric-label">Cartões</span>
+                </div>
+                <p className="quadro-card__metric-value">{cartoes}</p>
+              </div>
+            </div>
+
+            <p className="quadro-card__date">
+              <CalendarDays size={12} aria-hidden="true" />
+              <span>Atualizado em {formatarData(atualizado)}</span>
+            </p>
+          </div>
+
+          <div className="quadro-card__footer">
+            <span className="quadro-card__footer-label">Abrir quadro</span>
+            <ArrowRight className="quadro-card__footer-arrow" aria-hidden="true" />
+          </div>
+        </span>
+      </button>
     </article>
   );
 }

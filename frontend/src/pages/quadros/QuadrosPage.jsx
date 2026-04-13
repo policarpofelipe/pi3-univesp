@@ -335,6 +335,7 @@ export default function QuadrosPage() {
                   <QuadroCard
                     key={quadro.id}
                     quadro={quadro}
+                    omitirNomeOrganizacao={Boolean(organizacaoId)}
                     onOpen={handleAbrirQuadro}
                     onConfigure={handleConfigurarQuadro}
                   />

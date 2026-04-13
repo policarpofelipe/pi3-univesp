@@ -29,8 +29,8 @@
   padding: var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-2xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  background: var(--color-surface-alt);
+  box-shadow: var(--shadow-xs);
 }
 
 .quadros-page__toolbar-group {
@@ -112,8 +112,8 @@
   padding: var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  background: var(--color-surface-alt);
+  box-shadow: var(--shadow-xs);
 }
 
 .quadros-page__summary-label {
@@ -133,13 +133,13 @@
 }
 
 /* =========================================================
-   GRID
+   GRID (alinhado à listagem de organizações)
    ========================================================= */
 
 .quadros-page__grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .quadros-page__empty {
@@ -147,132 +147,281 @@
 }
 
 /* =========================================================
-   CARD
+   CARD DE QUADRO (mesmo padrão visual do card de organização)
    ========================================================= */
 
-.quadros-page__card {
+.quadro-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-5);
+  height: 100%;
+  min-width: 0;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-xl);
   background: var(--color-surface);
-  color: var(--color-text);
   box-shadow: var(--shadow-sm);
   transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast),
-    border-color var(--transition-fast);
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
-.quadros-page__card:hover {
-  transform: translateY(-2px);
+.quadro-card:hover {
+  border-color: var(--color-primary);
   box-shadow: var(--shadow-md);
-  border-color: var(--color-border-strong, var(--color-border));
 }
 
-.quadros-page__card-header {
+.quadro-card--compact .quadro-card__top {
+  padding: var(--space-4);
+  padding-bottom: var(--space-2);
+}
+
+.quadro-card--compact .quadro-card__body {
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+
+.quadro-card--compact .quadro-card__footer {
+  padding: var(--space-3) var(--space-4);
+}
+
+.quadro-card__top {
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: var(--space-3);
+  padding: var(--space-5);
+  padding-bottom: var(--space-2);
+  flex-shrink: 0;
 }
 
-.quadros-page__card-title-block {
+.quadro-card__icon {
   display: flex;
-  flex-direction: column;
+  height: 2.75rem;
+  width: 2.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-primary);
+}
+
+.quadro-card__icon-svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.quadro-card__top-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
   gap: var(--space-2);
   min-width: 0;
 }
 
-.quadros-page__card-title {
-  margin: 0;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-tight);
-  color: var(--color-text);
-  text-wrap: balance;
-}
-
-.quadros-page__card-org {
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-}
-
-.quadros-page__card-badge {
-  align-self: flex-start;
+.quadro-card__badge {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  background: var(--color-surface-alt);
-  color: var(--color-text);
+  border-radius: 999px;
+  padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
 }
 
-.quadros-page__card-description {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  line-height: 1.7;
+.quadro-card__badge--ativo {
+  border: 1px solid var(--color-success-border);
+  background: var(--color-success-surface);
+  color: var(--color-success-text);
+}
+
+.quadro-card__badge--arquivado {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
   color: var(--color-text-muted);
 }
 
-.quadros-page__card-metrics {
+.quadro-card__configure {
+  display: inline-flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-strong, var(--color-border));
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.quadro-card__configure:hover {
+  color: var(--color-primary);
+  border-color: var(--color-border-strong, var(--color-border));
+  background: var(--color-surface-hover, var(--color-surface-alt));
+}
+
+.quadro-card__configure:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--color-focus-ring);
+}
+
+.quadro-card__configure-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.quadro-card__open {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+.quadro-card__open-inner {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.quadro-card__open:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--color-focus-ring);
+}
+
+.quadro-card__body {
+  flex: 1 1 auto;
+  padding: 0 var(--space-5) var(--space-2);
+  min-width: 0;
+}
+
+.quadro-card__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  line-height: var(--line-height-tight);
+  word-break: break-word;
+}
+
+.quadro-card__org {
+  margin: var(--space-1) 0 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  min-width: 0;
+}
+
+.quadro-card__org span {
+  min-width: 0;
+  word-break: break-word;
+}
+
+.quadro-card__desc {
+  margin: var(--space-3) 0 0;
+  min-height: 2.75rem;
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  word-break: break-word;
+}
+
+.quadro-card__metrics {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-3);
-  margin: 0;
+  margin-top: var(--space-5);
 }
 
-.quadros-page__card-metric {
+.quadro-card__metric {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  padding: var(--space-3);
+  min-width: 0;
+}
+
+.quadro-card__metric-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-alt);
-}
-
-.quadros-page__card-metric dt {
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
   gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  color: var(--color-text-soft);
 }
 
-.quadros-page__card-metric dd {
-  margin: 0;
-  font-size: var(--font-size-md);
+.quadro-card__metric-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.quadro-card__metric-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.quadro-card__metric-value {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text);
 }
 
-.quadros-page__card-footer {
+.quadro-card__date {
+  margin: var(--space-4) 0 0;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-border);
-}
-
-.quadros-page__card-date {
-  margin: 0;
-  display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-soft);
+}
+
+.quadro-card__footer {
+  display: flex;
+  margin-top: auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-4) var(--space-5);
+}
+
+.quadro-card__footer-label {
   font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+}
+
+.quadro-card__footer-arrow {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: var(--color-primary);
+  transition: transform var(--transition-fast);
+}
+
+.quadro-card:hover .quadro-card__footer-arrow {
+  transform: translateX(4px);
 }
 
 /* =========================================================
@@ -284,12 +433,11 @@
     animation: none;
   }
 
-  .quadros-page__card {
+  .quadro-card__footer-arrow {
     transition: none;
-    transform: none;
   }
 
-  .quadros-page__card:hover {
+  .quadro-card:hover .quadro-card__footer-arrow {
     transform: none;
   }
 }
@@ -325,25 +473,17 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .quadros-page__card-header {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-  }
-
-  .quadros-page__card-metrics {
+  .quadro-card__metrics {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .quadros-page__card-footer {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+  .quadros-page__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
   .quadros-page__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
