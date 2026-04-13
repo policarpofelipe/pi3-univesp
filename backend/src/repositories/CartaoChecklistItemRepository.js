@@ -28,6 +28,31 @@ class CartaoChecklistItemRepository {
     return rows.map((row) => ({ ...row, concluido: Boolean(row.concluido) }));
   }
 
+  async obterPorIdGlobal(itemId) {
+    const [rows] = await db.query(
+      `
+      SELECT
+        id,
+        checklist_id AS checklistId,
+        titulo,
+        posicao,
+        prazo_em AS prazoEm,
+        concluido,
+        concluido_em AS concluidoEm,
+        concluido_por_usuario_id AS concluidoPorUsuarioId,
+        criado_em AS criadoEm,
+        atualizado_em AS atualizadoEm,
+        removido_em AS removidoEm
+      FROM cartao_checklist_itens
+      WHERE id = ?
+      LIMIT 1
+      `,
+      [itemId]
+    );
+    const row = rows[0];
+    return row ? { ...row, concluido: Boolean(row.concluido) } : null;
+  }
+
   async obterPorId(checklistId, itemId) {
     const [rows] = await db.query(
       `
@@ -92,12 +117,15 @@ class CartaoChecklistItemRepository {
       campos.push("prazo_em = ?");
       params.push(dados.prazoEm || null);
     }
-    if (!campos.length) return;
+    if (!campos.length) {
+      return this.obterPorIdGlobal(itemId);
+    }
     params.push(itemId);
     await db.query(
       `UPDATE cartao_checklist_itens SET ${campos.join(", ")}, atualizado_em = NOW() WHERE id = ?`,
       params
     );
+    return this.obterPorIdGlobal(itemId);
   }
 
   async remover(itemId) {

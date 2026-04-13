@@ -11,14 +11,16 @@ class TagRepository {
         quadro_id AS quadroId,
         nome,
         cor,
-        criado_em AS criadoEm
+        ativa,
+        criado_em AS criadoEm,
+        atualizado_em AS atualizadoEm
       FROM tags
       WHERE quadro_id = ?
       ORDER BY nome ASC, id ASC
       `,
       [quadroId]
     );
-    return rows;
+    return rows.map((row) => ({ ...row, ativa: Boolean(row.ativa) }));
   }
 
   async obterPorId(quadroId, tagId) {
@@ -29,23 +31,26 @@ class TagRepository {
         quadro_id AS quadroId,
         nome,
         cor,
-        criado_em AS criadoEm
+        ativa,
+        criado_em AS criadoEm,
+        atualizado_em AS atualizadoEm
       FROM tags
       WHERE quadro_id = ? AND id = ?
       LIMIT 1
       `,
       [quadroId, tagId]
     );
-    return rows[0] || null;
+    const row = rows[0];
+    return row ? { ...row, ativa: Boolean(row.ativa) } : null;
   }
 
-  async criar({ quadroId, nome, cor }) {
+  async criar({ quadroId, nome, cor, ativa = true }) {
     const [result] = await db.query(
       `
-      INSERT INTO tags (quadro_id, nome, cor, criado_em)
-      VALUES (?, ?, ?, NOW())
+      INSERT INTO tags (quadro_id, nome, cor, ativa, criado_em, atualizado_em)
+      VALUES (?, ?, ?, ?, NOW(), NOW())
       `,
-      [quadroId, nome, cor]
+      [quadroId, nome, cor, ativa ? 1 : 0]
     );
     return this.obterPorId(quadroId, result.insertId);
   }
