@@ -515,8 +515,8 @@ constants/tiposEvento.js
 ✅src/routes/cartaoChecklistRoutes.js
 ✅src/routes/cartaoAnexoRoutes.js
 ✅src/routes/cartaoHistoricoRoutes.js
-src/routes/cartaoAtribuicaoRoutes.js
-src/routes/cartaoRelacaoRoutes.js
+✅src/routes/cartaoAtribuicaoRoutes.js
+✅src/routes/cartaoRelacaoRoutes.js
 ✅src/routes/automacaoRoutes.js
 
 --------------------------------------------------
@@ -542,8 +542,8 @@ src/controllers/CartaoComentarioController.js
 ✅src/controllers/cartaoChecklistController.js
 ✅src/controllers/cartaoAnexoController.js
 ✅src/controllers/cartaoHistoricoController.js
-src/controllers/CartaoAtribuicaoController.js
-src/controllers/CartaoRelacaoController.js
+✅src/controllers/cartaoAtribuicaoController.js
+✅src/controllers/cartaoRelacaoController.js
 ✅src/controllers/AutomacaoController.js
 
 --------------------------------------------------
@@ -566,8 +566,8 @@ src/services/TagService.js
 ✅src/services/CartaoComentarioService.js
 ✅src/services/CartaoChecklistService.js
 ✅src/services/CartaoAnexoService.js
-src/services/CartaoAtribuicaoService.js
-src/services/CartaoRelacaoService.js
+✅src/services/cartaoAtribuicaoService.js
+✅src/services/cartaoRelacaoService.js
 src/services/CartaoEventoService.js
 src/services/CartaoVisualizacaoService.js
 ✅src/services/AutomacaoService.js
@@ -599,8 +599,8 @@ src/repositories/CampoOpcaoRepository.js
 ✅src/repositories/CartaoChecklistRepository.js
 src/repositories/CartaoChecklistItemRepository.js
 ✅src/repositories/CartaoAnexoRepository.js
-src/repositories/CartaoAtribuicaoRepository.js
-src/repositories/CartaoRelacaoRepository.js
+✅src/repositories/CartaoAtribuicaoRepository.js
+✅src/repositories/CartaoRelacaoRepository.js
 src/repositories/CartaoEventoRepository.js
 src/repositories/CartaoVisualizacaoRepository.js
 ✅src/repositories/AutomacaoRepository.js

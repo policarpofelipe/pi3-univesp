@@ -8,7 +8,6 @@ import { extractList } from "../../utils/apiData";
 export default function CartaoAtribuicoes({ quadroId, cartaoId }) {
   const [membros, setMembros] = useState([]);
   const [atribuicoes, setAtribuicoes] = useState([]);
-  const [featureUnavailable, setFeatureUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [salvando, setSalvando] = useState(false);
 
@@ -22,7 +21,6 @@ export default function CartaoAtribuicoes({ quadroId, cartaoId }) {
       ]);
       setMembros(extractList(resMembros));
       setAtribuicoes(extractList(resAtribuicoes));
-      setFeatureUnavailable(Boolean(resAtribuicoes?.featureUnavailable));
     } finally {
       setLoading(false);
     }
@@ -41,7 +39,6 @@ export default function CartaoAtribuicoes({ quadroId, cartaoId }) {
   );
 
   async function toggleMembro(membroId) {
-    if (featureUnavailable) return;
     setSalvando(true);
     try {
       if (atribuicoesSet.has(String(membroId))) {
@@ -67,10 +64,6 @@ export default function CartaoAtribuicoes({ quadroId, cartaoId }) {
       {loading ? (
         <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
           Carregando atribuições…
-        </p>
-      ) : featureUnavailable ? (
-        <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-          Backend de atribuições ainda não disponível. Estrutura de UX preparada.
         </p>
       ) : membros.length === 0 ? (
         <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">

@@ -5,7 +5,6 @@ import { extractList } from "../../utils/apiData";
 
 export default function CartaoRelacoes({ quadroId, cartaoId }) {
   const [loading, setLoading] = useState(true);
-  const [featureUnavailable, setFeatureUnavailable] = useState(false);
   const [relacoes, setRelacoes] = useState([]);
 
   const carregar = useCallback(async () => {
@@ -14,7 +13,6 @@ export default function CartaoRelacoes({ quadroId, cartaoId }) {
     try {
       const res = await cartaoRelacaoService.listar(quadroId, cartaoId);
       setRelacoes(extractList(res));
-      setFeatureUnavailable(Boolean(res?.featureUnavailable));
     } finally {
       setLoading(false);
     }
@@ -36,10 +34,6 @@ export default function CartaoRelacoes({ quadroId, cartaoId }) {
       {loading ? (
         <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
           Carregando relações…
-        </p>
-      ) : featureUnavailable ? (
-        <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-          Backend de relações ainda não disponível. Estrutura de UX preparada.
         </p>
       ) : relacoes.length === 0 ? (
         <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
