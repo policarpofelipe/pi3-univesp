@@ -187,7 +187,7 @@ export default function OrganizacaoForm({
             value={values.nome}
             onChange={handleChange}
             onBlur={handleBlur}
-            placeholder="Ex.: Reduz Telecom"
+            placeholder="Ex.: Equipe do projeto integrador"
             aria-invalid={Boolean(touched.nome && errors.nome)}
             aria-describedby={touched.nome && errors.nome ? "organizacao-nome-erro" : undefined}
           />
@@ -216,7 +216,7 @@ export default function OrganizacaoForm({
             value={values.slug}
             onChange={handleSlugChange}
             onBlur={handleBlur}
-            placeholder="reduz-telecom"
+            placeholder="equipe-projeto-integrador"
             aria-invalid={Boolean(touched.slug && errors.slug)}
             aria-describedby={
               touched.slug && errors.slug
