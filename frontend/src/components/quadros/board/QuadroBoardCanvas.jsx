@@ -11,6 +11,7 @@ import {
   KeyboardSensor,
   PointerSensor,
   closestCorners,
+  pointerWithin,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -92,6 +93,7 @@ export default function QuadroBoardCanvas({
   const [isDragging, setIsDragging] = useState(false);
   const snapshotRef = useRef(null);
   const itemIdsRef = useRef({});
+  const lastOverIdRef = useRef(null);
 
   useEffect(() => {
     itemIdsRef.current = itemIdsByList;
@@ -134,6 +136,7 @@ export default function QuadroBoardCanvas({
       );
       setActiveId(active.id);
       setIsDragging(true);
+      lastOverIdRef.current = null;
     },
     [dragDisabled]
   );
@@ -141,6 +144,7 @@ export default function QuadroBoardCanvas({
   const handleDragOver = useCallback(({ active, over }) => {
     const overId = over?.id;
     if (!overId || String(active.id) === String(overId)) return;
+    lastOverIdRef.current = String(overId);
 
     setItemIdsByList((items) => {
       const activeContainer = findContainer(items, active.id);
@@ -183,19 +187,22 @@ export default function QuadroBoardCanvas({
     setActiveId(null);
     setIsDragging(false);
     snapshotRef.current = null;
+    lastOverIdRef.current = null;
   }, []);
 
   const handleDragEnd = useCallback(
     async ({ active, over }) => {
       setActiveId(null);
       const snap = snapshotRef.current;
+      const overIdEfetivo = over?.id ?? lastOverIdRef.current;
 
-      if (dragDisabled || !over) {
+      if (dragDisabled || !overIdEfetivo) {
         if (snap) {
           setItemIdsByList(snap);
         }
         setIsDragging(false);
         snapshotRef.current = null;
+        lastOverIdRef.current = null;
         return;
       }
 
@@ -205,10 +212,11 @@ export default function QuadroBoardCanvas({
       if (!cardId) {
         setIsDragging(false);
         snapshotRef.current = null;
+        lastOverIdRef.current = null;
         return;
       }
 
-      const overId = String(over.id);
+      const overId = String(overIdEfetivo);
       const draft = JSON.parse(JSON.stringify(itemIdsRef.current || {}));
       const activeContainer = findContainer(draft, activeSid);
       const overContainer = findContainer(draft, overId);
@@ -219,6 +227,7 @@ export default function QuadroBoardCanvas({
         }
         setIsDragging(false);
         snapshotRef.current = null;
+        lastOverIdRef.current = null;
         return;
       }
 
@@ -257,6 +266,7 @@ export default function QuadroBoardCanvas({
         }
         setIsDragging(false);
         snapshotRef.current = null;
+        lastOverIdRef.current = null;
         return;
       }
 
@@ -269,6 +279,7 @@ export default function QuadroBoardCanvas({
         if (origC === dest && origIdx === pos) {
           setIsDragging(false);
           snapshotRef.current = null;
+          lastOverIdRef.current = null;
           return;
         }
       }
@@ -289,15 +300,24 @@ export default function QuadroBoardCanvas({
       } finally {
         setIsDragging(false);
         snapshotRef.current = null;
+        lastOverIdRef.current = null;
       }
     },
     [dragDisabled, quadroId, onCartoesUpdated]
   );
 
+  const collisionDetectionStrategy = useCallback((args) => {
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) {
+      return pointerCollisions;
+    }
+    return closestCorners(args);
+  }, []);
+
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={collisionDetectionStrategy}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
