@@ -1,6 +1,5 @@
 import React, { useRef } from "react";
-import { Hash, Trash2, X } from "lucide-react";
-import Button from "../ui/Button";
+import { Hash, X } from "lucide-react";
 
 export default function CartaoModalHeader({
   cartaoId,
@@ -11,8 +10,7 @@ export default function CartaoModalHeader({
   editandoTitulo = false,
   setEditandoTitulo,
   onClose,
-  onExcluir,
-  excluindo = false,
+  titleId = "cartao-modal-title",
 }) {
   const inputRef = useRef(null);
 
@@ -35,15 +33,14 @@ export default function CartaoModalHeader({
 
   return (
     <header className="cartao-modal-header">
-      <Button
+      <button
         type="button"
-        variant="ghost"
-        size="sm"
-        leftIcon={<X size={16} />}
+        className="cartao-modal-header__close-btn"
         onClick={onClose}
+        aria-label="Fechar"
       >
-        Fechar
-      </Button>
+        <X size={18} aria-hidden="true" focusable="false" />
+      </button>
 
       <div className="cartao-modal-header__title-wrap">
         {editandoTitulo ? (
@@ -59,34 +56,24 @@ export default function CartaoModalHeader({
             onKeyDown={handleKeyDown}
             className="cartao-modal-header__title-input"
             aria-label="Editar título do cartão"
+            id={titleId}
           />
         ) : (
           <button
             type="button"
             className="cartao-modal-header__title-btn"
             onClick={ativarEdicao}
+            id={titleId}
           >
             {titulo || "Sem título"}
           </button>
         )}
-
-        <span className="cartao-modal-header__id-badge">
-          <Hash size={12} />
-          {cartaoId}
-        </span>
       </div>
 
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        leftIcon={<Trash2 size={14} />}
-        onClick={onExcluir}
-        loading={excluindo}
-        disabled={excluindo}
-      >
-        Excluir
-      </Button>
+      <span className="cartao-modal-header__id-badge">
+        <Hash size={12} aria-hidden="true" focusable="false" />
+        {cartaoId}
+      </span>
     </header>
   );
 }

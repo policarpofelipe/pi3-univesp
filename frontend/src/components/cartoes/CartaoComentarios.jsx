@@ -180,6 +180,14 @@ export default function CartaoComentarios({
           rows={3}
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && !event.ctrlKey && !event.shiftKey) {
+              event.preventDefault();
+              if (texto.trim() && !enviando) {
+                handleEnviar(event);
+              }
+            }
+          }}
           disabled={enviando}
           placeholder="Escreva um comentário…"
           className="w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)]"

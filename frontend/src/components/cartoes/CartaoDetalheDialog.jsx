@@ -26,7 +26,8 @@ function getFocusableElements(container) {
  */
 export default function CartaoDetalheDialog({
   open = true,
-  ariaLabel = "Detalhes do cartão",
+  ariaLabel = "",
+  ariaLabelledBy = "",
   onClose,
   dismissDisabled = false,
   children,
@@ -105,7 +106,8 @@ export default function CartaoDetalheDialog({
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-label={ariaLabel}
+        aria-label={ariaLabel || undefined}
+        aria-labelledby={ariaLabelledBy || undefined}
         tabIndex={-1}
         className="cartao-detalhe-dialog__panel"
         onKeyDown={handleKeyDown}

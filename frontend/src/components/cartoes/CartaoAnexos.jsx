@@ -40,6 +40,7 @@ export default function CartaoAnexos({
   const [erro, setErro] = useState("");
   const [baixandoId, setBaixandoId] = useState(null);
   const [removendoId, setRemovendoId] = useState(null);
+  const [dragAtivo, setDragAtivo] = useState(false);
   const inputRef = useRef(null);
 
   const carregar = useCallback(async () => {
@@ -59,9 +60,7 @@ export default function CartaoAnexos({
     carregar();
   }, [carregar]);
 
-  async function handleArquivo(event) {
-    const file = event.target.files?.[0];
-    event.target.value = "";
+  async function enviarArquivo(file) {
     if (!file) return;
 
     setErro("");
@@ -98,6 +97,12 @@ export default function CartaoAnexos({
     } finally {
       setEnviando(false);
     }
+  }
+
+  async function handleArquivo(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    await enviarArquivo(file);
   }
 
   async function handleBaixar(anexo) {
@@ -190,6 +195,33 @@ export default function CartaoAnexos({
         Limite de {MAX_BYTES / (1024 * 1024)} MB por arquivo (armazenamento em
         memória; reinicia com o servidor).
       </p>
+
+      <button
+        type="button"
+        className={[
+          "cartao-anexos__dropzone",
+          dragAtivo ? "cartao-anexos__dropzone--active" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setDragAtivo(true);
+        }}
+        onDragLeave={(event) => {
+          event.preventDefault();
+          setDragAtivo(false);
+        }}
+        onDrop={async (event) => {
+          event.preventDefault();
+          setDragAtivo(false);
+          const file = event.dataTransfer?.files?.[0];
+          await enviarArquivo(file);
+        }}
+      >
+        Arraste arquivos ou clique para enviar
+      </button>
 
       {erro ? (
         <p className="mt-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]" role="alert">

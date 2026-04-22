@@ -25,7 +25,11 @@ export default function CartaoDetalheOverlay() {
   }, [navigate, focusCtx]);
 
   return (
-    <CartaoDetalheDialog onClose={handleClose} ariaLabel="Detalhes do cartão">
+    <CartaoDetalheDialog
+      onClose={handleClose}
+      ariaLabelledBy="cartao-modal-title"
+      ariaLabel="Detalhes do cartão"
+    >
       <CartaoDetalheContent variant="modal" onRequestClose={handleClose} />
     </CartaoDetalheDialog>
   );

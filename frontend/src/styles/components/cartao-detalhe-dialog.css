@@ -17,11 +17,13 @@
   width: min(90vw, 1024px);
   max-height: min(85vh, calc(100dvh - var(--space-8)));
   margin-block: auto;
-  border-radius: 12px;
+  border-radius: 16px;
   border: 1px solid var(--color-border);
   background: #f4f5f7;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
   outline: none;
+  animation: cartao-detalhe-dialog-enter 0.2s ease;
 }
 
 .cartao-detalhe-dialog__header {
@@ -39,10 +41,21 @@
 .cartao-detalhe-dialog__body {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 0;
 }
 
 .cartao-detalhe-content--modal .cartao-detalhe-content__inner {
   max-width: none;
+}
+
+@keyframes cartao-detalhe-dialog-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

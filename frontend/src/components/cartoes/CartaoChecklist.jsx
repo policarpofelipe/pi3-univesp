@@ -12,6 +12,7 @@ function BlocoChecklist({ checklist, quadroId, cartaoId, onChanged }) {
   const [salvandoTitulo, setSalvandoTitulo] = useState(false);
   const [adicionando, setAdicionando] = useState(false);
   const [removendoLista, setRemovendoLista] = useState(false);
+  const [expandido, setExpandido] = useState(true);
 
   useEffect(() => {
     setTitulo(checklist.titulo || "");
@@ -66,10 +67,22 @@ function BlocoChecklist({ checklist, quadroId, cartaoId, onChanged }) {
   }
 
   const itens = Array.isArray(checklist.itens) ? checklist.itens : [];
+  const total = itens.length;
+  const concluidos = itens.filter((it) => Boolean(it.concluido)).length;
+  const progresso = total > 0 ? Math.round((concluidos / total) * 100) : 0;
 
   return (
-    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-4">
-      <div className="flex flex-wrap items-start justify-between gap-2">
+    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-4 cartao-checklist__block">
+      <div className="flex flex-wrap items-start justify-between gap-2 cartao-checklist__block-header">
+        <button
+          type="button"
+          onClick={() => setExpandido((v) => !v)}
+          className="cartao-checklist__collapse-btn"
+          aria-expanded={expandido}
+          aria-label={expandido ? "Recolher checklist" : "Expandir checklist"}
+        >
+          {expandido ? "▾" : "▸"}
+        </button>
         <input
           type="text"
           value={titulo}
@@ -87,44 +100,60 @@ function BlocoChecklist({ checklist, quadroId, cartaoId, onChanged }) {
           disabled={removendoLista}
           leftIcon={<Trash2 size={14} />}
           onClick={removerLista}
+          className="cartao-checklist__remove-btn"
         >
-          Excluir lista
+          Excluir checklist
         </Button>
       </div>
-
-      <ul className="mt-3 flex list-none flex-col gap-1 pl-0">
-        {itens.map((it) => (
-          <CartaoChecklistItem
-            key={it.id}
-            quadroId={quadroId}
-            cartaoId={cartaoId}
-            checklistId={checklist.id}
-            item={it}
-            onChanged={onChanged}
+      <div className="cartao-checklist__progress">
+        <span className="cartao-checklist__progress-label">
+          {concluidos}/{total} itens
+        </span>
+        <div className="cartao-checklist__progress-track" aria-hidden="true">
+          <span
+            className="cartao-checklist__progress-fill"
+            style={{ width: `${progresso}%` }}
           />
-        ))}
-      </ul>
+        </div>
+      </div>
 
-      <form className="mt-3 flex gap-2" onSubmit={adicionarItem}>
-        <input
-          type="text"
-          value={novoItem}
-          onChange={(e) => setNovoItem(e.target.value)}
-          disabled={adicionando}
-          placeholder="Novo item…"
-          className="min-w-0 flex-1 rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)]"
-        />
-        <Button
-          type="submit"
-          variant="secondary"
-          size="sm"
-          loading={adicionando}
-          disabled={!novoItem.trim()}
-          leftIcon={<Plus size={14} />}
-        >
-          Adicionar
-        </Button>
-      </form>
+      {expandido ? (
+        <>
+          <ul className="mt-3 flex list-none flex-col gap-1 pl-0">
+            {itens.map((it) => (
+              <CartaoChecklistItem
+                key={it.id}
+                quadroId={quadroId}
+                cartaoId={cartaoId}
+                checklistId={checklist.id}
+                item={it}
+                onChanged={onChanged}
+              />
+            ))}
+          </ul>
+
+          <form className="mt-3 flex gap-2" onSubmit={adicionarItem}>
+            <input
+              type="text"
+              value={novoItem}
+              onChange={(e) => setNovoItem(e.target.value)}
+              disabled={adicionando}
+              placeholder="Adicionar item"
+              className="min-w-0 flex-1 rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)]"
+            />
+            <Button
+              type="submit"
+              variant="secondary"
+              size="sm"
+              loading={adicionando}
+              disabled={!novoItem.trim()}
+              leftIcon={<Plus size={14} />}
+            >
+              Adicionar
+            </Button>
+          </form>
+        </>
+      ) : null}
     </div>
   );
 }

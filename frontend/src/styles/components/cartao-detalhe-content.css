@@ -1,8 +1,11 @@
 .cartao-detalhe-content--modal .cartao-detalhe-content__inner--modal {
   max-width: none;
   background: #f4f5f7;
-  border-radius: 12px;
+  border-radius: 16px;
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
 }
 
 .cartao-detalhe-content--page .cartao-detalhe-content__inner {
@@ -12,43 +15,79 @@
 .cartao-modal-header {
   position: sticky;
   top: 0;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 12px;
+  z-index: 5;
+  display: flex;
   align-items: center;
-  padding: 12px;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 24px;
   border-bottom: 1px solid var(--color-border);
   background: #f4f5f7;
 }
 
 .cartao-modal-header__title-wrap {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  flex: 1;
 }
 
 .cartao-modal-header__title-btn {
   border: none;
   background: transparent;
-  font-size: var(--font-size-heading-3);
+  font-size: 20px;
   font-weight: 600;
   color: var(--color-text);
   cursor: pointer;
   text-align: left;
-  padding: 0;
+  padding: 0 0 2px;
+  border-bottom: 2px solid transparent;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cartao-modal-header__title-btn:hover {
+  border-bottom-color: color-mix(in srgb, #0079bf 45%, transparent);
 }
 
 .cartao-modal-header__title-input {
-  width: min(100%, 480px);
-  border: 1px solid var(--input-border);
-  border-radius: 8px;
-  background: var(--input-bg);
+  width: min(100%, 560px);
+  border: 1px solid #0079bf;
+  border-radius: 6px;
+  background: transparent;
   color: var(--color-text);
-  font-size: var(--font-size-heading-3);
+  font-size: 20px;
   font-weight: 600;
-  padding: 8px 10px;
+  padding: 4px 8px;
+}
+
+.cartao-modal-header__close-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  min-width: 2.5rem;
+  border: none;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cartao-modal-header__close-btn:hover {
+  color: var(--color-text);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.cartao-modal-header__close-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
 }
 
 .cartao-modal-header__id-badge {
@@ -63,11 +102,20 @@
   background: var(--color-surface);
 }
 
+.cartao-modal-content-wrap {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .cartao-modal-layout {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
-  gap: 16px;
-  padding: 16px;
+  gap: 20px;
+  padding: 24px;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .cartao-modal-layout__main,
@@ -79,12 +127,13 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-height: 0;
 }
 
 .cartao-modal-layout__sidebar {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .cartao-modal-section {
@@ -122,21 +171,81 @@
   padding: 8px 10px;
 }
 
+.cartao-modal-section__editor textarea {
+  min-height: 100px;
+}
+
 .cartao-modal-section__editor-actions {
   margin-top: 8px;
   display: flex;
   gap: 8px;
 }
 
+.cartao-modal-section__save-btn {
+  background: #2e7d32 !important;
+  border-color: #2e7d32 !important;
+}
+
+.cartao-modal-section__save-btn:hover:not(:disabled) {
+  background: #256a29 !important;
+}
+
+.cartao-checklist__block-header:hover .cartao-checklist__remove-btn {
+  opacity: 1;
+}
+
+.cartao-checklist__remove-btn {
+  opacity: 0.65;
+}
+
+.cartao-checklist__collapse-btn {
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cartao-checklist__progress {
+  margin-top: 8px;
+}
+
+.cartao-checklist__progress-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.cartao-checklist__progress-track {
+  margin-top: 4px;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #e0e0e0;
+  overflow: hidden;
+}
+
+.cartao-checklist__progress-fill {
+  display: block;
+  height: 100%;
+  background: #28a745;
+  transition: width 0.2s ease;
+}
+
 .cartao-modal-section__markdown {
   white-space: pre-wrap;
-  color: var(--color-text-muted);
+  color: var(--color-text);
   font-size: var(--font-size-sm);
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 12px;
 }
 
 .cartao-modal-section__placeholder {
   margin: 0;
   color: var(--color-text-soft);
+  font-style: italic;
 }
 
 .cartao-modal-section__muted {
@@ -147,6 +256,12 @@
 
 .cartao-modal-section--compact .mt-8 {
   margin-top: 0;
+}
+
+.cartao-modal-section--compact {
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 0;
 }
 
 .cartao-modal-section > section {
@@ -168,8 +283,81 @@
   margin-top: 8px;
 }
 
+.cartao-modal-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  background: var(--color-surface);
+}
+
+.cartao-modal-footer__delete-btn {
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.cartao-modal-footer__delete-btn:hover:not(:disabled) {
+  background: #c82333 !important;
+  transform: scale(1.02);
+}
+
+.cartao-anexos__dropzone {
+  width: 100%;
+  margin-top: 10px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  color: var(--color-text-muted);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cartao-anexos__dropzone--active {
+  border-color: #0079bf;
+  background: #eaf4ff;
+}
+
+.cartao-modal-layout::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cartao-modal-layout::-webkit-scrollbar-track {
+  background: #e0e0e0;
+}
+
+.cartao-modal-layout::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 999px;
+}
+
 @media (max-width: 768px) {
+  .cartao-detalhe-content--modal .cartao-detalhe-content__inner--modal {
+    max-height: none;
+  }
+
+  .cartao-modal-header {
+    padding: 12px 14px;
+  }
+
   .cartao-modal-layout {
     grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .cartao-modal-footer {
+    padding: 12px 14px;
+  }
+
+  .cartao-modal-header__close-btn,
+  .cartao-modal-footer__delete-btn {
+    min-height: 44px;
   }
 }
