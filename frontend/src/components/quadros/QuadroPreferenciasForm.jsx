@@ -115,60 +115,54 @@ export default function QuadroPreferenciasForm({
   return (
     <section
       className={[
-        "rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 md:p-6",
+        "quadro-preferencias-form",
         className,
       ].join(" ")}
       aria-labelledby="quadro-prefs-titulo"
     >
-      <h3
-        id="quadro-prefs-titulo"
-        className="text-[var(--font-size-md)] font-semibold text-[var(--color-text)]"
-      >
+      <h3 id="quadro-prefs-titulo" className="quadro-preferencias-form__title">
         Preferências neste quadro (por usuário)
       </h3>
-      <p className="mt-1 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+      <p className="quadro-preferencias-form__description">
         Ajustes de visualização aplicados só à sua conta neste quadro.
       </p>
 
       {loading ? (
-        <p className="mt-4 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+        <p className="quadro-preferencias-form__loading">
           Carregando preferências…
         </p>
       ) : null}
 
       {loadError ? (
-        <p
-          className="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-text-muted)]"
-          role="status"
-        >
+        <p className="quadro-preferencias-form__feedback" role="status">
           {loadError}
         </p>
       ) : null}
 
       {!loading ? (
-        <form className="mt-4 flex flex-col gap-4" onSubmit={handleSubmit}>
-          <label className="flex cursor-pointer items-start gap-3">
+        <form className="quadro-preferencias-form__form" onSubmit={handleSubmit}>
+          <label className="quadro-preferencias-form__check-card">
             <input
               type="checkbox"
               name="mostrarContagemCartoes"
               checked={values.mostrarContagemCartoes}
               onChange={handleChange}
-              className="mt-1 h-4 w-4 rounded border-[var(--color-border)]"
+              className="quadro-preferencias-form__checkbox"
             />
-            <span>
-              <span className="block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]">
+            <span className="quadro-preferencias-form__check-content">
+              <span className="quadro-preferencias-form__check-title">
                 Mostrar contagem de cartões nas listas
               </span>
-              <span className="mt-0.5 block text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
+              <span className="quadro-preferencias-form__check-description">
                 Exibe totais ao lado do nome de cada lista no quadro.
               </span>
             </span>
           </label>
 
-          <div>
+          <div className="quadro-preferencias-form__field">
             <label
               htmlFor="quadro-prefs-densidade"
-              className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
+              className="quadro-preferencias-form__label"
             >
               Densidade da listagem
             </label>
@@ -177,26 +171,26 @@ export default function QuadroPreferenciasForm({
               name="densidadeListagem"
               value={values.densidadeListagem}
               onChange={handleChange}
-              className="w-full max-w-md rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)]"
+              className="quadro-preferencias-form__select"
             >
               <option value="confortavel">Confortável</option>
               <option value="compacta">Compacta</option>
             </select>
           </div>
 
-          <label className="flex cursor-pointer items-start gap-3">
+          <label className="quadro-preferencias-form__check-card">
             <input
               type="checkbox"
               name="abrirDetalheEmPainel"
               checked={values.abrirDetalheEmPainel}
               onChange={handleChange}
-              className="mt-1 h-4 w-4 rounded border-[var(--color-border)]"
+              className="quadro-preferencias-form__checkbox"
             />
-            <span>
-              <span className="block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]">
+            <span className="quadro-preferencias-form__check-content">
+              <span className="quadro-preferencias-form__check-title">
                 Abrir detalhe do cartão em painel lateral
               </span>
-              <span className="mt-0.5 block text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
+              <span className="quadro-preferencias-form__check-description">
                 Quando disponível no fluxo do quadro, prioriza painel em vez de
                 página inteira.
               </span>
@@ -204,24 +198,18 @@ export default function QuadroPreferenciasForm({
           </label>
 
           {saveError ? (
-            <p
-              className="rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
-              role="alert"
-            >
+            <p className="quadro-preferencias-form__feedback quadro-preferencias-form__feedback--error" role="alert">
               {saveError}
             </p>
           ) : null}
 
           {saveOk ? (
-            <p
-              className="text-[var(--font-size-sm)] text-[var(--color-success-text)]"
-              role="status"
-            >
+            <p className="quadro-preferencias-form__feedback quadro-preferencias-form__feedback--success" role="status">
               Preferências salvas.
             </p>
           ) : null}
 
-          <div className="flex flex-wrap gap-2">
+          <div className="quadro-preferencias-form__actions">
             <Button type="submit" variant="primary" loading={saving}>
               Salvar preferências
             </Button>
