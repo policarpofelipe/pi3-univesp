@@ -78,6 +78,7 @@ export default function ListaColumn({
           nome={lista.nome}
           totalCartoes={lista.totalCartoes}
           limiteWip={lista.limiteWip}
+          cor={lista.cor}
           titleTag="h2"
           className="border-none pb-0"
           actions={

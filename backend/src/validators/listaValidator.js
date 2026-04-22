@@ -1,5 +1,9 @@
 const validateRequestMiddleware = require("../middlewares/validateRequestMiddleware");
 
+function corHexValida(cor) {
+  return /^#[0-9a-fA-F]{6}$/.test(String(cor || "").trim());
+}
+
 function validateCriarBody(body = {}) {
   const errors = [];
   const nome = typeof body.nome === "string" ? body.nome.trim() : "";
@@ -10,6 +14,11 @@ function validateCriarBody(body = {}) {
     const n = Number(body.limiteWip);
     if (!Number.isFinite(n) || n <= 0) {
       errors.push("limiteWip deve ser um número positivo ou vazio.");
+    }
+  }
+  if (body.cor !== undefined && body.cor !== null && body.cor !== "") {
+    if (!corHexValida(body.cor)) {
+      errors.push("cor deve estar no formato hexadecimal #RRGGBB.");
     }
   }
   return errors;
@@ -27,6 +36,11 @@ function validateAtualizarBody(body = {}) {
     const n = Number(body.limiteWip);
     if (!Number.isFinite(n) || n <= 0) {
       errors.push("limiteWip deve ser um número positivo ou nulo.");
+    }
+  }
+  if (body.cor !== undefined && body.cor !== null && body.cor !== "") {
+    if (!corHexValida(body.cor)) {
+      errors.push("cor deve estar no formato hexadecimal #RRGGBB.");
     }
   }
   return errors;

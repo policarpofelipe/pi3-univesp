@@ -6,6 +6,14 @@ function toPositiveInt(value) {
   return Number.isInteger(num) && num > 0 ? num : null;
 }
 
+function normalizarCorLista(value) {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+  const cor = String(value).trim();
+  return /^#[0-9a-fA-F]{6}$/.test(cor) ? cor.toUpperCase() : null;
+}
+
 class ListaService {
   async listar(quadroId) {
     const qId = toPositiveInt(quadroId);
@@ -63,6 +71,7 @@ class ListaService {
           ? null
           : String(dados.descricao).trim(),
       limiteWip: Number.isFinite(limiteWip) && limiteWip > 0 ? limiteWip : null,
+      cor: normalizarCorLista(dados.cor),
     });
   }
 
@@ -97,6 +106,9 @@ class ListaService {
           ? null
           : Number(dados.limiteWip);
       payload.limiteWip = Number.isFinite(limite) && limite > 0 ? limite : null;
+    }
+    if (dados.cor !== undefined) {
+      payload.cor = normalizarCorLista(dados.cor);
     }
 
     return ListaRepository.atualizar(qId, lId, payload);

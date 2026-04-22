@@ -17,6 +17,7 @@ export default function ListaModal({
       nome: listaEmEdicao.nome,
       descricao: listaEmEdicao.descricao,
       limiteWip: listaEmEdicao.limiteWip,
+      cor: listaEmEdicao.cor,
     };
   }, [listaEmEdicao]);
 

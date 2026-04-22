@@ -5,6 +5,7 @@ const DEFAULT = {
   nome: "",
   descricao: "",
   limiteWip: "",
+  cor: "#64748B",
 };
 
 function normalize(v = {}) {
@@ -15,6 +16,10 @@ function normalize(v = {}) {
       v.limiteWip === null || v.limiteWip === undefined
         ? ""
         : String(v.limiteWip),
+    cor:
+      typeof v.cor === "string" && /^#[0-9a-fA-F]{6}$/.test(v.cor.trim())
+        ? v.cor.trim().toUpperCase()
+        : DEFAULT.cor,
   };
 }
 
@@ -28,6 +33,9 @@ function validate(values) {
     if (!Number.isFinite(n) || n < 1) {
       errors.limiteWip = "Informe um limite WIP positivo ou deixe em branco.";
     }
+  }
+  if (!/^#[0-9a-fA-F]{6}$/.test(String(values.cor || "").trim())) {
+    errors.cor = "Selecione uma cor válida.";
   }
   return errors;
 }
@@ -75,6 +83,7 @@ export default function ListaForm({
           nome: values.nome.trim(),
           descricao: values.descricao.trim(),
           limiteWip,
+          cor: values.cor.trim().toUpperCase(),
         });
       }
     } catch (err) {
@@ -158,6 +167,45 @@ export default function ListaForm({
         ) : (
           <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
             Deixe em branco para não limitar cartões nesta lista.
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label
+          htmlFor="lista-form-cor"
+          className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
+        >
+          Cor da lista
+        </label>
+        <div className="flex items-center gap-3">
+          <input
+            id="lista-form-cor"
+            name="cor"
+            type="color"
+            value={values.cor}
+            onChange={handleChange}
+            className="h-10 w-12 cursor-pointer rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] p-1"
+            aria-invalid={Boolean(errors.cor)}
+          />
+          <input
+            name="cor"
+            type="text"
+            value={values.cor}
+            onChange={handleChange}
+            className="w-full max-w-[12rem] rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)]"
+            placeholder="#64748B"
+            aria-label="Valor hexadecimal da cor da lista"
+            aria-invalid={Boolean(errors.cor)}
+          />
+        </div>
+        {errors.cor ? (
+          <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-danger-text)]">
+            {errors.cor}
+          </p>
+        ) : (
+          <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
+            Usada no cabeçalho da lista para facilitar identificação visual.
           </p>
         )}
       </div>

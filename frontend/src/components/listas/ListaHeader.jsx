@@ -4,14 +4,17 @@ export default function ListaHeader({
   nome,
   totalCartoes = 0,
   limiteWip = null,
+  cor = null,
   actions = null,
   className = "",
   titleTag: TitleTag = "h4",
 }) {
   return (
     <div
+      style={cor ? { "--lista-header-color": cor } : undefined}
       className={[
         "lista-header",
+        cor ? "lista-header--colored" : "",
         className,
       ]
         .filter(Boolean)

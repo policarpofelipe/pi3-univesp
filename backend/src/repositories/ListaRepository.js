@@ -92,7 +92,7 @@ class ListaRepository {
     return this.mapRow(rows[0] || null);
   }
 
-  async criar({ quadroId, nome, descricao = null, limiteWip = null }) {
+  async criar({ quadroId, nome, descricao = null, limiteWip = null, cor = null }) {
     const [maxRows] = await db.query(
       "SELECT COALESCE(MAX(posicao_padrao), 0) AS maxPos FROM listas WHERE quadro_id = ?",
       [quadroId]
@@ -102,10 +102,10 @@ class ListaRepository {
     const [result] = await db.query(
       `
       INSERT INTO listas (
-        quadro_id, nome, descricao, posicao_padrao, limite_wip, criada_em, atualizada_em
-      ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+        quadro_id, nome, descricao, cor, posicao_padrao, limite_wip, criada_em, atualizada_em
+      ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
       `,
-      [quadroId, nome, descricao, nextPos, limiteWip]
+      [quadroId, nome, descricao, cor, nextPos, limiteWip]
     );
 
     return this.obterPorId(quadroId, result.insertId);
@@ -126,6 +126,10 @@ class ListaRepository {
     if (dados.limiteWip !== undefined) {
       campos.push("limite_wip = ?");
       params.push(dados.limiteWip);
+    }
+    if (dados.cor !== undefined) {
+      campos.push("cor = ?");
+      params.push(dados.cor);
     }
     if (campos.length === 0) return this.obterPorId(quadroId, listaId);
 
