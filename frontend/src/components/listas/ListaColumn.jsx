@@ -82,19 +82,21 @@ export default function ListaColumn({
           className="border-none pb-0"
           actions={
           temMenu ? (
-            <div className="relative flex items-center gap-1" ref={menuWrapRef}>
+            <div className="lista-column__menu-wrap" ref={menuWrapRef}>
               <Button
                 ref={botaoMenuRef}
                 type="button"
                 variant="ghost"
                 size="sm"
+                className="lista-column__menu-trigger"
                 aria-haspopup="true"
                 aria-expanded={menuAberto}
                 aria-controls={menuId}
                 onClick={() => setMenuAberto((v) => !v)}
-                leftIcon={<MoreHorizontal size={16} aria-hidden="true" />}
+                aria-label={`Ações da lista ${lista.nome}`}
+                title="Ações da lista"
               >
-                Ações
+                <MoreHorizontal size={16} aria-hidden="true" />
               </Button>
               {menuAberto ? (
                 <div

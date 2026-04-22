@@ -1,5 +1,4 @@
 import React from "react";
-import { Tag } from "lucide-react";
 
 export default function ListaHeader({
   nome,
@@ -12,26 +11,21 @@ export default function ListaHeader({
   return (
     <div
       className={[
-        "flex flex-wrap items-start justify-between gap-2 border-b border-[var(--color-border)] pb-3",
+        "lista-header",
         className,
       ]
         .filter(Boolean)
         .join(" ")}
     >
-      <div className="min-w-0 flex-1">
-        <TitleTag className="text-[var(--font-size-md)] font-semibold text-[var(--color-text)]">
-          {nome}
-        </TitleTag>
-        <div className="mt-1 flex flex-wrap items-center gap-3 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
-          <span>{totalCartoes ?? 0} cartões</span>
-          <span className="inline-flex items-center gap-1">
-            <Tag size={12} aria-hidden="true" />
-            {limiteWip ? `WIP máx.: ${limiteWip}` : "Sem limite WIP"}
-          </span>
-        </div>
+      <div className="lista-header__main">
+        <TitleTag className="lista-header__title">{nome}</TitleTag>
+        <span className="lista-header__meta">
+          ({totalCartoes ?? 0} cartões
+          {limiteWip ? ` / Limite ${limiteWip}` : ""})
+        </span>
       </div>
       {actions ? (
-        <div className="flex flex-shrink-0 flex-wrap items-center gap-1">
+        <div className="lista-header__actions">
           {actions}
         </div>
       ) : null}
