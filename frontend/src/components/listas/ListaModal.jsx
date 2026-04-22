@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { createPortal } from "react-dom";
 import ListaForm from "./ListaForm";
 
 export default function ListaModal({
@@ -33,7 +34,7 @@ export default function ListaModal({
     }
   }
 
-  return (
+  const modalNode = (
     <div
       className="fixed inset-0 z-[1300] flex items-center justify-center bg-[var(--color-scrim)] p-4"
       role="presentation"
@@ -64,4 +65,6 @@ export default function ListaModal({
       </div>
     </div>
   );
+
+  return createPortal(modalNode, document.body);
 }
