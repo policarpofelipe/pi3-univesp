@@ -1,27 +1,28 @@
-import React from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
+import { useNavigate } from "react-router-dom";
 import {
   Menu,
+  X,
   Search,
   Bell,
-  PanelLeftClose,
-  PanelLeftOpen,
   UserRound,
+  LogOut,
 } from "lucide-react";
 
 import ThemeToggle from "../ui/ThemeToggle";
 import FontSizeControl from "../ui/FontSizeControl";
 import IconButton from "../ui/IconButton";
+import useAuth from "../../hooks/useAuth";
 
 import "../../styles/components/topbar.css";
 
 export default function Topbar({
   title = "",
   subtitle = "",
-  onToggleDesktopSidebar,
-  onToggleMobileSidebar,
-  sidebarCollapsed = false,
-  showSidebarToggle = true,
+  navigationItems = [],
+  navigationGroups = [],
+  currentPath = "",
   searchValue = "",
   onSearchChange,
   searchPlaceholder = "Buscar...",
@@ -30,45 +31,148 @@ export default function Topbar({
   notificationCount = 0,
   className = "",
 }) {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const menuWrapRef = useRef(null);
+  const menuButtonRef = useRef(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
   const hasSearch = typeof onSearchChange === "function";
   const userName = user?.name || user?.nome || "Usuário";
   const userAvatar = user?.avatarUrl || null;
+  const navMenuItems = useMemo(() => {
+    const flatGroups = (navigationGroups || []).flatMap((group) => group?.items || []);
+    const merged = [...(navigationItems || []), ...flatGroups];
+    const uniques = [];
+    const seen = new Set();
+    for (const item of merged) {
+      const key = item?.key || item?.href || item?.label;
+      if (!item?.href || !key || seen.has(key)) continue;
+      seen.add(key);
+      uniques.push(item);
+    }
+    return uniques;
+  }, [navigationItems, navigationGroups]);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    function handleClickOutside(event) {
+      const root = menuWrapRef.current;
+      if (!root || root.contains(event.target)) return;
+      setMenuOpen(false);
+      setFocusedIndex(-1);
+    }
+    function handleEscape(event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMenuOpen(false);
+        setFocusedIndex(-1);
+        menuButtonRef.current?.focus();
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [menuOpen]);
+
+  async function handleLogout() {
+    await logout();
+    navigate("/login", { replace: true });
+    setMenuOpen(false);
+  }
+
+  function handleMenuKeyDown(event) {
+    if (!menuOpen) return;
+    const count = navMenuItems.length + 1;
+    if (!count) return;
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setFocusedIndex((prev) => (prev + 1 + count) % count);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setFocusedIndex((prev) => (prev - 1 + count) % count);
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      setFocusedIndex(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      setFocusedIndex(count - 1);
+    }
+  }
+
+  useEffect(() => {
+    if (!menuOpen || focusedIndex < 0) return;
+    const root = menuWrapRef.current;
+    if (!root) return;
+    const nodes = root.querySelectorAll("[data-menu-item='true']");
+    nodes[focusedIndex]?.focus();
+  }, [menuOpen, focusedIndex]);
 
   return (
     <header className={clsx("topbar", className)}>
       <div className="topbar__inner">
         <div className="topbar__left">
-          {showSidebarToggle && (
-            <>
-              <div className="topbar__desktop-toggle">
-                <IconButton
-                  icon={
-                    sidebarCollapsed ? (
-                      <PanelLeftOpen size={18} />
-                    ) : (
-                      <PanelLeftClose size={18} />
-                    )
-                  }
-                  label={
-                    sidebarCollapsed
-                      ? "Expandir barra lateral"
-                      : "Recolher barra lateral"
-                  }
-                  variant="ghost"
-                  onClick={onToggleDesktopSidebar}
-                />
-              </div>
-
-              <div className="topbar__mobile-toggle">
-                <IconButton
-                  icon={<Menu size={18} />}
-                  label="Abrir menu"
-                  variant="ghost"
-                  onClick={onToggleMobileSidebar}
-                />
-              </div>
-            </>
-          )}
+          <div
+            className="topbar__menu-wrap"
+            ref={menuWrapRef}
+            onKeyDown={handleMenuKeyDown}
+          >
+            <button
+              ref={menuButtonRef}
+              title={menuOpen ? "Fechar menu" : "Menu"}
+              aria-label={menuOpen ? "Fechar menu" : "Menu"}
+              className="topbar__menu-toggle"
+              onClick={() => {
+                setMenuOpen((prev) => !prev);
+                setFocusedIndex(0);
+              }}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+            >
+              {menuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+            <div
+              className={clsx("topbar__nav-dropdown", menuOpen && "topbar__nav-dropdown--open")}
+              role="menu"
+              aria-hidden={!menuOpen}
+            >
+              {navMenuItems.map((item) => {
+                const active =
+                  currentPath === item.href || currentPath.startsWith(`${item.href}/`);
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.key || item.href}
+                    type="button"
+                    role="menuitem"
+                    data-menu-item="true"
+                    className={clsx("topbar__nav-item", active && "topbar__nav-item--active")}
+                    onClick={() => {
+                      navigate(item.href);
+                      setMenuOpen(false);
+                      setFocusedIndex(-1);
+                    }}
+                  >
+                    {Icon ? <Icon size={16} aria-hidden="true" /> : null}
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                role="menuitem"
+                data-menu-item="true"
+                className="topbar__nav-item topbar__nav-item--danger"
+                onClick={handleLogout}
+              >
+                <LogOut size={16} aria-hidden="true" />
+                <span>Sair</span>
+              </button>
+            </div>
+          </div>
 
           <div className="topbar__title-block">
             {title ? <h1 className="topbar__title">{title}</h1> : null}

@@ -24,18 +24,91 @@
   gap: var(--space-3);
 }
 
+.topbar__menu-wrap {
+  position: relative;
+}
+
+.topbar__menu-toggle {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.topbar__menu-toggle:hover {
+  background: var(--color-surface-alt);
+}
+
+.topbar__menu-toggle:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.topbar__nav-dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 0;
+  z-index: 120;
+  min-width: 16rem;
+  max-width: min(92vw, 24rem);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transform: scaleY(0.92);
+  transform-origin: top;
+  pointer-events: none;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.topbar__nav-dropdown--open {
+  opacity: 1;
+  transform: scaleY(1);
+  pointer-events: auto;
+}
+
+.topbar__nav-item {
+  width: 100%;
+  min-height: 44px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.625rem 0.75rem;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.topbar__nav-item:hover,
+.topbar__nav-item:focus-visible {
+  background: var(--color-surface-alt);
+}
+
+.topbar__nav-item--active {
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+  color: var(--color-primary);
+}
+
+.topbar__nav-item--danger {
+  color: var(--color-danger-text);
+}
+
 .topbar__right {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-}
-
-.topbar__desktop-toggle {
-  display: none;
-}
-
-.topbar__mobile-toggle {
-  display: flex;
 }
 
 .topbar__title-block {
@@ -202,14 +275,6 @@
 @media (min-width: 768px) {
   .topbar__inner {
     padding: var(--space-3) var(--space-6);
-  }
-
-  .topbar__desktop-toggle {
-    display: flex;
-  }
-
-  .topbar__mobile-toggle {
-    display: none;
   }
 
   .topbar__search--desktop {
