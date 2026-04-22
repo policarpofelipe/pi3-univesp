@@ -138,13 +138,13 @@ export default function ConviteMembroForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4"
+      className="convite-membro-form"
       noValidate
     >
-      <div>
+      <div className="convite-membro-form__field">
         <label
           htmlFor="convite-membro-email"
-          className="mb-2 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
+          className="convite-membro-form__label"
         >
           E-mail
         </label>
@@ -166,7 +166,7 @@ export default function ConviteMembroForm({
         {touched.email && errors.email ? (
           <p
             id="convite-membro-email-erro"
-            className="mt-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+            className="convite-membro-form__field-feedback convite-membro-form__field-feedback--error"
             role="alert"
           >
             {errors.email}
@@ -174,17 +174,17 @@ export default function ConviteMembroForm({
         ) : (
           <p
             id="convite-membro-email-ajuda"
-            className="mt-2 text-[var(--font-size-xs)] text-[var(--color-text-soft)]"
+            className="convite-membro-form__field-feedback convite-membro-form__field-feedback--hint"
           >
             O convite será enviado para este endereço.
           </p>
         )}
       </div>
 
-      <div>
+      <div className="convite-membro-form__field">
         <label
           htmlFor="convite-membro-nome"
-          className="mb-2 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
+          className="convite-membro-form__label"
         >
           Nome do membro
         </label>
@@ -202,7 +202,7 @@ export default function ConviteMembroForm({
         {touched.nome && errors.nome ? (
           <p
             id="convite-membro-nome-erro"
-            className="mt-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+            className="convite-membro-form__field-feedback convite-membro-form__field-feedback--error"
             role="alert"
           >
             {errors.nome}
@@ -210,10 +210,10 @@ export default function ConviteMembroForm({
         ) : null}
       </div>
 
-      <div>
+      <div className="convite-membro-form__field">
         <label
           htmlFor="convite-membro-papel"
-          className="mb-2 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
+          className="convite-membro-form__label"
         >
           Papel inicial
         </label>
@@ -235,7 +235,7 @@ export default function ConviteMembroForm({
         {touched.papel && errors.papel ? (
           <p
             id="convite-membro-papel-erro"
-            className="mt-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+            className="convite-membro-form__field-feedback convite-membro-form__field-feedback--error"
             role="alert"
           >
             {errors.papel}
@@ -243,10 +243,10 @@ export default function ConviteMembroForm({
         ) : null}
       </div>
 
-      <div>
+      <div className="convite-membro-form__field">
         <label
           htmlFor="convite-membro-mensagem"
-          className="mb-2 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
+          className="convite-membro-form__label"
         >
           Mensagem opcional
         </label>
@@ -265,11 +265,11 @@ export default function ConviteMembroForm({
               : "convite-membro-mensagem-ajuda"
           }
         />
-        <div className="mt-2 flex items-center justify-between gap-3">
+        <div className="convite-membro-form__message-meta">
           {touched.mensagem && errors.mensagem ? (
             <p
               id="convite-membro-mensagem-erro"
-              className="text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+              className="convite-membro-form__field-feedback convite-membro-form__field-feedback--error"
               role="alert"
             >
               {errors.mensagem}
@@ -277,14 +277,14 @@ export default function ConviteMembroForm({
           ) : (
             <p
               id="convite-membro-mensagem-ajuda"
-              className="text-[var(--font-size-xs)] text-[var(--color-text-soft)]"
+              className="convite-membro-form__field-feedback convite-membro-form__field-feedback--hint"
             >
               Campo opcional. Máximo de 500 caracteres.
             </p>
           )}
 
           <span
-            className="text-[var(--font-size-xs)] text-[var(--color-text-soft)]"
+            className="convite-membro-form__counter"
             aria-live="polite"
           >
             {mensagemLength}/500
@@ -294,7 +294,7 @@ export default function ConviteMembroForm({
 
       {showMessage && submitError ? (
         <div
-          className="rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-4 py-3 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+          className="convite-membro-form__feedback convite-membro-form__feedback--error"
           role="alert"
         >
           {submitError}
@@ -303,14 +303,14 @@ export default function ConviteMembroForm({
 
       {showMessage && submitSuccess ? (
         <div
-          className="rounded-lg border border-[var(--color-success-border)] bg-[var(--color-success-surface)] px-4 py-3 text-[var(--font-size-sm)] text-[var(--color-success-text)]"
+          className="convite-membro-form__feedback convite-membro-form__feedback--success"
           role="status"
         >
           {submitSuccess}
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="convite-membro-form__actions">
         <Button type="submit" variant="primary" loading={loading}>
           Enviar convite
         </Button>

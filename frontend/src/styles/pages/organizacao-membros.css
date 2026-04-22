@@ -39,6 +39,77 @@
   color: var(--color-text);
 }
 
+.convite-membro-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.convite-membro-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.convite-membro-form__label {
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.convite-membro-form__field-feedback {
+  margin-top: var(--space-1);
+}
+
+.convite-membro-form__field-feedback--error {
+  color: var(--color-danger-text);
+  font-size: var(--font-size-sm);
+}
+
+.convite-membro-form__field-feedback--hint {
+  color: var(--color-text-soft);
+  font-size: var(--font-size-xs);
+}
+
+.convite-membro-form__message-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.convite-membro-form__counter {
+  color: var(--color-text-soft);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+}
+
+.convite-membro-form__feedback {
+  border-radius: var(--radius-lg);
+  border: 1px solid;
+  padding: 0.75rem 1rem;
+  font-size: var(--font-size-sm);
+}
+
+.convite-membro-form__feedback--error {
+  border-color: var(--color-danger-border);
+  background: var(--color-danger-surface);
+  color: var(--color-danger-text);
+}
+
+.convite-membro-form__feedback--success {
+  border-color: var(--color-success-border);
+  background: var(--color-success-surface);
+  color: var(--color-success-text);
+}
+
+.convite-membro-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 @media (min-width: 1280px) {
   .organizacao-membros-page__grid {
     grid-template-columns: minmax(0, 2fr) minmax(20rem, 1fr);
