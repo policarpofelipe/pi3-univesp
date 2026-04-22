@@ -42,8 +42,10 @@ function buildItemIdsByList(listas, cartoes) {
 
 function findContainer(itemsMap, id) {
   const s = String(id);
-  const col = parseColumnDroppableId(s);
-  if (col != null) return String(col);
+  if (s.startsWith("column-")) {
+    const col = parseColumnDroppableId(s);
+    return col != null ? String(col) : null;
+  }
 
   if (Object.prototype.hasOwnProperty.call(itemsMap, s)) return s;
   for (const k of Object.keys(itemsMap)) {
@@ -154,7 +156,10 @@ export default function QuadroBoardCanvas({
       const overContainer = findContainer(items, overId);
       if (!activeContainer) return items;
 
-      const targetContainer = overContainer;
+      const targetContainer = overContainer
+        || (String(overId).startsWith("column-")
+          ? String(parseColumnDroppableId(String(overId)) || "")
+          : null);
       if (!targetContainer) return items;
 
       const nextItems = { ...items };
@@ -235,7 +240,11 @@ export default function QuadroBoardCanvas({
       const overId = String(overIdEfetivo);
       const draft = JSON.parse(JSON.stringify(itemIdsRef.current || {}));
       const activeContainer = findContainer(draft, activeSid);
-      const overContainer = findContainer(draft, overId);
+      const overContainerRaw = findContainer(draft, overId);
+      const overContainer = overContainerRaw
+        || (overId.startsWith("column-")
+          ? String(parseColumnDroppableId(overId) || "")
+          : null);
 
       if (!activeContainer || !overContainer) {
         if (snap) {
@@ -245,6 +254,13 @@ export default function QuadroBoardCanvas({
         snapshotRef.current = null;
         lastOverIdRef.current = null;
         return;
+      }
+
+      if (!Array.isArray(draft[activeContainer])) {
+        draft[activeContainer] = [];
+      }
+      if (!Array.isArray(draft[overContainer])) {
+        draft[overContainer] = [];
       }
 
       if (activeContainer !== overContainer) {
@@ -287,6 +303,15 @@ export default function QuadroBoardCanvas({
       }
 
       const listaDestinoId = Number(dest);
+      if (!Number.isInteger(listaDestinoId) || listaDestinoId <= 0) {
+        if (snap) {
+          setItemIdsByList(snap);
+        }
+        setIsDragging(false);
+        snapshotRef.current = null;
+        lastOverIdRef.current = null;
+        return;
+      }
 
       if (snap) {
         const origC = findContainer(snap, activeSid);
