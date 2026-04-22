@@ -280,10 +280,7 @@ export default function QuadroMembrosPage() {
         />
 
         {acaoErro ? (
-          <p
-            className="mb-4 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
-            role="alert"
-          >
+          <p className="quadro-membros-page__feedback quadro-membros-page__feedback--error" role="alert">
             {acaoErro}
           </p>
         ) : null}
@@ -414,7 +411,7 @@ export default function QuadroMembrosPage() {
 
       {modalConvite ? (
         <div
-          className="fixed inset-0 z-[1300] flex items-center justify-center bg-[var(--color-scrim)] p-4"
+          className="quadro-membros-page__modal-overlay"
           role="presentation"
           onClick={() => !convidando && setModalConvite(false)}
         >
@@ -422,20 +419,17 @@ export default function QuadroMembrosPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="convite-titulo"
-            className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-lg)]"
+            className="quadro-membros-page__modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2
-              id="convite-titulo"
-              className="text-[var(--font-size-heading-3)] font-semibold text-[var(--color-text)]"
-            >
+            <h2 id="convite-titulo" className="quadro-membros-page__modal-title">
               Convidar membro
             </h2>
-            <form className="mt-4 flex flex-col gap-3" onSubmit={handleEnviarConvite}>
-              <div>
+            <form className="quadro-membros-page__modal-form" onSubmit={handleEnviarConvite}>
+              <div className="quadro-membros-page__modal-field">
                 <label
                   htmlFor="convite-email"
-                  className="mb-1 block text-[var(--font-size-sm)] font-medium"
+                  className="quadro-membros-page__modal-label"
                 >
                   E-mail
                 </label>
@@ -445,14 +439,14 @@ export default function QuadroMembrosPage() {
                   required
                   value={emailConvite}
                   onChange={(e) => setEmailConvite(e.target.value)}
-                  className="w-full rounded-lg border border-[var(--input-border)] px-3 py-2 text-[var(--font-size-sm)]"
+                  className="quadro-membros-page__modal-input"
                   placeholder="nome@exemplo.com"
                 />
               </div>
-              <div>
+              <div className="quadro-membros-page__modal-field">
                 <label
                   htmlFor="convite-papel"
-                  className="mb-1 block text-[var(--font-size-sm)] font-medium"
+                  className="quadro-membros-page__modal-label"
                 >
                   Papel inicial
                 </label>
@@ -460,7 +454,7 @@ export default function QuadroMembrosPage() {
                   id="convite-papel"
                   value={papelConvite}
                   onChange={(e) => setPapelConvite(e.target.value)}
-                  className="w-full rounded-lg border border-[var(--input-border)] px-3 py-2 text-[var(--font-size-sm)]"
+                  className="quadro-membros-page__modal-select"
                 >
                   {papeis.map((p) => (
                     <option key={p.id || p.nome} value={p.nome}>
@@ -469,7 +463,7 @@ export default function QuadroMembrosPage() {
                   ))}
                 </select>
               </div>
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="quadro-membros-page__modal-actions">
                 <Button
                   type="button"
                   variant="ghost"

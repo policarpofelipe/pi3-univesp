@@ -26,7 +26,7 @@ export default function QuadroMembrosTable({
 }) {
   if (loading) {
     return (
-      <p className="py-8 text-center text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+      <p className="quadro-membros-table__loading">
         Carregando membros…
       </p>
     );
@@ -37,20 +37,20 @@ export default function QuadroMembrosTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-[var(--color-border)]">
-      <table className="w-full min-w-[640px] border-collapse text-left text-[var(--font-size-sm)]">
-        <thead>
-          <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-alt)]">
-            <th className="px-4 py-3 text-[var(--font-size-xs)] font-semibold uppercase tracking-wide text-[var(--color-text-soft)]">
+    <div className="quadro-membros-table">
+      <table className="quadro-membros-table__table">
+        <thead className="quadro-membros-table__head">
+          <tr>
+            <th className="quadro-membros-table__head-cell">
               Membro
             </th>
-            <th className="px-4 py-3 text-[var(--font-size-xs)] font-semibold uppercase tracking-wide text-[var(--color-text-soft)]">
+            <th className="quadro-membros-table__head-cell">
               Status
             </th>
-            <th className="px-4 py-3 text-[var(--font-size-xs)] font-semibold uppercase tracking-wide text-[var(--color-text-soft)]">
+            <th className="quadro-membros-table__head-cell">
               Papel
             </th>
-            <th className="px-4 py-3 text-right text-[var(--font-size-xs)] font-semibold uppercase tracking-wide text-[var(--color-text-soft)]">
+            <th className="quadro-membros-table__head-cell quadro-membros-table__head-cell--actions">
               Ações
             </th>
           </tr>
@@ -64,37 +64,37 @@ export default function QuadroMembrosTable({
             return (
               <tr
                 key={membro.id}
-                className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-hover)]"
+                className="quadro-membros-table__row"
               >
-                <td className="px-4 py-3 align-top">
-                  <div className="font-medium text-[var(--color-text)]">
+                <td className="quadro-membros-table__cell">
+                  <div className="quadro-membros-table__member-name">
                     {membro.nome || "Sem nome"}
                   </div>
                   {membro.email ? (
-                    <div className="mt-1 flex items-center gap-1 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
+                    <div className="quadro-membros-table__member-email">
                       <Mail size={12} aria-hidden="true" />
                       <span>{membro.email}</span>
                     </div>
                   ) : null}
                 </td>
-                <td className="px-4 py-3 align-top">
+                <td className="quadro-membros-table__cell">
                   <span
                     className={[
-                      "inline-flex rounded-full border px-2 py-0.5 text-[var(--font-size-xs)] font-medium capitalize",
+                      "quadro-membros-table__status",
                       pendente
-                        ? "border-[var(--color-warning-border)] bg-[var(--color-warning-surface)] text-[var(--color-warning-text)]"
-                        : "border-[var(--color-success-border)] bg-[var(--color-success-surface)] text-[var(--color-success-text)]",
+                        ? "quadro-membros-table__status--pending"
+                        : "quadro-membros-table__status--active",
                     ].join(" ")}
                   >
                     {pendente ? "Pendente" : membro.status || "Ativo"}
                   </span>
                 </td>
-                <td className="px-4 py-3 align-top">
+                <td className="quadro-membros-table__cell">
                   {typeof onAlterarPapel === "function" &&
                   papeisDisponiveis.length > 0 ? (
                     <select
                       aria-label={`Papel de ${membro.nome || "membro"}`}
-                      className="w-full min-w-[10rem] max-w-[14rem] rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-2 py-1.5 text-[var(--font-size-sm)]"
+                      className="quadro-membros-table__role-select"
                       value={papelAtual}
                       onChange={(e) =>
                         onAlterarPapel(membro.id, e.target.value)
@@ -110,15 +110,15 @@ export default function QuadroMembrosTable({
                       ))}
                     </select>
                   ) : (
-                    <span className="text-[var(--color-text-muted)]">
+                    <span className="quadro-membros-table__role-text">
                       {papeisLista.length
                         ? papeisLista.join(", ")
                         : "Sem papel"}
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3 align-top">
-                  <div className="flex flex-wrap justify-end gap-2">
+                <td className="quadro-membros-table__cell quadro-membros-table__cell--actions">
+                  <div className="quadro-membros-table__actions">
                     {pendente && typeof onReenviarConvite === "function" ? (
                       <Button
                         type="button"
