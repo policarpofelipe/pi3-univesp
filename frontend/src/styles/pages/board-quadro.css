@@ -42,7 +42,7 @@
 }
 
 .board-sortable-card--dragging {
-  opacity: 0.35;
+  opacity: 0;
 }
 
 .board-drag-overlay {

@@ -188,26 +188,77 @@ export default function QuadroBoardCanvas({
   const handleDragEnd = useCallback(
     async ({ active, over }) => {
       setActiveId(null);
-      setIsDragging(false);
       const snap = snapshotRef.current;
-      snapshotRef.current = null;
 
       if (dragDisabled || !over) {
+        if (snap) {
+          setItemIdsByList(snap);
+        }
+        setIsDragging(false);
+        snapshotRef.current = null;
         return;
       }
 
       const activeSid = String(active.id);
       const m = activeSid.match(/^card-(\d+)$/);
       const cardId = m ? Number(m[1]) : null;
-      if (!cardId) return;
+      if (!cardId) {
+        setIsDragging(false);
+        snapshotRef.current = null;
+        return;
+      }
 
-      const final = itemIdsRef.current;
-      const dest = findContainer(final, activeSid);
-      if (!dest) return;
+      const overId = String(over.id);
+      const draft = JSON.parse(JSON.stringify(itemIdsRef.current || {}));
+      const activeContainer = findContainer(draft, activeSid);
+      const overContainer = findContainer(draft, overId);
 
-      const ord = final[dest] || [];
+      if (!activeContainer || !overContainer) {
+        if (snap) {
+          setItemIdsByList(snap);
+        }
+        setIsDragging(false);
+        snapshotRef.current = null;
+        return;
+      }
+
+      if (activeContainer !== overContainer) {
+        const from = [...(draft[activeContainer] || [])];
+        const to = [...(draft[overContainer] || [])];
+        const fromIdx = from.indexOf(activeSid);
+        if (fromIdx >= 0) {
+          from.splice(fromIdx, 1);
+        }
+
+        const overIndex = to.indexOf(overId);
+        const insertAt = overIndex >= 0 ? overIndex : to.length;
+        if (!to.includes(activeSid)) {
+          to.splice(insertAt, 0, activeSid);
+        }
+
+        draft[activeContainer] = from;
+        draft[overContainer] = to;
+      } else if (String(overId).startsWith("column-")) {
+        const same = [...(draft[activeContainer] || [])];
+        if (!same.includes(activeSid)) {
+          same.push(activeSid);
+          draft[activeContainer] = same;
+        }
+      }
+
+      setItemIdsByList(draft);
+
+      const dest = overContainer;
+      const ord = draft[dest] || [];
       const pos = ord.indexOf(activeSid);
-      if (pos < 0) return;
+      if (pos < 0) {
+        if (snap) {
+          setItemIdsByList(snap);
+        }
+        setIsDragging(false);
+        snapshotRef.current = null;
+        return;
+      }
 
       const listaDestinoId = Number(dest);
 
@@ -216,6 +267,8 @@ export default function QuadroBoardCanvas({
         const origIdx =
           origC != null ? (snap[origC] || []).indexOf(activeSid) : -1;
         if (origC === dest && origIdx === pos) {
+          setIsDragging(false);
+          snapshotRef.current = null;
           return;
         }
       }
@@ -233,6 +286,9 @@ export default function QuadroBoardCanvas({
             err?.message ||
             "Não foi possível mover o cartão."
         );
+      } finally {
+        setIsDragging(false);
+        snapshotRef.current = null;
       }
     },
     [dragDisabled, quadroId, onCartoesUpdated]
