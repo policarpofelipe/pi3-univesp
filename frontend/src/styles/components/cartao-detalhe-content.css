@@ -277,10 +277,20 @@
   cursor: pointer;
   color: var(--color-text);
   font-weight: 600;
+  list-style: none;
 }
 
 .cartao-modal-history > section {
   margin-top: 8px;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.cartao-modal-history summary::-webkit-details-marker {
+  display: none;
 }
 
 .cartao-modal-footer {

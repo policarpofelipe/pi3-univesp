@@ -128,7 +128,7 @@ export default function CartaoComentarios({
           Nenhum comentário ainda. Seja o primeiro a comentar.
         </p>
       ) : (
-        <ul className="mt-4 flex flex-col gap-3">
+        <ul className="mt-4 flex list-none flex-col gap-3 pl-0">
           {itens.map((c) => {
             const podeExcluir =
               uid && String(c.autorId || "") === uid;

@@ -480,14 +480,16 @@ export default function CartaoDetalheContent({
             />
           </section>
 
-          <details className="cartao-modal-history">
-            <summary>Histórico</summary>
-            <CartaoHistorico
-              quadroId={quadroId}
-              cartaoId={cartaoId}
-              recarregarSignal={historicoTick}
-            />
-          </details>
+          <section className="cartao-modal-section" aria-labelledby="cartao-historico-titulo-modal">
+            <details className="cartao-modal-history">
+              <summary id="cartao-historico-titulo-modal">Histórico</summary>
+              <CartaoHistorico
+                quadroId={quadroId}
+                cartaoId={cartaoId}
+                recarregarSignal={historicoTick}
+              />
+            </details>
+          </section>
           </main>
 
           <CartaoSidebar>
