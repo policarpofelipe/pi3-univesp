@@ -2,8 +2,11 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useCartaoOverlayReturnFocus } from "../../context/CartaoOverlayReturnFocusContext";
 import {
+  CircleUserRound,
   CalendarDays,
   CheckSquare,
+  MessageCircle,
+  Paperclip,
   GripVertical,
 } from "lucide-react";
 
@@ -12,8 +15,6 @@ import {
   formatarPrazoExibicao,
   prazoEstaAtrasado,
 } from "./CartaoPrazo";
-import { labelPrioridadeCartao } from "../../constants/prioridades";
-import { classePrioridadeCartao } from "./CartaoPrioridade";
 import TagBadge from "./TagBadge";
 import CartaoCardMenu from "./CartaoCardMenu";
 
@@ -67,6 +68,20 @@ export default function CartaoCard({
   });
 
   const pendentesChecklist = Number(cartao.checklistItensPendentes) || 0;
+  const totalChecklist = Number(cartao.checklistItensTotal) || 0;
+  const qtdComentarios = Number(cartao.comentariosTotal) || 0;
+  const qtdAnexos = Number(cartao.anexosTotal) || 0;
+
+  const prioridadeLabel =
+    cartao.prioridade === "urgente"
+      ? "Urgente"
+      : cartao.prioridade === "alta"
+        ? "Alta"
+        : cartao.prioridade === "media"
+          ? "Média"
+          : cartao.prioridade === "baixa"
+            ? "Baixa"
+            : "Sem prioridade";
 
   return (
     <article
@@ -101,12 +116,11 @@ export default function CartaoCard({
         <div className="cartao-board-card__top-chips">
           {cartao.prioridade ? (
             <span
-              className={[
-                "cartao-board-card__chip cartao-board-card__chip--prio",
-                classePrioridadeCartao(cartao.prioridade),
-              ].join(" ")}
+              className="cartao-board-card__priority-dot"
+              title={`Prioridade ${prioridadeLabel}`}
+              aria-label={`Prioridade ${prioridadeLabel}`}
             >
-              {labelPrioridadeCartao(cartao.prioridade)}
+              <span className={`cartao-board-card__priority-dot-inner cartao-board-card__priority-dot-inner--${cartao.prioridade}`} />
             </span>
           ) : null}
           {cartao.prazoEm ? (
@@ -186,16 +200,51 @@ export default function CartaoCard({
                 <span aria-hidden="true">{a.iniciais}</span>
               </span>
             ))
-          ) : (
-            <span className="cartao-board-card__meta-muted">Sem responsável</span>
-          )}
+          ) : null}
+          {!atribDisplay.length ? <CircleUserRound size={14} className="cartao-board-card__avatar-empty" aria-hidden="true" /> : null}
         </div>
-        {pendentesChecklist > 0 ? (
-          <span className="cartao-board-card__check-hint">
-            <CheckSquare size={14} aria-hidden="true" />
-            <span>{pendentesChecklist} pendente(s)</span>
-          </span>
-        ) : null}
+        <div className="cartao-board-card__meta">
+          {qtdComentarios > 0 ? (
+            <span className="cartao-board-card__meta-item" title={`${qtdComentarios} comentário(s)`}>
+              <MessageCircle size={13} aria-hidden="true" />
+              <span>{qtdComentarios}</span>
+            </span>
+          ) : null}
+          {qtdAnexos > 0 ? (
+            <span className="cartao-board-card__meta-item" title={`${qtdAnexos} anexo(s)`}>
+              <Paperclip size={13} aria-hidden="true" />
+              <span>{qtdAnexos}</span>
+            </span>
+          ) : null}
+          {totalChecklist > 0 ? (
+            <span className="cartao-board-card__meta-item" title="Checklist">
+              <CheckSquare size={13} aria-hidden="true" />
+              <span>{totalChecklist - pendentesChecklist}/{totalChecklist}</span>
+            </span>
+          ) : pendentesChecklist > 0 ? (
+            <span className="cartao-board-card__meta-item" title="Checklist">
+              <CheckSquare size={13} aria-hidden="true" />
+              <span>{pendentesChecklist}</span>
+            </span>
+          ) : null}
+          {cartao.prazoEm ? (
+            <span
+              className={[
+                "cartao-board-card__meta-item",
+                prazoEstaAtrasado(cartao.prazoEm) ? "cartao-board-card__meta-item--overdue" : "",
+              ].filter(Boolean).join(" ")}
+              title="Prazo"
+            >
+              <CalendarDays size={13} aria-hidden="true" />
+              <time dateTime={cartao.prazoEm}>{formatarPrazoExibicao(cartao.prazoEm)}</time>
+            </span>
+          ) : null}
+          {pendentesChecklist > 0 ? (
+            <span className="cartao-board-card__check-hint">
+              {pendentesChecklist} pend.
+            </span>
+          ) : null}
+        </div>
       </div>
     </article>
   );

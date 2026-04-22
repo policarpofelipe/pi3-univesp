@@ -1,5 +1,5 @@
 import React, { useId, useState } from "react";
-import { Filter, X } from "lucide-react";
+import { Filter, Search, X } from "lucide-react";
 
 import Button from "../../ui/Button";
 import {
@@ -103,6 +103,11 @@ export default function BoardQuickFilters({
           <label className="sr-only" htmlFor={`${baseId}-busca`}>
             Buscar no título do cartão
           </label>
+          <Search
+            size={16}
+            aria-hidden="true"
+            className="board-quick-filters__search-icon"
+          />
           <input
             id={`${baseId}-busca`}
             type="search"

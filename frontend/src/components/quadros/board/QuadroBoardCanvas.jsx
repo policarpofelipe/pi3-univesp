@@ -15,6 +15,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { useDroppable } from "@dnd-kit/core";
+import { Inbox } from "lucide-react";
 import {
   SortableContext,
   arrayMove,
@@ -96,13 +97,15 @@ export default function QuadroBoardCanvas({
   renderNovaListaColumn,
   listaColumnMenuPropsByIndex,
 }) {
-  const DEBUG_DND = true;
+  const DEBUG_DND = false;
   const [itemIdsByList, setItemIdsByList] = useState({});
   const [activeId, setActiveId] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [hasHorizontalOverflow, setHasHorizontalOverflow] = useState(false);
   const snapshotRef = useRef(null);
   const itemIdsRef = useRef({});
   const lastOverIdRef = useRef(null);
+  const scrollerRef = useRef(null);
 
   useEffect(() => {
     itemIdsRef.current = itemIdsByList;
@@ -120,6 +123,17 @@ export default function QuadroBoardCanvas({
     if (isDragging) return;
     setItemIdsByList(buildItemIdsByList(listas, cartoes));
   }, [listas, cartoes, isDragging]);
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return undefined;
+    function syncOverflow() {
+      setHasHorizontalOverflow(el.scrollWidth > el.clientWidth + 4);
+    }
+    syncOverflow();
+    window.addEventListener("resize", syncOverflow);
+    return () => window.removeEventListener("resize", syncOverflow);
+  }, [listas.length, cartoes.length]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -457,7 +471,9 @@ export default function QuadroBoardCanvas({
       onDragCancel={handleDragCancel}
     >
       <div
+        ref={scrollerRef}
         className="quadro-detalhe-page__columns-scroller"
+        data-has-overflow={hasHorizontalOverflow ? "true" : "false"}
         role="region"
         aria-label="Listas em rolagem horizontal"
       >
@@ -507,6 +523,15 @@ export default function QuadroBoardCanvas({
                       />
                     );
                   })}
+                  {ids.length === 0 ? (
+                    <div className="lista-column__empty-state" aria-live="polite">
+                      <div className="lista-column__empty-icon" aria-hidden="true">
+                        <Inbox size={20} />
+                      </div>
+                      <p className="lista-column__empty-title">Nenhum cartão nesta lista</p>
+                      <p className="lista-column__empty-text">Use "Adicionar cartão" para começar.</p>
+                    </div>
+                  ) : null}
                 </SortableContext>
               </DroppableListaBody>
             </ListaColumn>

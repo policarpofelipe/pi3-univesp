@@ -6,6 +6,13 @@
   height: 100%;
   color: var(--color-text);
   animation: quadro-detalhe-fade-in-up 0.35s ease-out;
+  background:
+    radial-gradient(#cbd5e1 0.5px, transparent 0.5px),
+    linear-gradient(135deg, #f5f7fb 0%, #eef2f6 100%);
+  background-size: 20px 20px, auto;
+  border-radius: var(--radius-xl);
+  padding: var(--space-3);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.02);
 }
 
 @keyframes quadro-detalhe-fade-in-up {
@@ -47,7 +54,10 @@
   font-size: var(--font-size-heading-2);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
-  color: var(--color-text);
+  background: linear-gradient(135deg, #1a2a3a, #2c3e50);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   text-wrap: balance;
 }
 
@@ -79,6 +89,10 @@
 .quadro-detalhe-page__metrics {
   margin: 0;
   font-variant-numeric: tabular-nums;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: #e9ecef;
+  color: #495057;
 }
 
 .quadro-detalhe-page__metrics-sep {
@@ -115,6 +129,25 @@
   padding-bottom: var(--space-2);
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+.quadro-detalhe-page__columns-scroller::after {
+  content: "";
+  position: sticky;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 60px;
+  margin-left: auto;
+  pointer-events: none;
+  background: linear-gradient(to right, rgba(245, 247, 251, 0), rgba(245, 247, 251, 0.92));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.quadro-detalhe-page__columns-scroller[data-has-overflow="true"]::after {
+  opacity: 1;
 }
 
 /* Coluna (lista) */
@@ -126,11 +159,24 @@
   height: 100%;
   min-height: 0;
   padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface-alt);
-  box-shadow: var(--shadow-xs);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(2px);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.03);
   scroll-snap-align: start;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.lista-column:hover {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
 .lista-column__descricao {
@@ -145,18 +191,14 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 2px solid var(--lista-header-color, var(--color-border));
   padding-bottom: var(--space-2);
   border-radius: var(--radius-md);
 }
 
 .lista-header--colored {
-  background: color-mix(
-    in srgb,
-    var(--lista-header-color) 18%,
-    var(--color-surface)
-  );
-  border-bottom-color: color-mix(in srgb, var(--lista-header-color) 30%, var(--color-border));
+  background: color-mix(in srgb, var(--lista-header-color) 10%, var(--color-surface));
+  border-image: linear-gradient(90deg, var(--lista-header-color), #00a3cc) 1;
 }
 
 .lista-header__main {
@@ -167,6 +209,13 @@
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
+}
+
+.lista-header__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--lista-header-color, var(--color-primary));
 }
 
 .lista-header__title {
@@ -241,14 +290,24 @@
 .criacao-rapida-cartao-kanban__trigger {
   width: 100%;
   justify-content: flex-start !important;
-  color: var(--color-text-muted) !important;
+  color: #5e6c84 !important;
   font-weight: var(--font-weight-medium);
+  border-radius: 10px !important;
+  transition: all 0.2s ease !important;
 }
 
 .criacao-rapida-cartao-kanban__trigger:hover,
 .criacao-rapida-cartao-kanban__trigger:focus-visible {
-  color: var(--color-text) !important;
-  background: var(--color-surface) !important;
+  color: #172b4d !important;
+  background: #f0f2f5 !important;
+}
+
+.criacao-rapida-cartao-kanban__trigger svg {
+  transition: transform 0.2s ease;
+}
+
+.criacao-rapida-cartao-kanban__trigger:hover svg {
+  transform: rotate(90deg);
 }
 
 .criacao-rapida-cartao-kanban--expanded {
@@ -477,4 +536,21 @@
     animation: none;
   }
 
+  .lista-column,
+  .criacao-rapida-cartao-kanban__trigger svg {
+    transition: none !important;
+    transform: none !important;
+  }
+
+}
+
+@media (max-width: 768px) {
+  .lista-column {
+    flex: 0 0 280px;
+    min-width: 280px;
+  }
+
+  .quadro-detalhe-page__board-meta-row {
+    display: none;
+  }
 }

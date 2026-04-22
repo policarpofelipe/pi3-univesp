@@ -44,6 +44,13 @@ export default function ListaColumn({
     return null;
   }
 
+  const listaNomeKey = String(lista.nome || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
   const {
     onEditar,
     onExcluir,
@@ -72,7 +79,15 @@ export default function ListaColumn({
   }
 
   return (
-    <section className={["lista-column", className].filter(Boolean).join(" ")}>
+    <section
+      className={[
+        "lista-column",
+        listaNomeKey ? `lista-column--${listaNomeKey}` : "",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div className="lista-column__header-shell">
         <ListaHeader
           nome={lista.nome}
