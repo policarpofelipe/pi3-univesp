@@ -94,6 +94,7 @@ export default function QuadroBoardCanvas({
   const snapshotRef = useRef(null);
   const itemIdsRef = useRef({});
   const lastOverIdRef = useRef(null);
+  const lastOverContainerRef = useRef(null);
 
   useEffect(() => {
     itemIdsRef.current = itemIdsByList;
@@ -137,14 +138,22 @@ export default function QuadroBoardCanvas({
       setActiveId(active.id);
       setIsDragging(true);
       lastOverIdRef.current = null;
+      lastOverContainerRef.current = null;
     },
     [dragDisabled]
   );
 
   const handleDragOver = useCallback(({ active, over }) => {
     const overId = over?.id;
-    if (!overId || String(active.id) === String(overId)) return;
-    lastOverIdRef.current = String(overId);
+    if (!overId) return;
+    if (String(active.id) !== String(overId)) {
+      lastOverIdRef.current = String(overId);
+      const overContainer = findContainer(itemIdsRef.current, overId);
+      if (overContainer) {
+        lastOverContainerRef.current = String(overContainer);
+      }
+    }
+    if (String(active.id) === String(overId)) return;
 
     setItemIdsByList((items) => {
       const activeContainer = findContainer(items, active.id);
@@ -188,38 +197,45 @@ export default function QuadroBoardCanvas({
     setIsDragging(false);
     snapshotRef.current = null;
     lastOverIdRef.current = null;
+    lastOverContainerRef.current = null;
   }, []);
 
   const handleDragEnd = useCallback(
     async ({ active, over }) => {
       setActiveId(null);
       const snap = snapshotRef.current;
-      const overIdEfetivo = over?.id ?? lastOverIdRef.current;
+      const activeSid = String(active.id);
+      const overIdEfetivo =
+        over?.id && String(over.id) !== activeSid
+          ? over.id
+          : lastOverIdRef.current;
 
-      if (dragDisabled || !overIdEfetivo) {
+      if (dragDisabled || (!overIdEfetivo && !lastOverContainerRef.current)) {
         if (snap) {
           setItemIdsByList(snap);
         }
         setIsDragging(false);
         snapshotRef.current = null;
         lastOverIdRef.current = null;
+        lastOverContainerRef.current = null;
         return;
       }
 
-      const activeSid = String(active.id);
       const m = activeSid.match(/^card-(\d+)$/);
       const cardId = m ? Number(m[1]) : null;
       if (!cardId) {
         setIsDragging(false);
         snapshotRef.current = null;
         lastOverIdRef.current = null;
+        lastOverContainerRef.current = null;
         return;
       }
 
-      const overId = String(overIdEfetivo);
+      const overId = overIdEfetivo ? String(overIdEfetivo) : "";
       const draft = JSON.parse(JSON.stringify(itemIdsRef.current || {}));
       const activeContainer = findContainer(draft, activeSid);
-      const overContainer = findContainer(draft, overId);
+      const overContainer =
+        findContainer(draft, overId) || lastOverContainerRef.current;
 
       if (!activeContainer || !overContainer) {
         if (snap) {
@@ -228,6 +244,7 @@ export default function QuadroBoardCanvas({
         setIsDragging(false);
         snapshotRef.current = null;
         lastOverIdRef.current = null;
+        lastOverContainerRef.current = null;
         return;
       }
 
@@ -239,7 +256,8 @@ export default function QuadroBoardCanvas({
           from.splice(fromIdx, 1);
         }
 
-        const overIndex = to.indexOf(overId);
+        const overEhColuna = String(overId).startsWith("column-");
+        const overIndex = overEhColuna ? -1 : to.indexOf(overId);
         const insertAt = overIndex >= 0 ? overIndex : to.length;
         if (!to.includes(activeSid)) {
           to.splice(insertAt, 0, activeSid);
@@ -267,6 +285,7 @@ export default function QuadroBoardCanvas({
         setIsDragging(false);
         snapshotRef.current = null;
         lastOverIdRef.current = null;
+        lastOverContainerRef.current = null;
         return;
       }
 
@@ -280,6 +299,7 @@ export default function QuadroBoardCanvas({
           setIsDragging(false);
           snapshotRef.current = null;
           lastOverIdRef.current = null;
+          lastOverContainerRef.current = null;
           return;
         }
       }
@@ -301,17 +321,30 @@ export default function QuadroBoardCanvas({
         setIsDragging(false);
         snapshotRef.current = null;
         lastOverIdRef.current = null;
+        lastOverContainerRef.current = null;
       }
     },
     [dragDisabled, quadroId, onCartoesUpdated]
   );
 
   const collisionDetectionStrategy = useCallback((args) => {
-    const pointerCollisions = pointerWithin(args);
+    const activeId = String(args.active?.id ?? "");
+    const filtrarAtivo = (collisions) =>
+      collisions.filter((collision) => String(collision.id) !== activeId);
+
+    const pointerCollisions = filtrarAtivo(pointerWithin(args));
     if (pointerCollisions.length > 0) {
-      return pointerCollisions;
+      const colisoesColuna = pointerCollisions.filter((collision) =>
+        String(collision.id).startsWith("column-")
+      );
+      return colisoesColuna.length > 0 ? colisoesColuna : pointerCollisions;
     }
-    return closestCorners(args);
+
+    const cornerCollisions = filtrarAtivo(closestCorners(args));
+    const colisoesColuna = cornerCollisions.filter((collision) =>
+      String(collision.id).startsWith("column-")
+    );
+    return colisoesColuna.length > 0 ? colisoesColuna : cornerCollisions;
   }, []);
 
   return (
