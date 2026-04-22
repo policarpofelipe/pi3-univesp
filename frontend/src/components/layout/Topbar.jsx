@@ -8,13 +8,13 @@ import {
   Bell,
   UserRound,
   LogOut,
-  Accessibility,
   RotateCcw,
 } from "lucide-react";
 
 import IconButton from "../ui/IconButton";
 import useAuth from "../../hooks/useAuth";
 import useAccessibility from "../../hooks/useAccessibility";
+import accessibilityOnuIcon from "../../assets/icons/accessibility-onu.svg";
 
 import "../../styles/components/topbar.css";
 
@@ -205,18 +205,6 @@ export default function Topbar({
             </div>
           </div>
 
-          <button
-            type="button"
-            className="topbar__menu-toggle"
-            aria-haspopup="dialog"
-            aria-expanded={accessibilityOpen}
-            aria-label={accessibilityOpen ? "Fechar acessibilidade" : "Abrir acessibilidade"}
-            title={accessibilityOpen ? "Fechar acessibilidade" : "Acessibilidade"}
-            onClick={() => setAccessibilityOpen(true)}
-          >
-            <Accessibility size={18} />
-          </button>
-
           <div className="topbar__title-block">
             {title ? <h1 className="topbar__title">{title}</h1> : null}
             {subtitle ? <p className="topbar__subtitle">{subtitle}</p> : null}
@@ -253,6 +241,18 @@ export default function Topbar({
           )}
 
           {actions ? <div className="topbar__actions">{actions}</div> : null}
+
+          <button
+            type="button"
+            className="topbar__menu-toggle topbar__a11y-trigger"
+            aria-haspopup="dialog"
+            aria-expanded={accessibilityOpen}
+            aria-label={accessibilityOpen ? "Fechar acessibilidade" : "Abrir acessibilidade"}
+            title={accessibilityOpen ? "Fechar acessibilidade" : "Acessibilidade"}
+            onClick={() => setAccessibilityOpen(true)}
+          >
+            <img src={accessibilityOnuIcon} alt="" aria-hidden="true" />
+          </button>
 
           <div className="topbar__notifications">
             <IconButton
