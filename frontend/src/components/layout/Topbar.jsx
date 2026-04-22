@@ -56,6 +56,13 @@ export default function Topbar({
   const [menuOpen, setMenuOpen] = useState(false);
   const [accessibilityOpen, setAccessibilityOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const fontScaleSteps = ["sm", "md", "lg", "xl"];
+  const fontScaleIndex = Math.max(0, fontScaleSteps.indexOf(fontScale));
+
+  function updateFontScaleByIndex(nextIndex) {
+    const idx = Math.max(0, Math.min(fontScaleSteps.length - 1, Number(nextIndex)));
+    setFontScale(fontScaleSteps[idx]);
+  }
   const hasSearch = typeof onSearchChange === "function";
   const userName = user?.name || user?.nome || "Usuário";
   const userAvatar = user?.avatarUrl || null;
@@ -357,33 +364,47 @@ export default function Topbar({
 
               <section className="topbar__a11y-section">
                 <h3>Tamanho da fonte</h3>
-                <div className="topbar__a11y-font-scale">
-                  {[
-                    { value: "sm", label: "A-" },
-                    { value: "md", label: "AA" },
-                    { value: "lg", label: "AA++" },
-                    { value: "xl", label: "AA+++" },
-                  ].map((item) => (
-                    <button
-                      key={item.value}
-                      type="button"
-                      className={clsx(
-                        "topbar__a11y-chip",
-                        fontScale === item.value && "topbar__a11y-chip--active"
-                      )}
-                      onClick={() => setFontScale(item.value)}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
+                <div className="topbar__a11y-slider-row">
+                  <button
+                    type="button"
+                    className="topbar__a11y-step-btn"
+                    onClick={() => updateFontScaleByIndex(fontScaleIndex - 1)}
+                  >
+                    −
+                  </button>
+                  <input
+                    type="range"
+                    min={0}
+                    max={3}
+                    step={1}
+                    value={fontScaleIndex}
+                    onChange={(event) => updateFontScaleByIndex(event.target.value)}
+                    className="topbar__a11y-slider"
+                    aria-label="Tamanho da fonte"
+                  />
+                  <button
+                    type="button"
+                    className="topbar__a11y-step-btn"
+                    onClick={() => updateFontScaleByIndex(fontScaleIndex + 1)}
+                  >
+                    +
+                  </button>
+                  <span className="topbar__a11y-value">{fontScaleIndex}</span>
                 </div>
+                <button
+                  type="button"
+                  className="topbar__a11y-reset-inline"
+                  onClick={() => setFontScale("md")}
+                >
+                  Redefinir
+                </button>
               </section>
 
               <section className="topbar__a11y-section">
                 <h3>Alto contraste</h3>
                 <button
                   type="button"
-                  className="topbar__a11y-toggle"
+                  className="topbar__a11y-toggle topbar__a11y-toggle--contrast"
                   role="switch"
                   aria-checked={theme === "high-contrast"}
                   onClick={() =>
@@ -414,63 +435,127 @@ export default function Topbar({
                     </label>
                   ))}
                 </div>
+                <button
+                  type="button"
+                  className="topbar__a11y-reset-inline"
+                  onClick={() => setFontFamily("sans")}
+                >
+                  Redefinir
+                </button>
               </section>
 
               <section className="topbar__a11y-section">
                 <h3>Espaçamento entre letras</h3>
-                <div className="topbar__a11y-stepper">
+                <div className="topbar__a11y-slider-row">
                   <button
                     type="button"
-                    onClick={() => setLetterSpacing((prev) => Math.max(-1, prev - 0.2))}
+                    className="topbar__a11y-step-btn"
+                    onClick={() => setLetterSpacing((prev) => Math.max(-1, Number((prev - 0.2).toFixed(1))))}
                   >
                     −
                   </button>
-                  <span>{letterSpacing.toFixed(1)}</span>
+                  <input
+                    type="range"
+                    min={-1}
+                    max={4}
+                    step={0.2}
+                    value={letterSpacing}
+                    onChange={(event) => setLetterSpacing(Number(event.target.value))}
+                    className="topbar__a11y-slider"
+                    aria-label="Espaçamento entre letras"
+                  />
                   <button
                     type="button"
-                    onClick={() => setLetterSpacing((prev) => Math.min(4, prev + 0.2))}
+                    className="topbar__a11y-step-btn"
+                    onClick={() => setLetterSpacing((prev) => Math.min(4, Number((prev + 0.2).toFixed(1))))}
                   >
                     +
                   </button>
+                  <span className="topbar__a11y-value">{letterSpacing.toFixed(1)}</span>
                 </div>
+                <button
+                  type="button"
+                  className="topbar__a11y-reset-inline"
+                  onClick={() => setLetterSpacing(0)}
+                >
+                  Redefinir
+                </button>
               </section>
 
               <section className="topbar__a11y-section">
                 <h3>Altura da linha</h3>
-                <div className="topbar__a11y-stepper">
+                <div className="topbar__a11y-slider-row">
                   <button
                     type="button"
+                    className="topbar__a11y-step-btn"
                     onClick={() => setLineHeight((prev) => Math.max(1.1, Number((prev - 0.1).toFixed(1))))}
                   >
                     −
                   </button>
-                  <span>{lineHeight.toFixed(1)}</span>
+                  <input
+                    type="range"
+                    min={1.1}
+                    max={2.2}
+                    step={0.1}
+                    value={lineHeight}
+                    onChange={(event) => setLineHeight(Number(event.target.value))}
+                    className="topbar__a11y-slider"
+                    aria-label="Altura da linha"
+                  />
                   <button
                     type="button"
+                    className="topbar__a11y-step-btn"
                     onClick={() => setLineHeight((prev) => Math.min(2.2, Number((prev + 0.1).toFixed(1))))}
                   >
                     +
                   </button>
+                  <span className="topbar__a11y-value">{lineHeight.toFixed(1)}</span>
                 </div>
+                <button
+                  type="button"
+                  className="topbar__a11y-reset-inline"
+                  onClick={() => setLineHeight(1.5)}
+                >
+                  Redefinir
+                </button>
               </section>
 
               <section className="topbar__a11y-section">
                 <h3>Largura do parágrafo</h3>
-                <div className="topbar__a11y-stepper">
+                <div className="topbar__a11y-slider-row">
                   <button
                     type="button"
+                    className="topbar__a11y-step-btn"
                     onClick={() => setParagraphWidth((prev) => Math.max(0, prev - 5))}
                   >
                     −
                   </button>
-                  <span>{paragraphWidth}</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={120}
+                    step={5}
+                    value={paragraphWidth}
+                    onChange={(event) => setParagraphWidth(Number(event.target.value))}
+                    className="topbar__a11y-slider"
+                    aria-label="Largura do parágrafo"
+                  />
                   <button
                     type="button"
+                    className="topbar__a11y-step-btn"
                     onClick={() => setParagraphWidth((prev) => Math.min(120, prev + 5))}
                   >
                     +
                   </button>
+                  <span className="topbar__a11y-value">{paragraphWidth}</span>
                 </div>
+                <button
+                  type="button"
+                  className="topbar__a11y-reset-inline"
+                  onClick={() => setParagraphWidth(0)}
+                >
+                  Redefinir
+                </button>
               </section>
 
               <section className="topbar__a11y-section">
@@ -491,14 +576,6 @@ export default function Topbar({
                   </button>
                 </div>
               </section>
-
-              <button
-                type="button"
-                className="topbar__a11y-reset topbar__a11y-reset--secondary"
-                onClick={resetAllAccessibility}
-              >
-                Redefinir todos os ajustes
-              </button>
             </div>
           </section>
         </div>
