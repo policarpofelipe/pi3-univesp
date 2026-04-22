@@ -27,7 +27,7 @@ import CriacaoRapidaCartao from "../../cartoes/CriacaoRapidaCartao";
 import BoardSortableCard from "./BoardSortableCard";
 import CartaoCard from "../../cartoes/CartaoCard";
 import cartaoService from "../../../services/cartaoService";
-import { cardSortableId, parseColumnDroppableId } from "../../../utils/boardItemIds";
+import { cardSortableId } from "../../../utils/boardItemIds";
 
 function buildItemIdsByList(listas, cartoes) {
   const map = {};
@@ -40,11 +40,15 @@ function buildItemIdsByList(listas, cartoes) {
   return map;
 }
 
+function extractListIdFromDroppable(id) {
+  const match = String(id).match(/^column-(\d+)$/);
+  return match ? match[1] : null;
+}
+
 function findContainer(itemsMap, id) {
   const s = String(id);
   if (s.startsWith("column-")) {
-    const col = parseColumnDroppableId(s);
-    return col != null ? String(col) : null;
+    return extractListIdFromDroppable(s);
   }
 
   if (Object.prototype.hasOwnProperty.call(itemsMap, s)) return s;
@@ -165,7 +169,7 @@ export default function QuadroBoardCanvas({
 
       const targetContainer = overContainer
         || (String(overId).startsWith("column-")
-          ? String(parseColumnDroppableId(String(overId)) || "")
+          ? String(extractListIdFromDroppable(String(overId)) || "")
           : null);
       if (DEBUG_DND) {
         console.debug("[DND] dragOver", {
@@ -268,18 +272,20 @@ export default function QuadroBoardCanvas({
       }
 
       const overId = String(overIdEfetivo);
+      const isOverColumn = overId.startsWith("column-");
       const draft = JSON.parse(JSON.stringify(itemIdsRef.current || {}));
       const activeContainer = findContainer(draft, activeSid);
       const overContainerRaw = findContainer(draft, overId);
       const overContainer = overContainerRaw
-        || (overId.startsWith("column-")
-          ? String(parseColumnDroppableId(overId) || "")
+        || (isOverColumn
+          ? String(extractListIdFromDroppable(overId) || "")
           : null);
       if (DEBUG_DND) {
         console.debug("[DND] dragEnd containers", {
           activeSid,
           overId,
           overIdEfetivo: String(overIdEfetivo),
+          isOverColumn,
           activeContainer,
           overContainerRaw,
           overContainer,
@@ -358,12 +364,19 @@ export default function QuadroBoardCanvas({
       }
 
       const listaDestinoId = Number(dest);
-      if (!Number.isInteger(listaDestinoId) || listaDestinoId <= 0) {
+      const listaDestinoFromColumn = isOverColumn
+        ? Number(extractListIdFromDroppable(overId))
+        : Number.NaN;
+      const listaDestinoFinal = Number.isInteger(listaDestinoFromColumn)
+        ? listaDestinoFromColumn
+        : listaDestinoId;
+      if (!Number.isInteger(listaDestinoFinal) || listaDestinoFinal <= 0) {
         if (DEBUG_DND) {
           console.debug("[DND] dragEnd aborted", {
             reason: "invalid_dest_list_id",
             dest,
             listaDestinoId,
+            listaDestinoFromColumn,
           });
         }
         if (snap) {
@@ -392,16 +405,20 @@ export default function QuadroBoardCanvas({
           console.debug("[DND] persist move request", {
             quadroId,
             cardId,
-            listaId: listaDestinoId,
+            listaId: listaDestinoFinal,
             posicao: pos,
           });
         }
         await cartaoService.mover(quadroId, cardId, {
-          listaId: listaDestinoId,
+          listaId: listaDestinoFinal,
           posicao: pos,
         });
         if (DEBUG_DND) {
-          console.debug("[DND] persist move success", { cardId, listaDestinoId, pos });
+          console.debug("[DND] persist move success", {
+            cardId,
+            listaDestinoId: listaDestinoFinal,
+            pos,
+          });
         }
         await onCartoesUpdated?.();
       } catch (err) {
