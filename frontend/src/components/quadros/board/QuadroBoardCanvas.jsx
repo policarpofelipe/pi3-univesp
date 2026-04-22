@@ -42,22 +42,25 @@ function buildItemIdsByList(listas, cartoes) {
 
 function findContainer(itemsMap, id) {
   const s = String(id);
+  const col = parseColumnDroppableId(s);
+  if (col != null) return String(col);
+
   if (Object.prototype.hasOwnProperty.call(itemsMap, s)) return s;
   for (const k of Object.keys(itemsMap)) {
     if (itemsMap[k].includes(s)) return k;
   }
-  const col = parseColumnDroppableId(s);
-  return col != null ? String(col) : null;
+  return null;
 }
 
 function DroppableListaBody({ listaId, children }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `column-${listaId}`,
-    data: { type: "column", listaId },
+    data: { type: "column", listaId, isEmpty: true },
   });
   return (
     <div
       ref={setNodeRef}
+      style={{ minHeight: "100px" }}
       className={[
         "lista-column__cards",
         "lista-column__droptarget",
@@ -149,33 +152,43 @@ export default function QuadroBoardCanvas({
     setItemIdsByList((items) => {
       const activeContainer = findContainer(items, active.id);
       const overContainer = findContainer(items, overId);
-      if (!activeContainer || !overContainer) return items;
+      if (!activeContainer) return items;
 
-      if (activeContainer === overContainer) {
+      const targetContainer = overContainer;
+      if (!targetContainer) return items;
+
+      const nextItems = { ...items };
+      if (!Array.isArray(nextItems[targetContainer])) {
+        nextItems[targetContainer] = [];
+      }
+
+      if (activeContainer === targetContainer) {
         if (String(overId).startsWith("column-")) return items;
-        const col = [...items[activeContainer]];
+        const col = [...nextItems[activeContainer]];
         const activeIndex = col.indexOf(String(active.id));
         const overIndex = col.indexOf(String(overId));
         if (activeIndex < 0 || overIndex < 0) return items;
         if (activeIndex === overIndex) return items;
         return {
-          ...items,
+          ...nextItems,
           [activeContainer]: arrayMove(col, activeIndex, overIndex),
         };
       }
 
-      const from = [...items[activeContainer]];
-      const to = [...items[overContainer]];
+      const from = [...(nextItems[activeContainer] || [])];
+      const to = [...(nextItems[targetContainer] || [])];
       const pos = from.indexOf(String(active.id));
-      if (pos < 0) return items;
+      if (pos < 0) return nextItems;
       const [moved] = from.splice(pos, 1);
-      const overIndex = to.indexOf(String(overId));
+      const overIndex = String(overId).startsWith("column-")
+        ? -1
+        : to.indexOf(String(overId));
       const insertAt = overIndex >= 0 ? overIndex : to.length;
       to.splice(insertAt, 0, moved);
       return {
-        ...items,
+        ...nextItems,
         [activeContainer]: from,
-        [overContainer]: to,
+        [targetContainer]: to,
       };
     });
   }, []);
