@@ -92,6 +92,7 @@ export default function QuadroBoardCanvas({
   renderNovaListaColumn,
   listaColumnMenuPropsByIndex,
 }) {
+  const DEBUG_DND = true;
   const [itemIdsByList, setItemIdsByList] = useState({});
   const [activeId, setActiveId] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -135,6 +136,12 @@ export default function QuadroBoardCanvas({
   const handleDragStart = useCallback(
     ({ active }) => {
       if (dragDisabled) return;
+      if (DEBUG_DND) {
+        console.debug("[DND] dragStart", {
+          activeId: String(active?.id ?? ""),
+          dragDisabled,
+        });
+      }
       snapshotRef.current = JSON.parse(
         JSON.stringify(itemIdsRef.current || {})
       );
@@ -142,7 +149,7 @@ export default function QuadroBoardCanvas({
       setIsDragging(true);
       lastOverIdRef.current = null;
     },
-    [dragDisabled]
+    [DEBUG_DND, dragDisabled]
   );
 
   const handleDragOver = useCallback(({ active, over }) => {
@@ -160,6 +167,15 @@ export default function QuadroBoardCanvas({
         || (String(overId).startsWith("column-")
           ? String(parseColumnDroppableId(String(overId)) || "")
           : null);
+      if (DEBUG_DND) {
+        console.debug("[DND] dragOver", {
+          activeId: String(active?.id ?? ""),
+          overId: String(overId),
+          activeContainer,
+          overContainer,
+          targetContainer,
+        });
+      }
       if (!targetContainer) return items;
 
       const nextItems = { ...items };
@@ -196,7 +212,7 @@ export default function QuadroBoardCanvas({
         [targetContainer]: to,
       };
     });
-  }, []);
+  }, [DEBUG_DND]);
 
   const handleDragCancel = useCallback(() => {
     if (snapshotRef.current) {
@@ -219,6 +235,14 @@ export default function QuadroBoardCanvas({
           : lastOverIdRef.current;
 
       if (dragDisabled || !overIdEfetivo) {
+        if (DEBUG_DND) {
+          console.debug("[DND] dragEnd aborted", {
+            reason: "dragDisabled_or_no_over",
+            dragDisabled,
+            overIdEfetivo,
+            lastOverId: lastOverIdRef.current,
+          });
+        }
         if (snap) {
           setItemIdsByList(snap);
         }
@@ -231,6 +255,12 @@ export default function QuadroBoardCanvas({
       const m = activeSid.match(/^card-(\d+)$/);
       const cardId = m ? Number(m[1]) : null;
       if (!cardId) {
+        if (DEBUG_DND) {
+          console.debug("[DND] dragEnd aborted", {
+            reason: "invalid_card_id",
+            activeSid,
+          });
+        }
         setIsDragging(false);
         snapshotRef.current = null;
         lastOverIdRef.current = null;
@@ -245,8 +275,25 @@ export default function QuadroBoardCanvas({
         || (overId.startsWith("column-")
           ? String(parseColumnDroppableId(overId) || "")
           : null);
+      if (DEBUG_DND) {
+        console.debug("[DND] dragEnd containers", {
+          activeSid,
+          overId,
+          overIdEfetivo: String(overIdEfetivo),
+          activeContainer,
+          overContainerRaw,
+          overContainer,
+        });
+      }
 
       if (!activeContainer || !overContainer) {
+        if (DEBUG_DND) {
+          console.debug("[DND] dragEnd aborted", {
+            reason: "container_not_found",
+            activeContainer,
+            overContainer,
+          });
+        }
         if (snap) {
           setItemIdsByList(snap);
         }
@@ -292,6 +339,14 @@ export default function QuadroBoardCanvas({
       const dest = overContainer;
       const ord = draft[dest] || [];
       const pos = ord.indexOf(activeSid);
+      if (DEBUG_DND) {
+        console.debug("[DND] dragEnd position", {
+          dest,
+          listaDestinoId: Number(dest),
+          pos,
+          ord,
+        });
+      }
       if (pos < 0) {
         if (snap) {
           setItemIdsByList(snap);
@@ -304,6 +359,13 @@ export default function QuadroBoardCanvas({
 
       const listaDestinoId = Number(dest);
       if (!Number.isInteger(listaDestinoId) || listaDestinoId <= 0) {
+        if (DEBUG_DND) {
+          console.debug("[DND] dragEnd aborted", {
+            reason: "invalid_dest_list_id",
+            dest,
+            listaDestinoId,
+          });
+        }
         if (snap) {
           setItemIdsByList(snap);
         }
@@ -326,12 +388,33 @@ export default function QuadroBoardCanvas({
       }
 
       try {
+        if (DEBUG_DND) {
+          console.debug("[DND] persist move request", {
+            quadroId,
+            cardId,
+            listaId: listaDestinoId,
+            posicao: pos,
+          });
+        }
         await cartaoService.mover(quadroId, cardId, {
           listaId: listaDestinoId,
           posicao: pos,
         });
+        if (DEBUG_DND) {
+          console.debug("[DND] persist move success", { cardId, listaDestinoId, pos });
+        }
         await onCartoesUpdated?.();
       } catch (err) {
+        if (DEBUG_DND) {
+          console.error("[DND] persist move error", {
+            cardId,
+            listaDestinoId,
+            pos,
+            status: err?.response?.status,
+            message: err?.response?.data?.message || err?.message,
+            data: err?.response?.data,
+          });
+        }
         if (snap) setItemIdsByList(snap);
         window.alert(
           err?.response?.data?.message ||
@@ -344,7 +427,7 @@ export default function QuadroBoardCanvas({
         lastOverIdRef.current = null;
       }
     },
-    [dragDisabled, quadroId, onCartoesUpdated]
+    [DEBUG_DND, dragDisabled, quadroId, onCartoesUpdated]
   );
 
   return (
