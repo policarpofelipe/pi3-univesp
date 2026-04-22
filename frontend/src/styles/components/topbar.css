@@ -221,13 +221,31 @@
   border-radius: var(--radius-md);
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
+  align-items: flex-start;
 }
 
 .topbar__a11y-radio {
-  display: flex;
-  align-items: center;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.25rem 1fr;
+  justify-content: start;
+  align-items: start;
   gap: var(--space-2);
   min-height: 36px;
+  cursor: pointer;
+}
+
+.topbar__a11y-radio input[type="radio"] {
+  margin: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+  justify-self: start;
+}
+
+.topbar__a11y-radio span {
+  text-align: left;
+  line-height: 1.4;
+  color: var(--color-text);
 }
 
 .topbar__a11y-slider-row {
