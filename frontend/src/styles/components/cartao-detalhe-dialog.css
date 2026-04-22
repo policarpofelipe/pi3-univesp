@@ -14,12 +14,12 @@
 .cartao-detalhe-dialog__panel {
   display: flex;
   flex-direction: column;
-  width: min(100%, 56rem);
-  max-height: min(92vh, calc(100dvh - var(--space-8)));
+  width: min(90vw, 1024px);
+  max-height: min(85vh, calc(100dvh - var(--space-8)));
   margin-block: auto;
-  border-radius: var(--radius-xl);
+  border-radius: 12px;
   border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  background: #f4f5f7;
   box-shadow: var(--shadow-lg);
   outline: none;
 }
@@ -40,7 +40,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--space-4) var(--space-5) var(--space-6);
+  padding: 0;
 }
 
 .cartao-detalhe-content--modal .cartao-detalhe-content__inner {

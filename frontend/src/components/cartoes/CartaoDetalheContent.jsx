@@ -3,10 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import AppLayout from "../layout/AppLayout";
 import Button from "../ui/Button";
-import CartaoHeader from "./CartaoHeader";
 import LoadingState from "../ui/LoadingState";
 import ErrorState from "../ui/ErrorState";
-import CartaoForm from "./CartaoForm";
 import CartaoPrazo from "./CartaoPrazo";
 import CartaoPrioridade from "./CartaoPrioridade";
 import CartaoChecklist from "./CartaoChecklist";
@@ -17,6 +15,9 @@ import CartaoTags from "./CartaoTags";
 import CartaoAtribuicoes from "./CartaoAtribuicoes";
 import CartaoCamposPersonalizados from "./CartaoCamposPersonalizados";
 import CartaoRelacoes from "./CartaoRelacoes";
+import CartaoModalHeader from "./CartaoModalHeader";
+import CartaoSidebar from "./CartaoSidebar";
+import useCartaoModal from "./useCartaoModal";
 
 import quadroService from "../../services/quadroService";
 import listaService from "../../services/listaService";
@@ -26,9 +27,17 @@ import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 import { extractList, extractObject } from "../../utils/apiData";
 import useAuth from "../../hooks/useAuth";
 
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { FileText, ListTodo } from "lucide-react";
 
 import "../../styles/components/cartao-detalhe-content.css";
+
+function renderSimpleMarkdown(texto) {
+  const t = String(texto || "").trim();
+  if (!t) return null;
+  return t.split("\n").map((line, idx) => (
+    <p key={`${line}-${idx}`}>{line}</p>
+  ));
+}
 
 /**
  * Conteúdo compartilhado entre página cheia (URL direta) e modal sobre o quadro.
@@ -143,23 +152,20 @@ export default function CartaoDetalheContent({
     return listas.find((l) => String(l.id) === String(cartao.listaId)) || null;
   }, [listas, cartao]);
 
-  const valoresFormularioCartao = useMemo(
-    () => ({
-      titulo: cartao?.titulo ?? "",
-      descricao: cartao?.descricao ?? "",
-      listaId: cartao?.listaId ?? "",
-    }),
-    [cartao?.id, cartao?.titulo, cartao?.descricao, cartao?.listaId]
-  );
-
-  async function handleSalvarCartao(payload) {
+  const handleSalvarCartao = useCallback(async (payload) => {
     if (!quadroId || !cartaoId) return;
+
+    const tituloAtual = String(cartao?.titulo || "").trim();
+    const descricaoAtual = String(cartao?.descricao || "").trim();
+    const tituloNovo = String(payload.titulo || "").trim();
+    const descricaoNova = String(payload.descricao || "").trim();
+    if (tituloAtual === tituloNovo && descricaoAtual === descricaoNova) return;
 
     setSalvando(true);
     try {
       const res = await cartaoService.atualizar(quadroId, cartaoId, {
-        titulo: payload.titulo,
-        descricao: payload.descricao,
+        titulo: tituloNovo,
+        descricao: descricaoNova,
       });
       const atualizado = extractObject(res) || res;
       if (atualizado) {
@@ -169,7 +175,22 @@ export default function CartaoDetalheContent({
     } finally {
       setSalvando(false);
     }
-  }
+  }, [quadroId, cartaoId, cartao?.titulo, cartao?.descricao, bumpHistorico]);
+
+  const {
+    tituloDraft,
+    setTituloDraft,
+    descricaoDraft,
+    setDescricaoDraft,
+    editandoTitulo,
+    setEditandoTitulo,
+    editandoDescricao,
+    setEditandoDescricao,
+    agendarSalvar,
+  } = useCartaoModal({
+    cartao,
+    onSaveTituloDescricao: handleSalvarCartao,
+  });
 
   async function handleMoverLista(event) {
     const novaListaId = event.target.value;
@@ -337,8 +358,6 @@ export default function CartaoDetalheContent({
     );
   }
 
-  const voltarLabel = isModal ? "Fechar" : "Voltar ao quadro";
-
   const inner = (
     <div
       className={[
@@ -348,124 +367,188 @@ export default function CartaoDetalheContent({
         .filter(Boolean)
         .join(" ")}
     >
-      <CartaoHeader
-        titulo={cartao.titulo}
-        nomeLista={listaAtual?.nome || ""}
-        nomeQuadro={quadro.nome || ""}
-        nomeOrganizacao={
-          quadro.organizacao?.nome || quadro.organizacaoNome || ""
+      <CartaoModalHeader
+        cartaoId={cartao.id}
+        titulo={tituloDraft}
+        onChangeTitulo={(value) => {
+          setTituloDraft(value);
+          agendarSalvar({ titulo: value, descricao: descricaoDraft });
+        }}
+        onConfirmTitulo={() =>
+          handleSalvarCartao({ titulo: tituloDraft, descricao: descricaoDraft })
         }
-        actions={
-          <>
-            <Button
-              variant="secondary"
-              leftIcon={<ArrowLeft size={16} />}
-              onClick={sairDoDetalhe}
-            >
-              {voltarLabel}
-            </Button>
-            <Button
-              variant="ghost"
-              leftIcon={<Trash2 size={16} />}
-              loading={excluindo}
-              disabled={excluindo}
-              onClick={handleExcluir}
-            >
-              Excluir
-            </Button>
-          </>
-        }
+        onCancelTitulo={() => setTituloDraft(cartao.titulo || "")}
+        editandoTitulo={editandoTitulo}
+        setEditandoTitulo={setEditandoTitulo}
+        onClose={sairDoDetalhe}
+        onExcluir={handleExcluir}
+        excluindo={excluindo}
       />
 
-      <section
-        className="mt-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-xs)]"
-        aria-labelledby="cartao-detalhe-conteudo"
-      >
-        <h2 id="cartao-detalhe-conteudo" className="sr-only">
-          Conteúdo do cartão
-        </h2>
+      <div className="cartao-modal-layout">
+        <main className="cartao-modal-layout__main">
+          <section className="cartao-modal-section" aria-labelledby="cartao-desc-titulo">
+            <div className="cartao-modal-section__header">
+              <h2 id="cartao-desc-titulo">
+                <FileText size={16} />
+                <span>Descrição</span>
+              </h2>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setEditandoDescricao((v) => !v)}
+              >
+                {editandoDescricao ? "Visualizar" : "Editar"}
+              </Button>
+            </div>
 
-        <div className="mb-6">
-          <label
-            htmlFor="cartao-detalhe-lista"
-            className="mb-2 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
-          >
-            Lista
-          </label>
-          {listas.length > 1 ? (
-            <select
-              id="cartao-detalhe-lista"
-              value={String(cartao.listaId)}
-              disabled={movendoLista}
-              onChange={handleMoverLista}
-              className="w-full max-w-md rounded-lg border border-[var(--input-border)] bg-[var(--color-surface)] px-3 py-2 text-[var(--font-size-sm)]"
-            >
-              {listas.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.nome}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-              {listaAtual?.nome ?? "—"}
-            </p>
-          )}
-        </div>
+            {editandoDescricao ? (
+              <div className="cartao-modal-section__editor">
+                <textarea
+                  rows={5}
+                  value={descricaoDraft}
+                  onChange={(event) => setDescricaoDraft(event.target.value)}
+                  placeholder="Adicione uma descrição mais detalhada..."
+                />
+                <div className="cartao-modal-section__editor-actions">
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    loading={salvando}
+                    onClick={() => {
+                      handleSalvarCartao({
+                        titulo: tituloDraft,
+                        descricao: descricaoDraft,
+                      });
+                      setEditandoDescricao(false);
+                    }}
+                  >
+                    Salvar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setDescricaoDraft(cartao.descricao || "");
+                      setEditandoDescricao(false);
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="cartao-modal-section__markdown">
+                {renderSimpleMarkdown(descricaoDraft) || (
+                  <p className="cartao-modal-section__placeholder">
+                    Adicione uma descrição mais detalhada...
+                  </p>
+                )}
+              </div>
+            )}
+          </section>
 
-        <CartaoPrazo
-          prazoEm={cartao.prazoEm}
-          loading={salvandoPrazo}
-          onSave={handleSalvarPrazo}
-        />
+          <section className="cartao-modal-section" aria-labelledby="cartao-checklist-titulo">
+            <div className="cartao-modal-section__header">
+              <h2 id="cartao-checklist-titulo">
+                <ListTodo size={16} />
+                <span>Checklists</span>
+              </h2>
+            </div>
+            <CartaoChecklist quadroId={quadroId} cartaoId={cartaoId} />
+          </section>
 
-        <CartaoPrioridade
-          prioridade={cartao.prioridade}
-          loading={salvandoPrioridade}
-          onSave={handleSalvarPrioridade}
-        />
+          <section className="cartao-modal-section">
+            <CartaoAnexos
+              quadroId={quadroId}
+              cartaoId={cartaoId}
+              onHistoricoMudou={bumpHistorico}
+            />
+          </section>
 
-        <CartaoTags
-          quadroId={quadroId}
-          tagIds={cartao.tagIds}
-          tags={tags}
-          disabled={salvandoTags}
-          onChange={handleSalvarTagIds}
-          onTagsRefresh={carregarTags}
-        />
+          <section className="cartao-modal-section">
+            <CartaoComentarios
+              quadroId={quadroId}
+              cartaoId={cartaoId}
+              usuarioId={usuarioChave}
+              onHistoricoMudou={bumpHistorico}
+            />
+          </section>
 
-        <CartaoForm
-          modo="editar"
-          initialValues={valoresFormularioCartao}
-          loading={salvando}
-          onSubmit={handleSalvarCartao}
-          submitLabel="Salvar alterações"
-        />
-      </section>
+          <details className="cartao-modal-history">
+            <summary>Histórico</summary>
+            <CartaoHistorico
+              quadroId={quadroId}
+              cartaoId={cartaoId}
+              recarregarSignal={historicoTick}
+            />
+          </details>
+        </main>
 
-      <CartaoChecklist quadroId={quadroId} cartaoId={cartaoId} />
-      <CartaoAtribuicoes quadroId={quadroId} cartaoId={cartaoId} />
-      <CartaoCamposPersonalizados quadroId={quadroId} cartaoId={cartaoId} />
-      <CartaoRelacoes quadroId={quadroId} cartaoId={cartaoId} />
+        <CartaoSidebar>
+          <section className="cartao-modal-section cartao-modal-section--compact">
+            <h3>Em</h3>
+            {listas.length > 1 ? (
+              <select
+                id="cartao-detalhe-lista"
+                value={String(cartao.listaId)}
+                disabled={movendoLista}
+                onChange={handleMoverLista}
+              >
+                {listas.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.nome}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className="cartao-modal-section__muted">{listaAtual?.nome ?? "—"}</p>
+            )}
+          </section>
 
-      <CartaoAnexos
-        quadroId={quadroId}
-        cartaoId={cartaoId}
-        onHistoricoMudou={bumpHistorico}
-      />
+          <section className="cartao-modal-section cartao-modal-section--compact">
+            <CartaoPrazo
+              prazoEm={cartao.prazoEm}
+              loading={salvandoPrazo}
+              onSave={handleSalvarPrazo}
+            />
+          </section>
 
-      <CartaoComentarios
-        quadroId={quadroId}
-        cartaoId={cartaoId}
-        usuarioId={usuarioChave}
-        onHistoricoMudou={bumpHistorico}
-      />
+          <section className="cartao-modal-section cartao-modal-section--compact">
+            <CartaoPrioridade
+              prioridade={cartao.prioridade}
+              loading={salvandoPrioridade}
+              onSave={handleSalvarPrioridade}
+            />
+          </section>
 
-      <CartaoHistorico
-        quadroId={quadroId}
-        cartaoId={cartaoId}
-        recarregarSignal={historicoTick}
-      />
+          <section className="cartao-modal-section cartao-modal-section--compact">
+            <CartaoAtribuicoes quadroId={quadroId} cartaoId={cartaoId} />
+          </section>
+
+          <section className="cartao-modal-section cartao-modal-section--compact">
+            <CartaoTags
+              quadroId={quadroId}
+              tagIds={cartao.tagIds}
+              tags={tags}
+              disabled={salvandoTags}
+              onChange={handleSalvarTagIds}
+              onTagsRefresh={carregarTags}
+            />
+          </section>
+
+          <section className="cartao-modal-section cartao-modal-section--compact">
+            <CartaoCamposPersonalizados quadroId={quadroId} cartaoId={cartaoId} />
+          </section>
+
+          <section className="cartao-modal-section cartao-modal-section--compact">
+            <CartaoRelacoes quadroId={quadroId} cartaoId={cartaoId} />
+          </section>
+        </CartaoSidebar>
+      </div>
     </div>
   );
 

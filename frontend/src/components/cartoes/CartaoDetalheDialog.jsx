@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import Button from "../ui/Button";
 import "../../styles/components/cartao-detalhe-dialog.css";
 
 const FOCUSABLE_SELECTOR = [
@@ -29,12 +28,10 @@ export default function CartaoDetalheDialog({
   open = true,
   ariaLabel = "Detalhes do cartão",
   onClose,
-  closeLabel = "Fechar",
   dismissDisabled = false,
   children,
 }) {
   const panelRef = useRef(null);
-  const closeBtnRef = useRef(null);
 
   const handleKeyDown = useCallback(
     (event) => {
@@ -87,10 +84,7 @@ export default function CartaoDetalheDialog({
     const t = window.setTimeout(() => {
       const panel = panelRef.current;
       const nodes = getFocusableElements(panel);
-      const closeBtn = closeBtnRef.current;
-      if (closeBtn && nodes.includes(closeBtn)) {
-        closeBtn.focus();
-      } else if (nodes[0]) {
+      if (nodes[0]) {
         nodes[0].focus();
       } else {
         panel?.focus();
@@ -116,18 +110,6 @@ export default function CartaoDetalheDialog({
         className="cartao-detalhe-dialog__panel"
         onKeyDown={handleKeyDown}
       >
-        <div className="cartao-detalhe-dialog__header">
-          <Button
-            ref={closeBtnRef}
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={onClose}
-            disabled={dismissDisabled}
-          >
-            {closeLabel}
-          </Button>
-        </div>
         <div className="cartao-detalhe-dialog__body">{children}</div>
       </div>
     </div>
