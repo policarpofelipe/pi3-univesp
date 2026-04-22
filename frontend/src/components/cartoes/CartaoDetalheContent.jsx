@@ -494,6 +494,24 @@ export default function CartaoDetalheContent({
 
           <CartaoSidebar>
             <section className="cartao-modal-section cartao-modal-section--compact">
+              <h3>Ações</h3>
+              <div className="cartao-modal-actions">
+                <Button
+                  type="button"
+                  variant="danger"
+                  className="cartao-modal-actions__delete-btn"
+                  leftIcon={<Trash2 size={16} aria-hidden="true" focusable="false" />}
+                  onClick={handleExcluir}
+                  loading={excluindo}
+                  disabled={excluindo}
+                  aria-label="Excluir cartão"
+                >
+                  Excluir cartão
+                </Button>
+              </div>
+            </section>
+
+            <section className="cartao-modal-section cartao-modal-section--compact">
               <h3>Em</h3>
               {listas.length > 1 ? (
                 <select
@@ -554,22 +572,6 @@ export default function CartaoDetalheContent({
           </CartaoSidebar>
         </div>
 
-        {isModal ? (
-          <footer className="cartao-modal-footer">
-            <Button
-              type="button"
-              variant="danger"
-              className="cartao-modal-footer__delete-btn"
-              leftIcon={<Trash2 size={16} aria-hidden="true" focusable="false" />}
-              onClick={handleExcluir}
-              loading={excluindo}
-              disabled={excluindo}
-              aria-label="Excluir cartão"
-            >
-              Excluir
-            </Button>
-          </footer>
-        ) : null}
       </div>
     </div>
   );

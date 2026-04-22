@@ -72,20 +72,12 @@ export default function CartaoHistorico({
           Nenhum evento registrado ainda.
         </p>
       ) : (
-        <ol className="mt-4 flex flex-col gap-3 border-l-2 border-[var(--color-border)] pl-4">
+        <ol className="cartao-historico__list mt-4">
           {itens.map((e) => (
-            <li key={e.id} className="relative">
-              <span
-                className="absolute -left-[calc(0.5rem+3px)] top-1.5 h-2 w-2 rounded-full bg-[var(--color-text-soft)]"
-                aria-hidden="true"
-              />
-              <p className="text-[var(--font-size-sm)] text-[var(--color-text)]">
-                {e.descricao}
-              </p>
-              <p className="mt-0.5 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
-                <span className="font-medium text-[var(--color-text-soft)]">
-                  {e.autorNome}
-                </span>
+            <li key={e.id} className="cartao-historico__item">
+              <p className="cartao-historico__text">{e.descricao}</p>
+              <p className="cartao-historico__meta">
+                <span className="cartao-historico__author">{e.autorNome}</span>
                 <span className="mx-1">·</span>
                 <time dateTime={e.criadoEm}>{formatarDataHora(e.criadoEm)}</time>
               </p>
