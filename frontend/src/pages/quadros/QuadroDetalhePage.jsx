@@ -13,7 +13,7 @@ import listaService from "../../services/listaService";
 import cartaoService from "../../services/cartaoService";
 import tagService from "../../services/tagService";
 import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
-import ListaForm from "../../components/listas/ListaForm";
+import ListaModal from "../../components/listas/ListaModal";
 import CartaoModal from "../../components/cartoes/CartaoModal";
 import QuadroManagementDrawer from "../../components/quadros/QuadroManagementDrawer";
 import BoardQuickFilters from "../../components/quadros/board/BoardQuickFilters";
@@ -705,45 +705,14 @@ export default function QuadroDetalhePage() {
         onSubmit={handleSalvarCartao}
       />
 
-      {listaModal ? (
-        <div
-          className="fixed inset-0 z-[1300] flex items-center justify-center bg-[var(--color-scrim)] p-4"
-          role="presentation"
-          onClick={() => !listaSalvando && setListaModal(null)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="lista-modal-titulo"
-            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-lg)]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2
-              id="lista-modal-titulo"
-              className="text-[var(--font-size-heading-3)] font-semibold text-[var(--color-text)]"
-            >
-              {listaModal.mode === "criar" ? "Nova lista" : "Editar lista"}
-            </h2>
-            <div className="mt-4">
-              <ListaForm
-                modo={listaModal.mode === "criar" ? "criar" : "editar"}
-                initialValues={
-                  listaModal.lista
-                    ? {
-                        nome: listaModal.lista.nome,
-                        descricao: listaModal.lista.descricao,
-                        limiteWip: listaModal.lista.limiteWip,
-                      }
-                    : {}
-                }
-                loading={listaSalvando}
-                onCancel={() => !listaSalvando && setListaModal(null)}
-                onSubmit={handleSalvarLista}
-              />
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <ListaModal
+        open={Boolean(listaModal)}
+        modo={listaModal?.mode === "criar" ? "criar" : "editar"}
+        listaEmEdicao={listaModal?.lista ?? null}
+        loading={listaSalvando}
+        onClose={() => setListaModal(null)}
+        onSubmit={handleSalvarLista}
+      />
     </AppLayout>
   );
 }

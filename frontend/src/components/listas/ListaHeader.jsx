@@ -20,8 +20,8 @@ export default function ListaHeader({
       <div className="lista-header__main">
         <TitleTag className="lista-header__title">{nome}</TitleTag>
         <span className="lista-header__meta">
-          ({totalCartoes ?? 0} cartões
-          {limiteWip ? ` / Limite ${limiteWip}` : ""})
+          ({totalCartoes ?? 0}
+          {limiteWip ? `/${limiteWip}` : ""})
         </span>
       </div>
       {actions ? (
