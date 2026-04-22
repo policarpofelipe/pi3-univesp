@@ -129,6 +129,22 @@ html {
 }
 
 /* =========================================================
+   FAMÍLIA DE FONTE (data-font-family)
+   ========================================================= */
+
+:root[data-font-family="sans"] {
+  --a11y-font-family: var(--font-family-base);
+}
+
+:root[data-font-family="serif"] {
+  --a11y-font-family: Georgia, "Times New Roman", serif;
+}
+
+:root[data-font-family="dyslexic"] {
+  --a11y-font-family: "OpenDyslexic", "Segoe UI", Arial, sans-serif;
+}
+
+/* =========================================================
    REDUÇÃO DE MOVIMENTO (ACESSIBILIDADE)
    ========================================================= */
 @media (prefers-reduced-motion: reduce) {

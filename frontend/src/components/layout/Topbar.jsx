@@ -8,12 +8,13 @@ import {
   Bell,
   UserRound,
   LogOut,
+  Accessibility,
+  RotateCcw,
 } from "lucide-react";
 
-import ThemeToggle from "../ui/ThemeToggle";
-import FontSizeControl from "../ui/FontSizeControl";
 import IconButton from "../ui/IconButton";
 import useAuth from "../../hooks/useAuth";
+import useAccessibility from "../../hooks/useAccessibility";
 
 import "../../styles/components/topbar.css";
 
@@ -33,9 +34,27 @@ export default function Topbar({
 }) {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const {
+    theme,
+    setTheme,
+    fontScale,
+    setFontScale,
+    fontFamily,
+    setFontFamily,
+    letterSpacing,
+    setLetterSpacing,
+    lineHeight,
+    setLineHeight,
+    paragraphWidth,
+    setParagraphWidth,
+    fontColor,
+    setFontColor,
+    resetAllAccessibility,
+  } = useAccessibility();
   const menuWrapRef = useRef(null);
   const menuButtonRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accessibilityOpen, setAccessibilityOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const hasSearch = typeof onSearchChange === "function";
   const userName = user?.name || user?.nome || "Usuário";
@@ -77,6 +96,18 @@ export default function Topbar({
       document.removeEventListener("keydown", handleEscape);
     };
   }, [menuOpen]);
+
+  useEffect(() => {
+    if (!accessibilityOpen) return undefined;
+    function handleEscape(event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setAccessibilityOpen(false);
+      }
+    }
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [accessibilityOpen]);
 
   async function handleLogout() {
     await logout();
@@ -174,6 +205,18 @@ export default function Topbar({
             </div>
           </div>
 
+          <button
+            type="button"
+            className="topbar__menu-toggle"
+            aria-haspopup="dialog"
+            aria-expanded={accessibilityOpen}
+            aria-label={accessibilityOpen ? "Fechar acessibilidade" : "Abrir acessibilidade"}
+            title={accessibilityOpen ? "Fechar acessibilidade" : "Acessibilidade"}
+            onClick={() => setAccessibilityOpen(true)}
+          >
+            <Accessibility size={18} />
+          </button>
+
           <div className="topbar__title-block">
             {title ? <h1 className="topbar__title">{title}</h1> : null}
             {subtitle ? <p className="topbar__subtitle">{subtitle}</p> : null}
@@ -208,14 +251,6 @@ export default function Topbar({
               </div>
             </form>
           )}
-
-          <div
-            className="topbar__accessibility"
-            aria-label="Controles de acessibilidade"
-          >
-            <ThemeToggle />
-            <FontSizeControl showLabel={false} />
-          </div>
 
           {actions ? <div className="topbar__actions">{actions}</div> : null}
 
@@ -281,6 +316,193 @@ export default function Topbar({
           </form>
         </div>
       )}
+
+      {accessibilityOpen ? (
+        <div
+          className="topbar__a11y-overlay"
+          role="presentation"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setAccessibilityOpen(false);
+            }
+          }}
+        >
+          <section
+            className="topbar__a11y-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="a11y-dialog-title"
+          >
+            <header className="topbar__a11y-header">
+              <h2 id="a11y-dialog-title">Acessibilidade</h2>
+              <button
+                type="button"
+                className="topbar__a11y-close"
+                onClick={() => setAccessibilityOpen(false)}
+                aria-label="Fechar acessibilidade"
+              >
+                <X size={16} />
+              </button>
+            </header>
+
+            <div className="topbar__a11y-body">
+              <button
+                type="button"
+                className="topbar__a11y-reset"
+                onClick={resetAllAccessibility}
+              >
+                <RotateCcw size={14} />
+                <span>Redefinir tudo</span>
+              </button>
+
+              <section className="topbar__a11y-section">
+                <h3>Tamanho da fonte</h3>
+                <div className="topbar__a11y-font-scale">
+                  {[
+                    { value: "sm", label: "A-" },
+                    { value: "md", label: "AA" },
+                    { value: "lg", label: "AA++" },
+                    { value: "xl", label: "AA+++" },
+                  ].map((item) => (
+                    <button
+                      key={item.value}
+                      type="button"
+                      className={clsx(
+                        "topbar__a11y-chip",
+                        fontScale === item.value && "topbar__a11y-chip--active"
+                      )}
+                      onClick={() => setFontScale(item.value)}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="topbar__a11y-section">
+                <h3>Alto contraste</h3>
+                <button
+                  type="button"
+                  className="topbar__a11y-toggle"
+                  role="switch"
+                  aria-checked={theme === "high-contrast"}
+                  onClick={() =>
+                    setTheme(theme === "high-contrast" ? "default" : "high-contrast")
+                  }
+                >
+                  {theme === "high-contrast" ? "Desativar" : "Ativar"}
+                </button>
+              </section>
+
+              <section className="topbar__a11y-section">
+                <h3>Tipo de fonte</h3>
+                <div className="topbar__a11y-radio-list">
+                  {[
+                    { value: "serif", label: "Serif" },
+                    { value: "sans", label: "Sans Serif" },
+                    { value: "dyslexic", label: "Dislexia (OpenDyslexic)" },
+                  ].map((item) => (
+                    <label key={item.value} className="topbar__a11y-radio">
+                      <input
+                        type="radio"
+                        name="font-family-a11y"
+                        value={item.value}
+                        checked={fontFamily === item.value}
+                        onChange={() => setFontFamily(item.value)}
+                      />
+                      <span>{item.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </section>
+
+              <section className="topbar__a11y-section">
+                <h3>Espaçamento entre letras</h3>
+                <div className="topbar__a11y-stepper">
+                  <button
+                    type="button"
+                    onClick={() => setLetterSpacing((prev) => Math.max(-1, prev - 0.2))}
+                  >
+                    −
+                  </button>
+                  <span>{letterSpacing.toFixed(1)}</span>
+                  <button
+                    type="button"
+                    onClick={() => setLetterSpacing((prev) => Math.min(4, prev + 0.2))}
+                  >
+                    +
+                  </button>
+                </div>
+              </section>
+
+              <section className="topbar__a11y-section">
+                <h3>Altura da linha</h3>
+                <div className="topbar__a11y-stepper">
+                  <button
+                    type="button"
+                    onClick={() => setLineHeight((prev) => Math.max(1.1, Number((prev - 0.1).toFixed(1))))}
+                  >
+                    −
+                  </button>
+                  <span>{lineHeight.toFixed(1)}</span>
+                  <button
+                    type="button"
+                    onClick={() => setLineHeight((prev) => Math.min(2.2, Number((prev + 0.1).toFixed(1))))}
+                  >
+                    +
+                  </button>
+                </div>
+              </section>
+
+              <section className="topbar__a11y-section">
+                <h3>Largura do parágrafo</h3>
+                <div className="topbar__a11y-stepper">
+                  <button
+                    type="button"
+                    onClick={() => setParagraphWidth((prev) => Math.max(0, prev - 5))}
+                  >
+                    −
+                  </button>
+                  <span>{paragraphWidth}</span>
+                  <button
+                    type="button"
+                    onClick={() => setParagraphWidth((prev) => Math.min(120, prev + 5))}
+                  >
+                    +
+                  </button>
+                </div>
+              </section>
+
+              <section className="topbar__a11y-section">
+                <h3>Cor da fonte</h3>
+                <div className="topbar__a11y-color-row">
+                  <input
+                    type="color"
+                    value={fontColor || "#111111"}
+                    onChange={(event) => setFontColor(event.target.value)}
+                    aria-label="Selecionar cor da fonte"
+                  />
+                  <button
+                    type="button"
+                    className="topbar__a11y-link"
+                    onClick={() => setFontColor("")}
+                  >
+                    Redefinir
+                  </button>
+                </div>
+              </section>
+
+              <button
+                type="button"
+                className="topbar__a11y-reset topbar__a11y-reset--secondary"
+                onClick={resetAllAccessibility}
+              >
+                Redefinir todos os ajustes
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </header>
   );
 }

@@ -70,12 +70,13 @@ table {
    ========================================================= */
 body {
   min-height: 100vh;
-  font-family: var(--font-family-base);
+  font-family: var(--a11y-font-family, var(--font-family-base));
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-base);
+  line-height: var(--a11y-line-height, var(--line-height-base));
+  letter-spacing: var(--a11y-letter-spacing, 0px);
   background-color: var(--color-bg);
-  color: var(--color-text);
+  color: var(--a11y-font-color, var(--color-text));
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -109,7 +110,8 @@ p,
 li,
 dt,
 dd {
-  color: var(--color-text);
+  color: var(--a11y-font-color, var(--color-text));
+  max-width: max(100%, var(--a11y-paragraph-width, 0ch));
 }
 
 small {
