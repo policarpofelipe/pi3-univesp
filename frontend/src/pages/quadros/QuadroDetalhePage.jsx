@@ -13,6 +13,9 @@ import listaService from "../../services/listaService";
 import cartaoService from "../../services/cartaoService";
 import tagService from "../../services/tagService";
 import automacaoService from "../../services/automacaoService";
+import visaoService from "../../services/visaoService";
+import campoPersonalizadoService from "../../services/campoPersonalizadoService";
+import quadroPapelService from "../../services/quadroPapelService";
 import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 import ListaModal from "../../components/listas/ListaModal";
 import CartaoModal from "../../components/cartoes/CartaoModal";
@@ -80,11 +83,24 @@ export default function QuadroDetalhePage() {
   const [cartaoSalvando, setCartaoSalvando] = useState(false);
   const [movendoCartaoId, setMovendoCartaoId] = useState(null);
   const [tags, setTags] = useState([]);
+  const [visoes, setVisoes] = useState([]);
+  const [camposPersonalizados, setCamposPersonalizados] = useState([]);
+  const [papeisQuadro, setPapeisQuadro] = useState([]);
   const [automacoes, setAutomacoes] = useState([]);
   const [automacoesLoading, setAutomacoesLoading] = useState(false);
   const [automacoesErro, setAutomacoesErro] = useState("");
   const [automacaoSalvando, setAutomacaoSalvando] = useState(false);
+  const [membrosErro, setMembrosErro] = useState("");
+  const [membroSalvando, setMembroSalvando] = useState(false);
+  const [visoesErro, setVisoesErro] = useState("");
+  const [visaoSalvando, setVisaoSalvando] = useState(false);
+  const [camposErro, setCamposErro] = useState("");
+  const [campoSalvando, setCampoSalvando] = useState(false);
+  const [papeisErro, setPapeisErro] = useState("");
+  const [papelSalvando, setPapelSalvando] = useState(false);
   const [removendoTagId, setRemovendoTagId] = useState(null);
+  const [tagSalvando, setTagSalvando] = useState(false);
+  const [tagsErro, setTagsErro] = useState("");
   const [criandoTag, setCriandoTag] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerSection, setDrawerSection] = useState("geral");
@@ -104,7 +120,17 @@ export default function QuadroDetalhePage() {
     setErro("");
 
     try {
-      const [resQuadro, resMembros, resListas, resCartoes, resTags, resAutomacoes] =
+      const [
+        resQuadro,
+        resMembros,
+        resListas,
+        resCartoes,
+        resTags,
+        resAutomacoes,
+        resVisoes,
+        resCampos,
+        resPapeis,
+      ] =
         await Promise.all([
           quadroService.obterPorId(quadroId),
           quadroMembroService.listar(quadroId).catch(() => ({ data: [] })),
@@ -112,6 +138,9 @@ export default function QuadroDetalhePage() {
           cartaoService.listar(quadroId).catch(() => ({ data: [] })),
           tagService.listar(quadroId).catch(() => ({ data: [] })),
           automacaoService.listar(quadroId).catch(() => ({ data: [] })),
+          visaoService.listar(quadroId).catch(() => ({ data: [] })),
+          campoPersonalizadoService.listar(quadroId).catch(() => ({ data: [] })),
+          quadroPapelService.listar(quadroId).catch(() => ({ data: [] })),
         ]);
 
       let data = extractObject(resQuadro) || resQuadro;
@@ -146,7 +175,15 @@ export default function QuadroDetalhePage() {
       setCartoes(extractList(resCartoes));
       setTags(extractList(resTags));
       setAutomacoes(extractList(resAutomacoes));
+      setVisoes(extractList(resVisoes));
+      setCamposPersonalizados(extractList(resCampos));
+      setPapeisQuadro(extractList(resPapeis));
       setAutomacoesErro("");
+      setMembrosErro("");
+      setVisoesErro("");
+      setCamposErro("");
+      setPapeisErro("");
+      setTagsErro("");
     } catch (error) {
       setErro(
         error?.response?.data?.message ||
@@ -159,6 +196,9 @@ export default function QuadroDetalhePage() {
       setCartoes([]);
       setTags([]);
       setAutomacoes([]);
+      setVisoes([]);
+      setCamposPersonalizados([]);
+      setPapeisQuadro([]);
       setAutomacoesErro("");
     } finally {
       setLoading(false);
@@ -224,6 +264,70 @@ export default function QuadroDetalhePage() {
     }
   }, [quadroId]);
 
+  const carregarMembros = useCallback(async () => {
+    if (!quadroId) return;
+    try {
+      const res = await quadroMembroService.listar(quadroId);
+      const listaMembros = extractList(res);
+      setMembros(listaMembros.map(normalizarMembro));
+    } catch (error) {
+      setMembrosErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível carregar os membros."
+      );
+      setMembros([]);
+    }
+  }, [quadroId]);
+
+  const carregarVisoes = useCallback(async () => {
+    if (!quadroId) return;
+    try {
+      const res = await visaoService.listar(quadroId);
+      setVisoes(extractList(res));
+      setVisoesErro("");
+    } catch (error) {
+      setVisoesErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível carregar as visões."
+      );
+      setVisoes([]);
+    }
+  }, [quadroId]);
+
+  const carregarCampos = useCallback(async () => {
+    if (!quadroId) return;
+    try {
+      const res = await campoPersonalizadoService.listar(quadroId);
+      setCamposPersonalizados(extractList(res));
+      setCamposErro("");
+    } catch (error) {
+      setCamposErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível carregar os campos personalizados."
+      );
+      setCamposPersonalizados([]);
+    }
+  }, [quadroId]);
+
+  const carregarPapeis = useCallback(async () => {
+    if (!quadroId) return;
+    try {
+      const res = await quadroPapelService.listar(quadroId);
+      setPapeisQuadro(extractList(res));
+      setPapeisErro("");
+    } catch (error) {
+      setPapeisErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível carregar os papéis."
+      );
+      setPapeisQuadro([]);
+    }
+  }, [quadroId]);
+
   const carregarAutomacoes = useCallback(async () => {
     if (!quadroId) return;
     setAutomacoesLoading(true);
@@ -282,26 +386,287 @@ export default function QuadroDetalhePage() {
 
   async function handleCriarTagQuadro(payload) {
     setCriandoTag(true);
+    setTagSalvando(true);
+    setTagsErro("");
     try {
       await tagService.criar(quadroId, payload);
       await carregarTags();
       await carregarCartoes();
     } catch (err) {
+      setTagsErro(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Não foi possível criar a tag."
+      );
       throw err;
     } finally {
       setCriandoTag(false);
+      setTagSalvando(false);
+    }
+  }
+
+  async function handleAtualizarTagQuadro(tagId, payload) {
+    setTagSalvando(true);
+    setTagsErro("");
+    try {
+      await tagService.atualizar(quadroId, tagId, payload);
+      await carregarTags();
+      await carregarCartoes();
+    } catch (err) {
+      setTagsErro(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Não foi possível atualizar a tag."
+      );
+      throw err;
+    } finally {
+      setTagSalvando(false);
     }
   }
 
   async function handleRemoverTagQuadro(tag) {
     if (!window.confirm(`Remover a tag "${tag.nome}" dos cartões?`)) return;
     setRemovendoTagId(tag.id);
+    setTagsErro("");
     try {
       await tagService.remover(quadroId, tag.id);
       await carregarTags();
       await carregarCartoes();
+    } catch (err) {
+      setTagsErro(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Não foi possível remover a tag."
+      );
     } finally {
       setRemovendoTagId(null);
+    }
+  }
+
+  async function handleConvidarMembroQuadro(payload) {
+    setMembroSalvando(true);
+    setMembrosErro("");
+    try {
+      await quadroMembroService.convidar(quadroId, payload);
+      await carregarMembros();
+    } catch (error) {
+      setMembrosErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível convidar o membro."
+      );
+      throw error;
+    } finally {
+      setMembroSalvando(false);
+    }
+  }
+
+  async function handleAlterarPapelMembroQuadro(membroId, papelNome) {
+    setMembroSalvando(true);
+    setMembrosErro("");
+    try {
+      await quadroMembroService.atualizarPapel(quadroId, membroId, { papel: papelNome });
+      await carregarMembros();
+    } catch (error) {
+      setMembrosErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível atualizar o papel do membro."
+      );
+    } finally {
+      setMembroSalvando(false);
+    }
+  }
+
+  async function handleRemoverMembroQuadro(membroId) {
+    if (!window.confirm("Remover este membro do quadro?")) return;
+    setMembroSalvando(true);
+    setMembrosErro("");
+    try {
+      await quadroMembroService.remover(quadroId, membroId);
+      await carregarMembros();
+    } catch (error) {
+      setMembrosErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível remover o membro."
+      );
+    } finally {
+      setMembroSalvando(false);
+    }
+  }
+
+  async function handleReenviarConviteMembroQuadro(membroId) {
+    setMembroSalvando(true);
+    setMembrosErro("");
+    try {
+      await quadroMembroService.reenviarConvite(quadroId, membroId);
+      await carregarMembros();
+    } catch (error) {
+      setMembrosErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível reenviar o convite."
+      );
+    } finally {
+      setMembroSalvando(false);
+    }
+  }
+
+  async function handleCriarVisaoQuadro(payload) {
+    setVisaoSalvando(true);
+    setVisoesErro("");
+    try {
+      await visaoService.criar(quadroId, payload);
+      await carregarVisoes();
+    } catch (error) {
+      setVisoesErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível criar a visão."
+      );
+      throw error;
+    } finally {
+      setVisaoSalvando(false);
+    }
+  }
+
+  async function handleAtualizarVisaoQuadro(visaoId, payload) {
+    setVisaoSalvando(true);
+    setVisoesErro("");
+    try {
+      await visaoService.atualizar(quadroId, visaoId, payload);
+      await carregarVisoes();
+    } catch (error) {
+      setVisoesErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível atualizar a visão."
+      );
+      throw error;
+    } finally {
+      setVisaoSalvando(false);
+    }
+  }
+
+  async function handleRemoverVisaoQuadro(visao) {
+    if (!window.confirm(`Remover a visão "${visao.nome}"?`)) return;
+    setVisoesErro("");
+    try {
+      await visaoService.remover(quadroId, visao.id);
+      await carregarVisoes();
+    } catch (error) {
+      setVisoesErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível remover a visão."
+      );
+    }
+  }
+
+  async function handleCriarCampoQuadro(payload) {
+    setCampoSalvando(true);
+    setCamposErro("");
+    try {
+      await campoPersonalizadoService.criar(quadroId, payload);
+      await carregarCampos();
+    } catch (error) {
+      setCamposErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível criar o campo."
+      );
+      throw error;
+    } finally {
+      setCampoSalvando(false);
+    }
+  }
+
+  async function handleAtualizarCampoQuadro(campoId, payload) {
+    setCampoSalvando(true);
+    setCamposErro("");
+    try {
+      await campoPersonalizadoService.atualizar(quadroId, campoId, payload);
+      await carregarCampos();
+    } catch (error) {
+      setCamposErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível atualizar o campo."
+      );
+      throw error;
+    } finally {
+      setCampoSalvando(false);
+    }
+  }
+
+  async function handleRemoverCampoQuadro(campo) {
+    if (!window.confirm(`Remover o campo "${campo.nome}"?`)) return;
+    setCamposErro("");
+    try {
+      await campoPersonalizadoService.remover(quadroId, campo.id);
+      await carregarCampos();
+    } catch (error) {
+      setCamposErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível remover o campo."
+      );
+    }
+  }
+
+  async function handleCriarPapelQuadro(payload) {
+    setPapelSalvando(true);
+    setPapeisErro("");
+    try {
+      await quadroPapelService.criar(quadroId, payload);
+      await carregarPapeis();
+    } catch (error) {
+      setPapeisErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível criar o papel."
+      );
+      throw error;
+    } finally {
+      setPapelSalvando(false);
+    }
+  }
+
+  async function handleAtualizarPapelQuadro(papelId, payload) {
+    setPapelSalvando(true);
+    setPapeisErro("");
+    try {
+      await quadroPapelService.atualizar(quadroId, papelId, {
+        nome: payload.nome,
+        descricao: payload.descricao,
+      });
+      await quadroPapelService.atualizarPermissoes(quadroId, papelId, payload.permissoes);
+      await carregarPapeis();
+    } catch (error) {
+      setPapeisErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível atualizar o papel."
+      );
+      throw error;
+    } finally {
+      setPapelSalvando(false);
+    }
+  }
+
+  async function handleRemoverPapelQuadro(papel) {
+    if (!window.confirm(`Remover o papel "${papel.nome}"?`)) return;
+    setPapeisErro("");
+    try {
+      await quadroPapelService.remover(quadroId, papel.id);
+      await carregarPapeis();
+    } catch (error) {
+      setPapeisErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível remover o papel."
+      );
     }
   }
 
@@ -672,7 +1037,20 @@ export default function QuadroDetalhePage() {
         quadro={quadro}
         membros={membros}
         tags={tags}
+        visoes={visoes}
+        campos={camposPersonalizados}
+        papeis={papeisQuadro}
         listas={listas}
+        membrosErro={membrosErro}
+        membrosSalvando={membroSalvando}
+        tagsErro={tagsErro}
+        tagSalvando={tagSalvando}
+        visoesErro={visoesErro}
+        visaoSalvando={visaoSalvando}
+        camposErro={camposErro}
+        campoSalvando={campoSalvando}
+        papeisErro={papeisErro}
+        papelSalvando={papelSalvando}
         automacoes={automacoes}
         automacoesLoading={automacoesLoading}
         automacoesErro={automacoesErro}
@@ -681,7 +1059,21 @@ export default function QuadroDetalhePage() {
         removendoTagId={removendoTagId}
         criandoTag={criandoTag}
         onCriarTag={handleCriarTagQuadro}
+        onAtualizarTag={handleAtualizarTagQuadro}
         onRemoverTag={handleRemoverTagQuadro}
+        onConvidarMembro={handleConvidarMembroQuadro}
+        onAlterarPapelMembro={handleAlterarPapelMembroQuadro}
+        onRemoverMembro={handleRemoverMembroQuadro}
+        onReenviarConviteMembro={handleReenviarConviteMembroQuadro}
+        onCriarVisao={handleCriarVisaoQuadro}
+        onAtualizarVisao={handleAtualizarVisaoQuadro}
+        onRemoverVisao={handleRemoverVisaoQuadro}
+        onCriarCampo={handleCriarCampoQuadro}
+        onAtualizarCampo={handleAtualizarCampoQuadro}
+        onRemoverCampo={handleRemoverCampoQuadro}
+        onCriarPapel={handleCriarPapelQuadro}
+        onAtualizarPapel={handleAtualizarPapelQuadro}
+        onRemoverPapel={handleRemoverPapelQuadro}
         onCriarAutomacao={handleCriarAutomacao}
         onAtualizarAutomacao={handleAtualizarAutomacao}
         onRemoverAutomacao={handleRemoverAutomacao}

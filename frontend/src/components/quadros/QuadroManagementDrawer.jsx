@@ -14,8 +14,11 @@ import {
   Clock3,
   Eye,
   LayoutList,
+  Mail,
+  Plus,
   Settings,
   SlidersHorizontal,
+  UserPlus,
   X,
 } from "lucide-react";
 
@@ -24,6 +27,10 @@ import TagList from "./TagList";
 import TagForm from "./TagForm";
 import AutomacaoList from "../automacoes/AutomacaoList";
 import AutomacaoForm from "../automacoes/AutomacaoForm";
+import VisaoForm from "../visoes/VisaoForm";
+import CampoPersonalizadoList from "../camposPersonalizados/CampoPersonalizadoList";
+import CampoPersonalizadoForm from "../camposPersonalizados/CampoPersonalizadoForm";
+import QuadroPapelForm from "./QuadroPapelForm";
 
 import "../../styles/components/quadro-management-drawer.css";
 
@@ -54,8 +61,21 @@ export default function QuadroManagementDrawer({
   quadro,
   membros = [],
   tags = [],
+  visoes = [],
+  campos = [],
+  papeis = [],
   atividades = [],
   listas = [],
+  membrosErro = "",
+  membrosSalvando = false,
+  tagsErro = "",
+  tagSalvando = false,
+  visoesErro = "",
+  visaoSalvando = false,
+  camposErro = "",
+  campoSalvando = false,
+  papeisErro = "",
+  papelSalvando = false,
   automacoes = [],
   automacoesLoading = false,
   automacoesErro = "",
@@ -63,7 +83,21 @@ export default function QuadroManagementDrawer({
   removendoTagId = null,
   criandoTag = false,
   onCriarTag,
+  onAtualizarTag,
   onRemoverTag,
+  onConvidarMembro,
+  onAlterarPapelMembro,
+  onRemoverMembro,
+  onReenviarConviteMembro,
+  onCriarVisao,
+  onAtualizarVisao,
+  onRemoverVisao,
+  onCriarCampo,
+  onAtualizarCampo,
+  onRemoverCampo,
+  onCriarPapel,
+  onAtualizarPapel,
+  onRemoverPapel,
   onCriarAutomacao,
   onAtualizarAutomacao,
   onRemoverAutomacao,
@@ -84,6 +118,16 @@ export default function QuadroManagementDrawer({
   const [section, setSection] = useState(defaultSection);
   const [automacaoEmEdicao, setAutomacaoEmEdicao] = useState(null);
   const [automacoesMode, setAutomacoesMode] = useState("lista");
+  const [membrosMode, setMembrosMode] = useState("lista");
+  const [tagsMode, setTagsMode] = useState("lista");
+  const [visoesMode, setVisoesMode] = useState("lista");
+  const [camposMode, setCamposMode] = useState("lista");
+  const [papeisMode, setPapeisMode] = useState("lista");
+  const [tagEmEdicao, setTagEmEdicao] = useState(null);
+  const [visaoEmEdicao, setVisaoEmEdicao] = useState(null);
+  const [campoEmEdicao, setCampoEmEdicao] = useState(null);
+  const [papelEmEdicao, setPapelEmEdicao] = useState(null);
+  const [conviteMembro, setConviteMembro] = useState({ email: "", papel: "" });
 
   useLayoutEffect(() => {
     if (open) {
@@ -94,6 +138,16 @@ export default function QuadroManagementDrawer({
       setSection(defaultSection);
       setAutomacaoEmEdicao(null);
       setAutomacoesMode("lista");
+      setMembrosMode("lista");
+      setTagsMode("lista");
+      setVisoesMode("lista");
+      setCamposMode("lista");
+      setPapeisMode("lista");
+      setTagEmEdicao(null);
+      setVisaoEmEdicao(null);
+      setCampoEmEdicao(null);
+      setPapelEmEdicao(null);
+      setConviteMembro({ email: "", papel: "" });
     } else {
       drawerOpenedRef.current = false;
     }
@@ -320,65 +374,279 @@ export default function QuadroManagementDrawer({
                       <h3 className="quadro-detalhe-page__section-title">
                         Membros do quadro
                       </h3>
-                      <Button variant="ghost" onClick={() => onNavigateMembros?.()}>
-                        Ver todos
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="secondary"
+                          leftIcon={<UserPlus size={14} aria-hidden="true" />}
+                          onClick={() => setMembrosMode("criar")}
+                        >
+                          Convidar
+                        </Button>
+                        <Button variant="ghost" onClick={() => onNavigateMembros?.()}>
+                          Abrir página
+                        </Button>
+                      </div>
                     </div>
-                    {membros.length === 0 ? (
-                      <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-                        Nenhum membro listado.
+
+                    {membrosErro ? (
+                      <p
+                        className="mb-3 mt-3 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+                        role="alert"
+                      >
+                        {membrosErro}
                       </p>
+                    ) : null}
+
+                    {membrosMode === "lista" ? (
+                      membros.length === 0 ? (
+                        <p className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+                          Nenhum membro listado.
+                        </p>
+                      ) : (
+                        <ul className="mt-3 flex flex-col gap-2">
+                          {membros.map((membro) => {
+                            const nomeMembro = membro.nome || "Sem nome";
+                            const papeisMembro =
+                              Array.isArray(membro.papeis) && membro.papeis.length
+                                ? membro.papeis
+                                : [];
+                            return (
+                              <li
+                                key={membro.id}
+                                className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-3"
+                              >
+                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                  <div className="min-w-0 flex-1">
+                                    <strong className="block text-[var(--font-size-sm)] text-[var(--color-text)]">
+                                      {nomeMembro}
+                                    </strong>
+                                    {membro.email ? (
+                                      <p className="mt-1 flex items-center gap-1 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
+                                        <Mail size={12} aria-hidden="true" />
+                                        <span>{membro.email}</span>
+                                      </p>
+                                    ) : null}
+                                    <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
+                                      Papel:{" "}
+                                      {papeisMembro.length
+                                        ? papeisMembro.join(", ")
+                                        : "Sem papel"}
+                                    </p>
+                                  </div>
+                                  <div className="flex flex-wrap gap-2">
+                                    {papeis.length ? (
+                                      <select
+                                        aria-label={`Papel de ${nomeMembro}`}
+                                        disabled={membrosSalvando}
+                                        defaultValue={papeisMembro[0] || ""}
+                                        onChange={(event) =>
+                                          onAlterarPapelMembro?.(
+                                            membro.id,
+                                            event.target.value
+                                          )
+                                        }
+                                      >
+                                        <option value="">Selecionar papel</option>
+                                        {papeis.map((papel) => (
+                                          <option
+                                            key={papel.id || papel.nome}
+                                            value={papel.nome}
+                                          >
+                                            {papel.nome}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    ) : null}
+                                    {String(membro.status || "").toLowerCase() ===
+                                    "pendente" ? (
+                                      <Button
+                                        type="button"
+                                        variant="secondary"
+                                        size="sm"
+                                        disabled={membrosSalvando}
+                                        onClick={() =>
+                                          onReenviarConviteMembro?.(membro.id)
+                                        }
+                                      >
+                                        Reenviar
+                                      </Button>
+                                    ) : null}
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      disabled={membrosSalvando}
+                                      onClick={() => onRemoverMembro?.(membro.id)}
+                                      aria-label={`Remover membro ${nomeMembro}`}
+                                    >
+                                      Remover
+                                    </Button>
+                                  </div>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )
                     ) : (
-                      <ul className="quadro-detalhe-page__membros">
-                        {membros.slice(0, 12).map((membro) => (
-                          <li
-                            key={membro.id}
-                            className="quadro-detalhe-page__membro-item"
-                          >
-                            <div
-                              className="quadro-detalhe-page__membro-avatar"
-                              aria-hidden="true"
+                      <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+                        <h4 className="mb-3 text-[var(--font-size-md)] font-semibold text-[var(--color-text)]">
+                          Convidar membro
+                        </h4>
+                        <form
+                          className="flex flex-col gap-3"
+                          onSubmit={async (event) => {
+                            event.preventDefault();
+                            await onConvidarMembro?.({
+                              email: conviteMembro.email.trim(),
+                              papel:
+                                conviteMembro.papel ||
+                                papeis.find((p) => p.nome)?.nome ||
+                                "Colaborador",
+                            });
+                            setConviteMembro({ email: "", papel: "" });
+                            setMembrosMode("lista");
+                          }}
+                        >
+                          <div>
+                            <label
+                              htmlFor="drawer-membro-email"
+                              className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
                             >
-                              {(membro.nome || "?").slice(0, 1).toUpperCase()}
-                            </div>
-                            <div className="quadro-detalhe-page__membro-body">
-                              <strong className="quadro-detalhe-page__membro-nome">
-                                {membro.nome}
-                              </strong>
-                              <span className="quadro-detalhe-page__membro-papel">
-                                {Array.isArray(membro.papeis) && membro.papeis.length
-                                  ? membro.papeis.join(", ")
-                                  : "Sem papel"}
-                              </span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
+                              E-mail
+                            </label>
+                            <input
+                              id="drawer-membro-email"
+                              type="email"
+                              required
+                              disabled={membrosSalvando}
+                              value={conviteMembro.email}
+                              onChange={(event) =>
+                                setConviteMembro((prev) => ({
+                                  ...prev,
+                                  email: event.target.value,
+                                }))
+                              }
+                              placeholder="nome@exemplo.com"
+                            />
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="drawer-membro-papel"
+                              className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
+                            >
+                              Papel inicial
+                            </label>
+                            <select
+                              id="drawer-membro-papel"
+                              disabled={membrosSalvando}
+                              value={conviteMembro.papel}
+                              onChange={(event) =>
+                                setConviteMembro((prev) => ({
+                                  ...prev,
+                                  papel: event.target.value,
+                                }))
+                              }
+                            >
+                              <option value="">Selecionar papel</option>
+                              {papeis.map((papel) => (
+                                <option key={papel.id || papel.nome} value={papel.nome}>
+                                  {papel.nome}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              disabled={membrosSalvando}
+                              onClick={() => setMembrosMode("lista")}
+                            >
+                              Cancelar
+                            </Button>
+                            <Button
+                              type="submit"
+                              variant="primary"
+                              loading={membrosSalvando}
+                            >
+                              Enviar convite
+                            </Button>
+                          </div>
+                        </form>
+                      </div>
                     )}
                   </section>
                 ) : null}
 
                 {s.key === "tags" ? (
                   <section className="quadro-detalhe-page__section" aria-label="Tags">
-                    <h3 className="quadro-detalhe-page__section-title">
-                      Tags do quadro
-                    </h3>
+                    <div className="quadro-detalhe-page__section-header">
+                      <h3 className="quadro-detalhe-page__section-title">
+                        Tags do quadro
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="secondary"
+                          leftIcon={<Plus size={14} aria-hidden="true" />}
+                          onClick={() => {
+                            setTagEmEdicao(null);
+                            setTagsMode("criar");
+                          }}
+                        >
+                          Nova tag
+                        </Button>
+                      </div>
+                    </div>
                     <p className="quadro-detalhe-page__section-text mb-3">
                       Use tags nos cartões para classificar o trabalho. Remover uma
                       tag aqui tira a etiqueta de todos os cartões.
                     </p>
-                    <TagList
-                      tags={tags}
-                      onRemover={onRemoverTag}
-                      removendoId={removendoTagId}
-                    />
-                    <div className="mt-4 border-t border-[var(--color-border)] pt-4">
-                      <TagForm
-                        loading={criandoTag}
-                        submitLabel="Adicionar tag"
-                        onSubmit={onCriarTag}
+
+                    {tagsErro ? (
+                      <p
+                        className="mb-3 mt-3 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+                        role="alert"
+                      >
+                        {tagsErro}
+                      </p>
+                    ) : null}
+
+                    {tagsMode === "lista" ? (
+                      <TagList
+                        tags={tags}
+                        onEditar={(tag) => {
+                          setTagEmEdicao(tag);
+                          setTagsMode("editar");
+                        }}
+                        onRemover={onRemoverTag}
+                        removendoId={removendoTagId}
                       />
-                    </div>
+                    ) : (
+                      <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+                        <h4 className="mb-3 text-[var(--font-size-md)] font-semibold text-[var(--color-text)]">
+                          {tagsMode === "editar" ? "Editar tag" : "Criar tag"}
+                        </h4>
+                        <TagForm
+                          loading={tagSalvando || criandoTag}
+                          initialValues={tagEmEdicao || {}}
+                          submitLabel={tagsMode === "editar" ? "Salvar tag" : "Adicionar tag"}
+                          onCancel={() => {
+                            setTagEmEdicao(null);
+                            setTagsMode("lista");
+                          }}
+                          onSubmit={async (payload) => {
+                            if (tagsMode === "editar" && tagEmEdicao?.id) {
+                              await onAtualizarTag?.(tagEmEdicao.id, payload);
+                            } else {
+                              await onCriarTag?.(payload);
+                            }
+                            setTagEmEdicao(null);
+                            setTagsMode("lista");
+                          }}
+                        />
+                      </div>
+                    )}
                   </section>
                 ) : null}
 
@@ -386,18 +654,111 @@ export default function QuadroManagementDrawer({
                   <section className="quadro-detalhe-page__section" aria-label="Visões">
                     <div className="quadro-detalhe-page__section-header">
                       <h3 className="quadro-detalhe-page__section-title">Visões</h3>
-                      <Button
-                        variant="ghost"
-                        leftIcon={<Eye size={14} aria-hidden="true" />}
-                        onClick={() => onNavigateVisoes?.()}
-                      >
-                        Gerenciar
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="secondary"
+                          onClick={() => {
+                            setVisaoEmEdicao(null);
+                            setVisoesMode("criar");
+                          }}
+                        >
+                          Nova visão
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          leftIcon={<Eye size={14} aria-hidden="true" />}
+                          onClick={() => onNavigateVisoes?.()}
+                        >
+                          Abrir página
+                        </Button>
+                      </div>
                     </div>
                     <p className="quadro-detalhe-page__section-text">
                       Crie visões salvas para aplicar filtros recorrentes e acelerar a
                       análise do quadro.
                     </p>
+
+                    {visoesErro ? (
+                      <p
+                        className="mb-3 mt-3 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+                        role="alert"
+                      >
+                        {visoesErro}
+                      </p>
+                    ) : null}
+
+                    {visoesMode === "lista" ? (
+                      visoes.length === 0 ? (
+                        <p className="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+                          Nenhuma visão cadastrada.
+                        </p>
+                      ) : (
+                        <ul className="mt-3 flex flex-col gap-2">
+                          {visoes.map((visao) => (
+                            <li
+                              key={visao.id}
+                              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-3"
+                            >
+                              <div className="flex flex-wrap items-start justify-between gap-2">
+                                <div className="min-w-0 flex-1">
+                                  <strong className="block text-[var(--font-size-sm)] text-[var(--color-text)]">
+                                    {visao.nome}
+                                  </strong>
+                                  <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
+                                    Status: {visao.ativa ? "Ativa" : "Inativa"}
+                                  </p>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => {
+                                      setVisaoEmEdicao(visao);
+                                      setVisoesMode("editar");
+                                    }}
+                                    aria-label={`Editar visão ${visao.nome}`}
+                                  >
+                                    Editar
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => onRemoverVisao?.(visao)}
+                                    aria-label={`Remover visão ${visao.nome}`}
+                                  >
+                                    Remover
+                                  </Button>
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      )
+                    ) : (
+                      <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+                        <h4 className="mb-3 text-[var(--font-size-md)] font-semibold text-[var(--color-text)]">
+                          {visoesMode === "editar" ? "Editar visão" : "Criar visão"}
+                        </h4>
+                        <VisaoForm
+                          modo={visoesMode === "editar" ? "editar" : "criar"}
+                          initialValues={visaoEmEdicao || {}}
+                          loading={visaoSalvando}
+                          onSubmit={async (payload) => {
+                            if (visoesMode === "editar" && visaoEmEdicao?.id) {
+                              await onAtualizarVisao?.(visaoEmEdicao.id, payload);
+                            } else {
+                              await onCriarVisao?.(payload);
+                            }
+                            setVisaoEmEdicao(null);
+                            setVisoesMode("lista");
+                          }}
+                          onCancel={() => {
+                            setVisaoEmEdicao(null);
+                            setVisoesMode("lista");
+                          }}
+                        />
+                      </div>
+                    )}
                   </section>
                 ) : null}
 
@@ -410,18 +771,83 @@ export default function QuadroManagementDrawer({
                       <h3 className="quadro-detalhe-page__section-title">
                         Campos personalizados
                       </h3>
-                      <Button
-                        variant="ghost"
-                        leftIcon={<SlidersHorizontal size={14} aria-hidden="true" />}
-                        onClick={() => onNavigateCamposPersonalizados?.()}
-                      >
-                        Gerenciar
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="secondary"
+                          onClick={() => {
+                            setCampoEmEdicao(null);
+                            setCamposMode("criar");
+                          }}
+                        >
+                          Novo campo
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          leftIcon={<SlidersHorizontal size={14} aria-hidden="true" />}
+                          onClick={() => onNavigateCamposPersonalizados?.()}
+                        >
+                          Abrir página
+                        </Button>
+                      </div>
                     </div>
                     <p className="quadro-detalhe-page__section-text">
                       Defina metadados extras dos cartões para adaptar o quadro ao seu
                       processo.
                     </p>
+
+                    {camposErro ? (
+                      <p
+                        className="mb-3 mt-3 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+                        role="alert"
+                      >
+                        {camposErro}
+                      </p>
+                    ) : null}
+
+                    {camposMode === "lista" ? (
+                      campos.length === 0 ? (
+                        <p className="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+                          Nenhum campo personalizado cadastrado.
+                        </p>
+                      ) : (
+                        <div className="mt-3">
+                          <CampoPersonalizadoList
+                            campos={campos}
+                            onEditar={(campo) => {
+                              setCampoEmEdicao(campo);
+                              setCamposMode("editar");
+                            }}
+                            onRemover={onRemoverCampo}
+                          />
+                        </div>
+                      )
+                    ) : (
+                      <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+                        <h4 className="mb-3 text-[var(--font-size-md)] font-semibold text-[var(--color-text)]">
+                          {camposMode === "editar"
+                            ? "Editar campo personalizado"
+                            : "Criar campo personalizado"}
+                        </h4>
+                        <CampoPersonalizadoForm
+                          modo={camposMode === "editar" ? "editar" : "criar"}
+                          initialValues={campoEmEdicao || {}}
+                          loading={campoSalvando}
+                          onSubmit={async (payload) => {
+                            if (camposMode === "editar" && campoEmEdicao?.id) {
+                              await onAtualizarCampo?.(campoEmEdicao.id, payload);
+                            } else {
+                              await onCriarCampo?.(payload);
+                            }
+                            setCampoEmEdicao(null);
+                            setCamposMode("lista");
+                          }}
+                          onCancel={() => {
+                            setCampoEmEdicao(null);
+                            setCamposMode("lista");
+                          }}
+                        />
+                      </div>
+                    )}
                   </section>
                 ) : null}
 
@@ -520,14 +946,118 @@ export default function QuadroManagementDrawer({
                       <h3 className="quadro-detalhe-page__section-title">
                         Papéis do quadro
                       </h3>
-                      <Button variant="ghost" onClick={() => onNavigatePapeis?.()}>
-                        Gerenciar
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="secondary"
+                          onClick={() => {
+                            setPapelEmEdicao(null);
+                            setPapeisMode("criar");
+                          }}
+                        >
+                          Novo papel
+                        </Button>
+                        <Button variant="ghost" onClick={() => onNavigatePapeis?.()}>
+                          Abrir página
+                        </Button>
+                      </div>
                     </div>
                     <p className="quadro-detalhe-page__section-text">
                       Os papéis controlam permissões de visualização, edição, listas,
                       cartões e membros.
                     </p>
+
+                    {papeisErro ? (
+                      <p
+                        className="mb-3 mt-3 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+                        role="alert"
+                      >
+                        {papeisErro}
+                      </p>
+                    ) : null}
+
+                    {papeisMode === "lista" ? (
+                      papeis.length === 0 ? (
+                        <p className="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+                          Nenhum papel cadastrado.
+                        </p>
+                      ) : (
+                        <ul className="mt-3 flex flex-col gap-2">
+                          {papeis.map((papel) => (
+                            <li
+                              key={papel.id}
+                              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-3"
+                            >
+                              <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div className="min-w-0 flex-1">
+                                  <strong className="block text-[var(--font-size-sm)] text-[var(--color-text)]">
+                                    {papel.nome}
+                                  </strong>
+                                  <p className="mt-1 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+                                    {papel.descricao || "Sem descrição cadastrada."}
+                                  </p>
+                                  <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
+                                    Status: {papel.ativo === false ? "Inativo" : "Ativo"}
+                                  </p>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => {
+                                      setPapelEmEdicao(papel);
+                                      setPapeisMode("editar");
+                                    }}
+                                    aria-label={`Editar papel ${papel.nome}`}
+                                  >
+                                    Editar
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => onRemoverPapel?.(papel)}
+                                    aria-label={`Remover papel ${papel.nome}`}
+                                  >
+                                    Remover
+                                  </Button>
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      )
+                    ) : (
+                      <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+                        <h4 className="mb-3 text-[var(--font-size-md)] font-semibold text-[var(--color-text)]">
+                          {papeisMode === "editar" ? "Editar papel" : "Criar papel"}
+                        </h4>
+                        <QuadroPapelForm
+                          modo={papeisMode === "editar" ? "editar" : "criar"}
+                          initialValues={
+                            papelEmEdicao
+                              ? {
+                                  nome: papelEmEdicao.nome,
+                                  descricao: papelEmEdicao.descricao,
+                                  permissoes: papelEmEdicao.permissoes,
+                                }
+                              : {}
+                          }
+                          loading={papelSalvando}
+                          onSubmit={async (payload) => {
+                            if (papeisMode === "editar" && papelEmEdicao?.id) {
+                              await onAtualizarPapel?.(papelEmEdicao.id, payload);
+                            } else {
+                              await onCriarPapel?.(payload);
+                            }
+                            setPapelEmEdicao(null);
+                            setPapeisMode("lista");
+                          }}
+                          onCancel={() => {
+                            setPapelEmEdicao(null);
+                            setPapeisMode("lista");
+                          }}
+                        />
+                      </div>
+                    )}
                   </section>
                 ) : null}
 

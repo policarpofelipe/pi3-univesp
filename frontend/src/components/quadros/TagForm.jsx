@@ -1,15 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button from "../ui/Button";
 
 export default function TagForm({
   loading = false,
+  initialValues = {},
   onSubmit,
   onCancel = null,
   submitLabel = "Criar tag",
 }) {
-  const [nome, setNome] = useState("");
-  const [cor, setCor] = useState("#64748b");
+  const [nome, setNome] = useState(initialValues.nome || "");
+  const [cor, setCor] = useState(initialValues.cor || "#64748b");
   const [erro, setErro] = useState("");
+
+  useEffect(() => {
+    setNome(initialValues.nome || "");
+    setCor(initialValues.cor || "#64748b");
+    setErro("");
+  }, [initialValues.nome, initialValues.cor]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -23,8 +30,10 @@ export default function TagForm({
       if (typeof onSubmit === "function") {
         await onSubmit({ nome: n, cor });
       }
-      setNome("");
-      setCor("#64748b");
+      if (!initialValues?.id) {
+        setNome("");
+        setCor("#64748b");
+      }
     } catch (err) {
       setErro(
         err?.response?.data?.error?.message ||
