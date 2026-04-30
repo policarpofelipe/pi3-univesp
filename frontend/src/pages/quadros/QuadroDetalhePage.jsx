@@ -515,8 +515,8 @@ export default function QuadroDetalhePage() {
 
   return (
     <AppLayout
-      title=""
-      subtitle=""
+      title={quadro.nome}
+      subtitle={quadro.descricao || orgNome || "Quadro"}
       breadcrumbItems={[
         { label: "Início", href: "/home" },
         { label: "Quadros", href: "/quadros" },

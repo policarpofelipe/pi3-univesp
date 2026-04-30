@@ -14,7 +14,6 @@ import {
   Clock3,
   Eye,
   LayoutList,
-  Plus,
   Settings,
   SlidersHorizontal,
   X,
@@ -278,14 +277,6 @@ export default function QuadroManagementDrawer({
                     ) : null}
                     <div className="mt-4">
                       <div className="flex flex-wrap gap-2">
-                        <Button
-                          type="button"
-                          variant="primary"
-                          leftIcon={<Plus size={16} aria-hidden="true" />}
-                          onClick={() => onNovoCartao?.()}
-                        >
-                          Novo cartão
-                        </Button>
                         <Button
                           type="button"
                           variant="secondary"

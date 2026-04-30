@@ -14,7 +14,7 @@ import {
 import IconButton from "../ui/IconButton";
 import useAuth from "../../hooks/useAuth";
 import useAccessibility from "../../hooks/useAccessibility";
-import accessibilityOnuIcon from "../../assets/icons/accessibility-onu.svg";
+import AccessibilityLogoIcon from "../icons/AccessibilityLogoIcon";
 
 import "../../styles/components/topbar.css";
 
@@ -251,14 +251,17 @@ export default function Topbar({
 
           <button
             type="button"
-            className="topbar__menu-toggle topbar__a11y-trigger"
+            className="topbar__menu-toggle topbar__a11y-trigger topbar-accessibility-button"
             aria-haspopup="dialog"
             aria-expanded={accessibilityOpen}
             aria-label={accessibilityOpen ? "Fechar acessibilidade" : "Abrir acessibilidade"}
             title={accessibilityOpen ? "Fechar acessibilidade" : "Acessibilidade"}
             onClick={() => setAccessibilityOpen(true)}
           >
-            <img src={accessibilityOnuIcon} alt="" aria-hidden="true" />
+            <AccessibilityLogoIcon
+              className="topbar-accessibility-button__icon"
+              decorative
+            />
           </button>
 
           <div className="topbar__notifications">
