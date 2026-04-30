@@ -289,6 +289,11 @@ export default function CartaoDetalheContent({
       if (atualizado) {
         setCartao(atualizado);
         bumpHistorico();
+        window.dispatchEvent(
+          new CustomEvent("quadro:cartoes-tags-atualizados", {
+            detail: { quadroId: String(quadroId) },
+          })
+        );
       }
     } finally {
       setSalvandoTags(false);

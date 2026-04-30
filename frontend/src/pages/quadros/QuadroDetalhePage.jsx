@@ -247,6 +247,22 @@ export default function QuadroDetalhePage() {
     }
   }, [location.pathname, quadroId, carregarCartoes, carregarTags]);
 
+  useEffect(() => {
+    function handleCartoesTagsAtualizados(event) {
+      const idEvento = String(event?.detail?.quadroId || "");
+      if (!idEvento || idEvento !== String(quadroId)) return;
+      void carregarCartoes();
+      void carregarTags();
+      void carregarListas();
+    }
+    window.addEventListener("quadro:cartoes-tags-atualizados", handleCartoesTagsAtualizados);
+    return () =>
+      window.removeEventListener(
+        "quadro:cartoes-tags-atualizados",
+        handleCartoesTagsAtualizados
+      );
+  }, [quadroId, carregarCartoes, carregarTags, carregarListas]);
+
   async function atualizarListasETotais() {
     await carregarListas();
     await carregarCartoes();

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Tags } from "lucide-react";
+import { Check, Tags } from "lucide-react";
 
 import Button from "../ui/Button";
 import TagBadge from "./TagBadge";
@@ -81,10 +81,14 @@ export default function TagSelector({
                 disabled={disabled || salvando}
                 onClick={() => toggle(t.id)}
                 className={[
-                  "rounded-full transition-opacity",
-                  ativo ? "opacity-100 ring-2 ring-[var(--color-focus-ring)] ring-offset-2" : "opacity-60 hover:opacity-100",
+                  "inline-flex items-center gap-1 rounded-full transition-opacity",
+                  ativo
+                    ? "opacity-100 ring-2 ring-[var(--color-focus-ring)] ring-offset-2"
+                    : "opacity-60 hover:opacity-100",
                 ].join(" ")}
+                aria-pressed={ativo}
               >
+                {ativo ? <Check size={14} aria-hidden="true" /> : null}
                 <TagBadge nome={t.nome} cor={t.cor} />
               </button>
             );
