@@ -155,9 +155,20 @@
 
 .quadro-detalhe-page .cartao-board-card__tags {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
   gap: var(--space-1);
   min-width: 0;
+}
+
+.quadro-detalhe-page .cartao-board-card__tags .cartao-tag-chip {
+  max-inline-size: 100%;
+}
+
+:root[data-theme="high-contrast"] .quadro-detalhe-page .cartao-board-card__tags .cartao-tag-chip {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-text);
 }
 
 .quadro-detalhe-page .cartao-board-card__title {

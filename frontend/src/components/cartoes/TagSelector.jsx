@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Check, Tags } from "lucide-react";
 
 import Button from "../ui/Button";
-import TagBadge from "./TagBadge";
 import TagForm from "../quadros/TagForm";
 import tagService from "../../services/tagService";
 import { extractObject } from "../../utils/apiData";
@@ -71,7 +70,7 @@ export default function TagSelector({
           Não há tags no quadro. Crie uma abaixo.
         </p>
       ) : tags.length > 0 ? (
-        <div className="mb-3 flex flex-wrap gap-2">
+        <div className="cartao-tags-list">
           {tags.map((t) => {
             const ativo = selecionados.has(String(t.id));
             return (
@@ -81,15 +80,20 @@ export default function TagSelector({
                 disabled={disabled || salvando}
                 onClick={() => toggle(t.id)}
                 className={[
-                  "inline-flex items-center gap-1 rounded-full transition-opacity",
+                  "cartao-tag-chip",
+                  "cartao-tag-chip--selector",
                   ativo
-                    ? "opacity-100 ring-2 ring-[var(--color-focus-ring)] ring-offset-2"
-                    : "opacity-60 hover:opacity-100",
+                    ? "cartao-tag-chip--selected"
+                    : "",
                 ].join(" ")}
+                style={{
+                  "--tag-color": t.cor || "var(--color-primary)",
+                }}
                 aria-pressed={ativo}
+                title={t.nome}
               >
-                {ativo ? <Check size={14} aria-hidden="true" /> : null}
-                <TagBadge nome={t.nome} cor={t.cor} />
+                {ativo ? <Check className="cartao-tag-chip__check" size={14} aria-hidden="true" /> : null}
+                <span className="cartao-tag-chip__text">{t.nome}</span>
               </button>
             );
           })}
