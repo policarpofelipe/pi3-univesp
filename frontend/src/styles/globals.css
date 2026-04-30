@@ -190,7 +190,7 @@ select:disabled {
   cursor: not-allowed;
 }
 
-input,
+input:not([type="checkbox"]):not([type="radio"]),
 textarea,
 select {
   width: 100%;
@@ -204,7 +204,7 @@ select {
     background-color var(--transition-fast);
 }
 
-input,
+input:not([type="checkbox"]):not([type="radio"]),
 select {
   min-height: var(--input-height-md);
   padding: 0 var(--space-3);
@@ -216,25 +216,25 @@ textarea {
   padding: var(--space-3);
 }
 
-input::placeholder,
+input:not([type="checkbox"]):not([type="radio"])::placeholder,
 textarea::placeholder {
   color: var(--input-placeholder);
 }
 
-input:hover,
+input:not([type="checkbox"]):not([type="radio"]):hover,
 textarea:hover,
 select:hover {
   border-color: var(--input-border-hover);
 }
 
-input:focus-visible,
+input:not([type="checkbox"]):not([type="radio"]):focus-visible,
 textarea:focus-visible,
 select:focus-visible {
   border-color: var(--input-border-focus);
   box-shadow: 0 0 0 var(--focus-ring-width) var(--color-focus-ring);
 }
 
-input:disabled,
+input:not([type="checkbox"]):not([type="radio"]):disabled,
 textarea:disabled,
 select:disabled {
   background: var(--input-disabled-bg);

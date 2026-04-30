@@ -83,6 +83,7 @@ export default function QuadroManagementDrawer({
   const tablistId = useId();
   const [section, setSection] = useState(defaultSection);
   const [automacaoEmEdicao, setAutomacaoEmEdicao] = useState(null);
+  const [automacoesMode, setAutomacoesMode] = useState("lista");
 
   useLayoutEffect(() => {
     if (open) {
@@ -92,6 +93,7 @@ export default function QuadroManagementDrawer({
       }
       setSection(defaultSection);
       setAutomacaoEmEdicao(null);
+      setAutomacoesMode("lista");
     } else {
       drawerOpenedRef.current = false;
     }
@@ -430,7 +432,10 @@ export default function QuadroManagementDrawer({
                       <div className="flex flex-wrap gap-2">
                         <Button
                           variant="secondary"
-                          onClick={() => setAutomacaoEmEdicao(null)}
+                          onClick={() => {
+                            setAutomacaoEmEdicao(null);
+                            setAutomacoesMode("criar");
+                          }}
                         >
                           Nova automação
                         </Button>
@@ -456,47 +461,56 @@ export default function QuadroManagementDrawer({
                       </p>
                     ) : null}
 
-                    {automacoesLoading ? (
-                      <p className="mt-3 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-                        Carregando automações...
-                      </p>
+                    {automacoesMode === "lista" ? (
+                      automacoesLoading ? (
+                        <p className="mt-3 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+                          Carregando automações...
+                        </p>
+                      ) : (
+                        <div className="mt-3">
+                          {automacoes.length === 0 ? (
+                            <p className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+                              Nenhuma automação cadastrada para este quadro.
+                            </p>
+                          ) : (
+                            <AutomacaoList
+                              automacoes={automacoes}
+                              onEditar={(automacao) => {
+                                setAutomacaoEmEdicao(automacao);
+                                setAutomacoesMode("editar");
+                              }}
+                              onRemover={onRemoverAutomacao}
+                            />
+                          )}
+                        </div>
+                      )
                     ) : (
-                      <div className="mt-3">
-                        {automacoes.length === 0 ? (
-                          <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-                            Nenhuma automação cadastrada para este quadro.
-                          </p>
-                        ) : (
-                          <AutomacaoList
-                            automacoes={automacoes}
-                            onEditar={(automacao) => setAutomacaoEmEdicao(automacao)}
-                            onRemover={onRemoverAutomacao}
-                          />
-                        )}
+                      <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+                        <h4 className="mb-3 text-[var(--font-size-md)] font-semibold text-[var(--color-text)]">
+                          {automacoesMode === "editar" ? "Editar automação" : "Criar automação"}
+                        </h4>
+                        <AutomacaoForm
+                          modo={automacoesMode === "editar" ? "editar" : "criar"}
+                          initialValues={automacaoEmEdicao || {}}
+                          listas={listas}
+                          tags={tags}
+                          loading={automacaoSalvando}
+                          onSubmit={async (payload) => {
+                            if (automacoesMode === "editar" && automacaoEmEdicao?.id) {
+                              await onAtualizarAutomacao?.(automacaoEmEdicao.id, payload);
+                            } else {
+                              await onCriarAutomacao?.(payload);
+                            }
+                            setAutomacaoEmEdicao(null);
+                            setAutomacoesMode("lista");
+                          }}
+                          onCancel={() => {
+                            setAutomacaoEmEdicao(null);
+                            setAutomacoesMode("lista");
+                          }}
+                        />
                       </div>
                     )}
-
-                    <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
-                      <h4 className="mb-3 text-[var(--font-size-md)] font-semibold text-[var(--color-text)]">
-                        {automacaoEmEdicao ? "Editar automação" : "Criar automação"}
-                      </h4>
-                      <AutomacaoForm
-                        modo={automacaoEmEdicao ? "editar" : "criar"}
-                        initialValues={automacaoEmEdicao || {}}
-                        listas={listas}
-                        tags={tags}
-                        loading={automacaoSalvando}
-                        onSubmit={async (payload) => {
-                          if (automacaoEmEdicao?.id) {
-                            await onAtualizarAutomacao?.(automacaoEmEdicao.id, payload);
-                          } else {
-                            await onCriarAutomacao?.(payload);
-                          }
-                          setAutomacaoEmEdicao(null);
-                        }}
-                        onCancel={() => setAutomacaoEmEdicao(null)}
-                      />
-                    </div>
                   </section>
                 ) : null}
 
