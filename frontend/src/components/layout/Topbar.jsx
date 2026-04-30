@@ -14,7 +14,7 @@ import {
 import IconButton from "../ui/IconButton";
 import useAuth from "../../hooks/useAuth";
 import useAccessibility from "../../hooks/useAccessibility";
-import AccessibilityLogoIcon from "../icons/AccessibilityLogoIcon";
+import accessibilityLogo from "../../assets/icons/Accessibility_logo.svg";
 
 import "../../styles/components/topbar.css";
 
@@ -258,9 +258,10 @@ export default function Topbar({
             title={accessibilityOpen ? "Fechar acessibilidade" : "Acessibilidade"}
             onClick={() => setAccessibilityOpen(true)}
           >
-            <AccessibilityLogoIcon
+            <img
+              src={accessibilityLogo}
+              alt=""
               className="topbar-accessibility-button__icon"
-              decorative
             />
           </button>
 
