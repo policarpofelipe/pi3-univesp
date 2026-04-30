@@ -330,6 +330,20 @@ export default function QuadroDetalhePage() {
     }
   }
 
+  function handleNovoCartao() {
+    if (!listas.length) {
+      window.alert(
+        "Crie pelo menos uma lista antes de adicionar cartões a este quadro."
+      );
+      return;
+    }
+    setCartaoModal({ mode: "criar" });
+  }
+
+  function handleNovaLista() {
+    setListaModal({ mode: "criar", lista: null });
+  }
+
   const handleCriacaoRapidaCartao = useCallback(
     async ({ titulo, listaId }) => {
       try {
@@ -585,6 +599,8 @@ export default function QuadroDetalhePage() {
         onNavigateCamposPersonalizados={goCamposPersonalizados}
         onNavigateAutomacoes={goAutomacoes}
         onNavigatePapeis={goPapeis}
+        onNovoCartao={handleNovoCartao}
+        onNovaLista={handleNovaLista}
       />
 
       <CartaoModal
