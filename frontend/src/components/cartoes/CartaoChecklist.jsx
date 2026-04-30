@@ -73,7 +73,7 @@ function BlocoChecklist({ checklist, quadroId, cartaoId, onChanged }) {
 
   return (
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-4 cartao-checklist__block">
-      <div className="flex flex-wrap items-start justify-between gap-2 cartao-checklist__block-header">
+      <div className="cartao-checklist__block-header">
         <button
           type="button"
           onClick={() => setExpandido((v) => !v)}
@@ -119,7 +119,7 @@ function BlocoChecklist({ checklist, quadroId, cartaoId, onChanged }) {
 
       {expandido ? (
         <>
-          <ul className="mt-3 flex list-none flex-col gap-1 pl-0">
+          <ul className="cartao-checklist__list">
             {itens.map((it) => (
               <CartaoChecklistItem
                 key={it.id}
@@ -132,14 +132,14 @@ function BlocoChecklist({ checklist, quadroId, cartaoId, onChanged }) {
             ))}
           </ul>
 
-          <form className="mt-3 flex gap-2" onSubmit={adicionarItem}>
+          <form className="cartao-checklist__new-form" onSubmit={adicionarItem}>
             <input
               type="text"
               value={novoItem}
               onChange={(e) => setNovoItem(e.target.value)}
               disabled={adicionando}
               placeholder="Adicionar item"
-              className="min-w-0 flex-1 rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)]"
+              className="cartao-checklist__new-input"
             />
             <Button
               type="submit"
@@ -194,22 +194,16 @@ export default function CartaoChecklist({ quadroId, cartaoId }) {
 
   return (
     <section
-      className="mt-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-xs)]"
+      className="card-section"
       aria-labelledby="cartao-checklists-titulo"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+      <div className="card-section__header">
+        <div className="card-section__title">
           <ListChecks
-            size={20}
-            className="text-[var(--color-text-muted)]"
+            size={16}
             aria-hidden="true"
           />
-          <h2
-            id="cartao-checklists-titulo"
-            className="text-[var(--font-size-heading-3)] font-semibold text-[var(--color-text)]"
-          >
-            Checklists
-          </h2>
+          <h2 id="cartao-checklists-titulo">Checklists</h2>
         </div>
         <Button
           type="button"

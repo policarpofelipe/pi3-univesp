@@ -103,10 +103,10 @@ export default function CartaoCamposPersonalizados({ quadroId, cartaoId }) {
   }
 
   return (
-    <section className="mt-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-xs)]">
-      <div className="mb-3 flex items-center gap-2">
-        <SlidersHorizontal size={18} />
-        <h2 className="text-[var(--font-size-heading-4)] font-semibold text-[var(--color-text)]">
+    <section className="card-section">
+      <div className="card-section__header">
+        <h2 className="card-section__title">
+          <SlidersHorizontal size={16} />
           Campos personalizados
         </h2>
       </div>

@@ -1,11 +1,9 @@
 .cartao-detalhe-content--modal .cartao-detalhe-content__inner--modal {
   max-width: none;
-  background: #f4f5f7;
-  border-radius: 16px;
+  background: var(--color-surface-alt);
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  max-height: 85vh;
 }
 
 .cartao-detalhe-content--page .cartao-detalhe-content__inner {
@@ -15,91 +13,93 @@
 .cartao-modal-header {
   position: sticky;
   top: 0;
-  z-index: 5;
-  display: flex;
+  z-index: var(--z-sticky);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 24px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-6);
+  min-height: 4rem;
   border-bottom: 1px solid var(--color-border);
-  background: #f4f5f7;
+  background: var(--color-surface);
 }
 
 .cartao-modal-header__title-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
   min-width: 0;
-  flex: 1;
 }
 
 .cartao-modal-header__title-btn {
   border: none;
   background: transparent;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
   color: var(--color-text);
   cursor: pointer;
   text-align: left;
-  padding: 0 0 2px;
-  border-bottom: 2px solid transparent;
+  padding: var(--space-1) 0;
+  border-radius: var(--radius-sm);
   min-width: 0;
-  max-width: 100%;
+  width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .cartao-modal-header__title-btn:hover {
-  border-bottom-color: color-mix(in srgb, #0079bf 45%, transparent);
+  color: var(--color-primary);
 }
 
 .cartao-modal-header__title-input {
-  width: min(100%, 560px);
-  border: 1px solid #0079bf;
-  border-radius: 6px;
-  background: transparent;
+  width: min(100%, 42rem);
+  min-height: var(--input-height-md);
+  border: 1px solid var(--input-border-focus);
+  border-radius: var(--radius-md);
+  background: var(--input-bg);
   color: var(--color-text);
-  font-size: 20px;
-  font-weight: 600;
-  padding: 4px 8px;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  padding: 0 var(--space-3);
 }
 
 .cartao-modal-header__close-btn {
   width: 2.5rem;
   height: 2.5rem;
   min-width: 2.5rem;
-  border: none;
-  border-radius: 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--color-text-muted);
   background: transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .cartao-modal-header__close-btn:hover {
   color: var(--color-text);
-  background: rgba(0, 0, 0, 0.06);
-}
-
-.cartao-modal-header__close-btn:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
+  background: var(--color-surface-hover);
+  border-color: var(--color-border);
 }
 
 .cartao-modal-header__id-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
-  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-xs);
+  line-height: 1;
   color: var(--color-text-muted);
-  background: var(--color-surface);
+  background: var(--color-surface-alt);
 }
 
 .cartao-modal-content-wrap {
@@ -111,9 +111,9 @@
 
 .cartao-modal-layout {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
-  gap: 20px;
-  padding: 24px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 30vw, 360px);
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
   min-height: 0;
   overflow-y: auto;
 }
@@ -126,156 +126,97 @@
 .cartao-modal-layout__main {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 0;
 }
 
 .cartao-modal-layout__sidebar {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-3);
 }
 
 .cartao-modal-section {
   border: 1px solid var(--color-border);
   background: var(--color-surface);
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
   box-shadow: var(--shadow-xs);
 }
 
+.card-section {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-xs);
+}
+
+.cartao-modal-section--compact {
+  padding: var(--space-3);
+}
+
+.cartao-modal-section > section {
+  margin-top: 0;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.card-section__header,
 .cartao-modal-section__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
-.cartao-modal-section__header h2 {
+.card-section__title,
+.cartao-modal-section__header h2,
+.cartao-modal-section h3 {
   margin: 0;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-2);
   font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
   color: var(--color-text);
 }
 
-.cartao-modal-section__editor textarea,
-.cartao-modal-section select {
-  width: 100%;
-  border: 1px solid var(--input-border);
-  border-radius: 8px;
-  background: var(--input-bg);
-  color: var(--color-text);
-  padding: 8px 10px;
+.card-section__title svg,
+.cartao-modal-section__header h2 svg,
+.cartao-modal-section h3 svg,
+.cartao-modal-section button svg,
+.cartao-modal-section span svg {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  color: currentColor;
 }
 
 .cartao-modal-section__editor textarea {
-  min-height: 100px;
+  min-height: 8rem;
 }
 
 .cartao-modal-section__editor-actions {
-  margin-top: 8px;
+  margin-top: var(--space-2);
   display: flex;
-  gap: 8px;
-}
-
-.cartao-modal-section__save-btn {
-  background: #2e7d32 !important;
-  border-color: #2e7d32 !important;
-}
-
-.cartao-modal-section__save-btn:hover:not(:disabled) {
-  background: #256a29 !important;
-}
-
-.cartao-checklist__block-header:hover .cartao-checklist__remove-btn {
-  opacity: 1;
-}
-
-.cartao-checklist__remove-btn {
-  opacity: 0.65;
-}
-
-.cartao-checklist__collapse-btn {
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.cartao-checklist__progress {
-  margin-top: 8px;
-}
-
-.cartao-checklist__progress-label {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-}
-
-.cartao-checklist__progress-track {
-  margin-top: 4px;
-  width: 100%;
-  height: 8px;
-  border-radius: 999px;
-  background: #e0e0e0;
-  overflow: hidden;
-}
-
-.cartao-checklist__progress-fill {
-  display: block;
-  height: 100%;
-  background: #28a745;
-  transition: width 0.2s ease;
-}
-
-.cartao-checklist__checkbox {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  min-width: 16px;
-  margin-top: 2px;
-  border-radius: 4px;
-  border: 1px solid var(--input-border);
-  background: var(--color-surface);
-  cursor: pointer;
-  position: relative;
-}
-
-.cartao-checklist__checkbox:checked {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-}
-
-.cartao-checklist__checkbox:checked::after {
-  content: "";
-  position: absolute;
-  left: 5px;
-  top: 2px;
-  width: 4px;
-  height: 8px;
-  border: solid #fff;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-
-.cartao-checklist__checkbox:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
 .cartao-modal-section__markdown {
   white-space: pre-wrap;
   color: var(--color-text);
   font-size: var(--font-size-sm);
-  background: #f9f9f9;
-  border-radius: 8px;
-  padding: 12px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
 }
 
 .cartao-modal-section__placeholder {
@@ -290,34 +231,24 @@
   font-size: var(--font-size-sm);
 }
 
-.cartao-modal-section--compact .mt-8 {
-  margin-top: 0;
+.cartao-modal-actions {
+  display: flex;
 }
 
-.cartao-modal-section--compact {
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 0;
-}
-
-.cartao-modal-section > section {
-  margin-top: 0;
-  border: 0;
-  padding: 0;
-  box-shadow: none;
-  border-radius: 0;
-  background: transparent;
+.cartao-modal-actions__delete-btn {
+  width: 100%;
 }
 
 .cartao-modal-history summary {
   cursor: pointer;
   color: var(--color-text);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   list-style: none;
+  border-radius: var(--radius-sm);
 }
 
 .cartao-modal-history > section {
-  margin-top: 8px;
+  margin-top: var(--space-2);
   border: 0;
   border-radius: 0;
   padding: 0;
@@ -329,65 +260,214 @@
   display: none;
 }
 
-.cartao-modal-actions {
-  display: flex;
+.cartao-checklist__block {
+  padding: var(--space-3);
 }
 
-.cartao-modal-actions__delete-btn {
+.cartao-checklist__block-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.cartao-checklist__collapse-btn {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text-muted);
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.cartao-checklist__collapse-btn:hover {
+  border-color: var(--color-border);
+  background: var(--color-surface-hover);
+}
+
+.cartao-checklist__progress {
+  margin-top: var(--space-2);
+}
+
+.cartao-checklist__progress-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.cartao-checklist__progress-track {
+  margin-top: var(--space-1);
   width: 100%;
-  border-radius: 8px !important;
-  font-weight: 500 !important;
+  height: 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-active);
+  overflow: hidden;
+}
+
+.cartao-checklist__progress-fill {
+  display: block;
+  height: 100%;
+  background: var(--color-success);
+  transition: width var(--transition-base);
+}
+
+.cartao-checklist__list {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.cartao-checklist__item {
+  list-style: none;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: var(--space-1);
+}
+
+.cartao-checklist__item:hover {
+  border-color: var(--color-border);
+  background: var(--color-surface-alt);
+}
+
+.cartao-checklist__checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  inline-size: 1rem;
+  block-size: 1rem;
+  min-inline-size: 1rem;
+  min-block-size: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--input-border);
+  background: var(--color-surface);
+  cursor: pointer;
+  position: relative;
+  margin: 0;
+}
+
+.cartao-checklist__checkbox:checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.cartao-checklist__checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 0.3rem;
+  top: 0.1rem;
+  width: 0.25rem;
+  height: 0.5rem;
+  border: solid var(--color-on-primary);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.cartao-checklist__checkbox:focus-visible {
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--color-focus-ring);
+}
+
+.cartao-checklist__item-input {
+  min-height: 2rem;
+  border-color: transparent;
+  background: transparent;
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.cartao-checklist__item-input:focus-visible {
+  border-color: var(--input-border-focus);
+  background: var(--input-bg);
+}
+
+.cartao-checklist__item-input--done {
+  text-decoration: line-through;
+  color: var(--color-text-soft);
+}
+
+.cartao-checklist__new-form {
+  margin-top: var(--space-3);
+  display: flex;
+  gap: var(--space-2);
+}
+
+.cartao-checklist__new-input {
+  min-width: 0;
+  flex: 1;
 }
 
 .cartao-anexos__dropzone {
   width: 100%;
-  margin-top: 10px;
-  border: 2px dashed #ccc;
-  border-radius: 8px;
-  padding: 20px;
+  margin-top: var(--space-2);
+  border: 2px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
   text-align: center;
   color: var(--color-text-muted);
-  background: #fff;
+  background: var(--color-surface-alt);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 .cartao-anexos__dropzone--active {
-  border-color: #0079bf;
-  background: #eaf4ff;
+  border-color: var(--color-primary);
+  background: var(--color-info-surface);
 }
 
-.cartao-modal-layout::-webkit-scrollbar {
-  width: 8px;
-}
-
-.cartao-modal-layout::-webkit-scrollbar-track {
-  background: #e0e0e0;
-}
-
-.cartao-modal-layout::-webkit-scrollbar-thumb {
-  background: #c0c0c0;
-  border-radius: 999px;
-}
-
-.cartao-comentarios__list {
-  margin: 1rem 0 0;
-  padding: 0;
+.cartao-anexos__list,
+.cartao-comentarios__list,
+.cartao-historico__list,
+.cartao-relacoes__list {
   list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+}
+
+.cartao-anexos__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.cartao-comentarios__item {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  padding: var(--space-3);
+}
+
+.cartao-comentarios__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.cartao-comentarios__body {
+  margin-top: var(--space-1);
+  white-space: pre-wrap;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
 }
 
 .cartao-historico__list {
-  margin: 1rem 0 0;
-  padding: 0;
-  list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-2);
 }
 
 .cartao-historico__item {
   border-left: 2px solid var(--color-border);
-  padding-left: 0.75rem;
+  padding-left: var(--space-3);
 }
 
 .cartao-historico__text {
@@ -397,7 +477,7 @@
 }
 
 .cartao-historico__meta {
-  margin: 0.25rem 0 0;
+  margin: var(--space-1) 0 0;
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
 }
@@ -407,22 +487,22 @@
   font-weight: var(--font-weight-medium);
 }
 
-@media (max-width: 768px) {
-  .cartao-detalhe-content--modal .cartao-detalhe-content__inner--modal {
-    max-height: none;
-  }
+.cartao-modal-section :where(input, select, textarea) {
+  width: 100%;
+  box-sizing: border-box;
+}
 
+.cartao-modal-section :where(input[type="checkbox"], input[type="radio"]) {
+  width: auto;
+}
+
+@media (max-width: 980px) {
   .cartao-modal-header {
-    padding: 12px 14px;
+    padding: var(--space-3) var(--space-4);
   }
 
   .cartao-modal-layout {
     grid-template-columns: 1fr;
-    padding: 14px;
-  }
-
-  .cartao-modal-header__close-btn,
-  .cartao-modal-actions__delete-btn {
-    min-height: 44px;
+    padding: var(--space-3) var(--space-4);
   }
 }

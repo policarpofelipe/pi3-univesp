@@ -23,10 +23,10 @@ export default function CartaoRelacoes({ quadroId, cartaoId }) {
   }, [carregar]);
 
   return (
-    <section className="mt-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-xs)]">
-      <div className="mb-3 flex items-center gap-2">
-        <Link2 size={18} />
-        <h2 className="text-[var(--font-size-heading-4)] font-semibold text-[var(--color-text)]">
+    <section className="card-section">
+      <div className="card-section__header">
+        <h2 className="card-section__title">
+          <Link2 size={16} />
           Relações
         </h2>
       </div>
@@ -40,7 +40,7 @@ export default function CartaoRelacoes({ quadroId, cartaoId }) {
           Nenhuma relação cadastrada para este cartão.
         </p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="cartao-relacoes__list space-y-2">
           {relacoes.map((relacao) => (
             <li
               key={relacao.id}

@@ -102,21 +102,17 @@ export default function CartaoComentarios({
 
   return (
     <section
-      className="mt-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-xs)]"
+      className="card-section"
       aria-labelledby="cartao-comentarios-titulo"
     >
-      <div className="flex items-center gap-2">
+      <div className="card-section__header">
+        <div className="card-section__title">
         <MessageCircle
-          size={20}
-          className="text-[var(--color-text-muted)]"
+          size={16}
           aria-hidden="true"
         />
-        <h2
-          id="cartao-comentarios-titulo"
-          className="text-[var(--font-size-heading-3)] font-semibold text-[var(--color-text)]"
-        >
-          Comentários
-        </h2>
+        <h2 id="cartao-comentarios-titulo">Comentários</h2>
+        </div>
       </div>
 
       {loading ? (
@@ -128,16 +124,16 @@ export default function CartaoComentarios({
           Nenhum comentário ainda. Seja o primeiro a comentar.
         </p>
       ) : (
-        <ul className="cartao-comentarios__list mt-4 flex flex-col gap-3">
+        <ul className="cartao-comentarios__list flex flex-col gap-3">
           {itens.map((c) => {
             const podeExcluir =
               uid && String(c.autorId || "") === uid;
             return (
               <li
                 key={c.id}
-                className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-3"
+                className="cartao-comentarios__item"
               >
-                <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="cartao-comentarios__meta">
                   <div className="min-w-0 flex-1">
                     <p className="text-[var(--font-size-xs)] font-medium text-[var(--color-text)]">
                       {c.autorNome || "Usuário"}
@@ -145,7 +141,7 @@ export default function CartaoComentarios({
                         · {formatarDataHora(c.criadoEm)}
                       </span>
                     </p>
-                    <p className="mt-1 whitespace-pre-wrap text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+                    <p className="cartao-comentarios__body">
                       {c.texto}
                     </p>
                   </div>
@@ -168,7 +164,7 @@ export default function CartaoComentarios({
         </ul>
       )}
 
-      <form className="mt-6 flex flex-col gap-2" onSubmit={handleEnviar}>
+      <form className="flex flex-col gap-2" onSubmit={handleEnviar}>
         <label
           htmlFor="cartao-novo-comentario"
           className="text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"

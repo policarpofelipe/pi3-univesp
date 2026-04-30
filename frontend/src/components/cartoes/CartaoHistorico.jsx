@@ -46,21 +46,17 @@ export default function CartaoHistorico({
 
   return (
     <section
-      className="mt-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-xs)]"
+      className="card-section"
       aria-labelledby="cartao-historico-titulo"
     >
-      <div className="flex items-center gap-2">
+      <div className="card-section__header">
+        <div className="card-section__title">
         <History
-          size={20}
-          className="text-[var(--color-text-muted)]"
+          size={16}
           aria-hidden="true"
         />
-        <h2
-          id="cartao-historico-titulo"
-          className="text-[var(--font-size-heading-3)] font-semibold text-[var(--color-text)]"
-        >
-          Histórico
-        </h2>
+        <h2 id="cartao-historico-titulo">Histórico</h2>
+        </div>
       </div>
 
       {loading ? (
@@ -72,7 +68,7 @@ export default function CartaoHistorico({
           Nenhum evento registrado ainda.
         </p>
       ) : (
-        <ol className="cartao-historico__list mt-4">
+        <ol className="cartao-historico__list">
           {itens.map((e) => (
             <li key={e.id} className="cartao-historico__item">
               <p className="cartao-historico__text">{e.descricao}</p>

@@ -71,7 +71,7 @@ export default function CartaoChecklistItem({
   }
 
   return (
-    <li className="flex items-start gap-2 rounded-md border border-transparent py-1 hover:border-[var(--color-border)]">
+    <li className="cartao-checklist__item">
       <input
         type="checkbox"
         checked={Boolean(item.concluido)}
@@ -93,8 +93,8 @@ export default function CartaoChecklistItem({
         }}
         disabled={salvando}
         className={[
-          "min-w-0 flex-1 rounded border border-transparent bg-transparent px-1 py-0.5 text-[var(--font-size-sm)] text-[var(--color-text)]",
-          item.concluido ? "text-[var(--color-text-soft)] line-through" : "",
+          "cartao-checklist__item-input",
+          item.concluido ? "cartao-checklist__item-input--done" : "",
         ].join(" ")}
       />
       <Button

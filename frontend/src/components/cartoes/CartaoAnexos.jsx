@@ -153,22 +153,16 @@ export default function CartaoAnexos({
 
   return (
     <section
-      className="mt-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-xs)]"
+      className="card-section"
       aria-labelledby="cartao-anexos-titulo"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+      <div className="card-section__header">
+        <div className="card-section__title">
           <Paperclip
-            size={20}
-            className="text-[var(--color-text-muted)]"
+            size={16}
             aria-hidden="true"
           />
-          <h2
-            id="cartao-anexos-titulo"
-            className="text-[var(--font-size-heading-3)] font-semibold text-[var(--color-text)]"
-          >
-            Anexos
-          </h2>
+          <h2 id="cartao-anexos-titulo">Anexos</h2>
         </div>
         <div>
           <input
@@ -191,7 +185,7 @@ export default function CartaoAnexos({
         </div>
       </div>
 
-      <p className="mt-2 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
+      <p className="text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
         Limite de {MAX_BYTES / (1024 * 1024)} MB por arquivo (armazenamento em
         memória; reinicia com o servidor).
       </p>
@@ -238,11 +232,11 @@ export default function CartaoAnexos({
           Nenhum anexo. Envie um arquivo acima.
         </p>
       ) : (
-        <ul className="mt-4 flex flex-col gap-2">
+        <ul className="cartao-anexos__list flex flex-col gap-2">
           {itens.map((a) => (
             <li
               key={a.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2"
+              className="cartao-anexos__item rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2"
             >
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[var(--font-size-sm)] font-medium text-[var(--color-text)]">
