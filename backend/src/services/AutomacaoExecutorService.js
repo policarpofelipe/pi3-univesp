@@ -8,6 +8,10 @@ function contextoPermiteAutomacao(automacao, gatilho, ctx = {}) {
   const g = String(gatilho).toUpperCase();
 
   if (g === "AO_CRIAR_CARTAO") {
+    if (automacao.listaOrigemId != null && ctx.listaId != null) {
+      return Number(automacao.listaOrigemId) === Number(ctx.listaId);
+    }
+    // Compatibilidade: em automações antigas sem listaOrigemId, considera listaDestinoId.
     if (automacao.listaDestinoId != null && ctx.listaId != null) {
       return Number(automacao.listaDestinoId) === Number(ctx.listaId);
     }
