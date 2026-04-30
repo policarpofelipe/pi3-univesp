@@ -7,6 +7,7 @@ import {
   CheckSquare,
   MessageCircle,
   Paperclip,
+  Flag,
   GripVertical,
 } from "lucide-react";
 
@@ -94,80 +95,18 @@ export default function CartaoCard({
         .join(" ")}
       aria-label={`Cartão ${cartao.titulo}`}
     >
-      <div
-        className={[
-          "cartao-board-card__top",
-          dragDisabled ? "cartao-board-card__top--no-grip" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-      >
+      <div className="cartao-board-card__header">
         {!dragDisabled ? (
           <button
             type="button"
             ref={dragActivatorRef}
-            className="cartao-board-card__grip"
+            className="cartao-board-card__drag"
             aria-label={`Arrastar cartão ${cartao.titulo}`}
             {...(dragListeners || {})}
           >
             <GripVertical size={16} aria-hidden="true" />
           </button>
         ) : null}
-        <div className="cartao-board-card__top-chips">
-          {cartao.prioridade ? (
-            <span
-              className="cartao-board-card__priority-dot"
-              title={`Prioridade ${prioridadeLabel}`}
-              aria-label={`Prioridade ${prioridadeLabel}`}
-            >
-              <span className={`cartao-board-card__priority-dot-inner cartao-board-card__priority-dot-inner--${cartao.prioridade}`} />
-            </span>
-          ) : null}
-          {cartao.prazoEm ? (
-            <span
-              className={[
-                "cartao-board-card__chip cartao-board-card__chip--date",
-                prazoEstaAtrasado(cartao.prazoEm)
-                  ? "cartao-board-card__chip--overdue"
-                  : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-            >
-              <CalendarDays size={12} aria-hidden="true" />
-              <time dateTime={cartao.prazoEm}>
-                {formatarPrazoExibicao(cartao.prazoEm)}
-              </time>
-            </span>
-          ) : null}
-        </div>
-        <CartaoCardMenu
-          cartaoTitulo={cartao.titulo}
-          quadroId={quadroId}
-          cartaoId={cartao.id}
-          listas={listas}
-          onEditar={typeof onEdit === "function" ? () => onEdit(cartao) : undefined}
-          onArquivar={
-            typeof onArquivar === "function" ? () => onArquivar(cartao) : undefined
-          }
-          onMoverParaLista={
-            typeof onMoverLista === "function"
-              ? (listaId) => onMoverLista(cartao, listaId)
-              : undefined
-          }
-          movendo={movendo}
-        />
-      </div>
-
-      {tagsNoCartao.length ? (
-        <div className="cartao-board-card__tags" aria-label="Tags">
-          {tagsNoCartao.map((t) => (
-            <TagBadge key={t.id} nome={t.nome} cor={t.cor} />
-          ))}
-        </div>
-      ) : null}
-
-      <div className="cartao-board-card__body">
         <h3 className="cartao-board-card__title">
           {quadroId ? (
             <Link
@@ -184,8 +123,39 @@ export default function CartaoCard({
             cartao.titulo
           )}
         </h3>
-        <CartaoDescricao texto={cartao.descricao} variant="compact" />
+        <div className="cartao-board-card__menu">
+          <CartaoCardMenu
+            cartaoTitulo={cartao.titulo}
+            quadroId={quadroId}
+            cartaoId={cartao.id}
+            listas={listas}
+            onEditar={typeof onEdit === "function" ? () => onEdit(cartao) : undefined}
+            onArquivar={
+              typeof onArquivar === "function" ? () => onArquivar(cartao) : undefined
+            }
+            onMoverParaLista={
+              typeof onMoverLista === "function"
+                ? (listaId) => onMoverLista(cartao, listaId)
+                : undefined
+            }
+            movendo={movendo}
+          />
+        </div>
       </div>
+
+      {tagsNoCartao.length ? (
+        <div className="cartao-board-card__tags" aria-label="Tags">
+          {tagsNoCartao.map((t) => (
+            <TagBadge key={t.id} nome={t.nome} cor={t.cor} />
+          ))}
+        </div>
+      ) : null}
+
+      <CartaoDescricao
+        texto={cartao.descricao}
+        variant="compact"
+        className="cartao-board-card__description"
+      />
 
       <div className="cartao-board-card__footer">
         <div className="cartao-board-card__avatars" aria-label="Responsáveis">
@@ -237,6 +207,16 @@ export default function CartaoCard({
             >
               <CalendarDays size={13} aria-hidden="true" />
               <time dateTime={cartao.prazoEm}>{formatarPrazoExibicao(cartao.prazoEm)}</time>
+            </span>
+          ) : null}
+          {cartao.prioridade ? (
+            <span
+              className="cartao-board-card__meta-item"
+              title={`Prioridade ${prioridadeLabel}`}
+              aria-label={`Prioridade ${prioridadeLabel}`}
+            >
+              <Flag size={13} aria-hidden="true" />
+              <span>{prioridadeLabel}</span>
             </span>
           ) : null}
           {pendentesChecklist > 0 ? (
