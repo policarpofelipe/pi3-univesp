@@ -30,6 +30,7 @@ export default function BoardQuickFilters({
   onChange,
   tags = [],
   membros = [],
+  actions = null,
 }) {
   const baseId = useId();
   const [painelAberto, setPainelAberto] = useState(false);
@@ -129,6 +130,7 @@ export default function BoardQuickFilters({
         >
           Mais filtros
         </Button>
+        {actions}
         {ativos ? (
           <Button
             type="button"

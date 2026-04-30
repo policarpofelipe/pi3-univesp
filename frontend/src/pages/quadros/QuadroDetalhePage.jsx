@@ -26,30 +26,12 @@ import {
 import useAuth from "../../hooks/useAuth";
 
 import {
-  Building2,
   ListTodo,
-  Plus,
   Settings,
-  Eye,
-  LayoutList,
 } from "lucide-react";
 
 import "../../styles/pages/quadro-detalhe.css";
 import "../../styles/pages/board-quadro.css";
-
-function formatarData(data) {
-  if (!data) return "Não informado";
-
-  try {
-    return new Intl.DateTimeFormat("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }).format(new Date(data));
-  } catch {
-    return data;
-  }
-}
 
 function normalizarMembro(m) {
   const papeis = [];
@@ -293,16 +275,6 @@ export default function QuadroDetalhePage() {
     }
   }
 
-  function handleNovoCartao() {
-    if (!listas.length) {
-      window.alert(
-        "Crie pelo menos uma lista antes de adicionar cartões a este quadro."
-      );
-      return;
-    }
-    setCartaoModal({ mode: "criar" });
-  }
-
   async function handleSalvarCartao(payload) {
     if (!cartaoModal) return;
 
@@ -378,10 +350,6 @@ export default function QuadroDetalhePage() {
     },
     [quadroId, carregarListas, carregarCartoes]
   );
-
-  function handleNovaLista() {
-    setListaModal({ mode: "criar", lista: null });
-  }
 
   async function aplicarOrdem(novaOrdem) {
     const ids = novaOrdem.map((l) => l.id);
@@ -533,8 +501,8 @@ export default function QuadroDetalhePage() {
 
   return (
     <AppLayout
-      title={quadro.nome}
-      subtitle={orgNome || "Quadro"}
+      title=""
+      subtitle=""
       breadcrumbItems={[
         { label: "Início", href: "/home" },
         { label: "Quadros", href: "/quadros" },
@@ -544,93 +512,24 @@ export default function QuadroDetalhePage() {
       contentClassName="app-layout__content--quadro-kanban"
     >
       <div className="quadro-detalhe-page">
-        <header className="quadro-detalhe-page__board-header">
-          <div className="quadro-detalhe-page__board-header-row">
-            <div className="quadro-detalhe-page__board-title-block">
-              <h1 className="quadro-detalhe-page__board-title">{quadro.nome}</h1>
-              {quadro.descricao ? (
-                <p className="quadro-detalhe-page__board-desc">
-                  {quadro.descricao}
-                </p>
-              ) : null}
-            </div>
-            <nav
-              className="quadro-detalhe-page__board-toolbar"
-              aria-label="Ações do quadro"
-            >
-              <Button
-                type="button"
-                variant="primary"
-                leftIcon={<Plus size={16} aria-hidden="true" />}
-                onClick={handleNovoCartao}
-              >
-                Novo cartão
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                leftIcon={<LayoutList size={16} aria-hidden="true" />}
-                onClick={handleNovaLista}
-              >
-                Nova lista
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                leftIcon={<Eye size={16} aria-hidden="true" />}
-                onClick={() => openDrawer("visoes")}
-                aria-expanded={drawerOpen && drawerSection === "visoes"}
-                aria-label="Visões e filtros salvos do quadro"
-              >
-                Visões
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                leftIcon={<Settings size={16} aria-hidden="true" />}
-                onClick={() => openDrawer("geral")}
-                aria-expanded={drawerOpen && drawerSection === "geral"}
-              >
-                Gerenciar quadro
-              </Button>
-            </nav>
-          </div>
-          <div className="quadro-detalhe-page__board-meta-row">
-            <p
-              className="quadro-detalhe-page__metrics"
-              aria-label="Resumo do quadro"
-            >
-              <span>{listas.length} listas</span>
-              <span className="quadro-detalhe-page__metrics-sep" aria-hidden="true">
-                •
-              </span>
-              <span>
-                {filtrosAtivos
-                  ? `${cartoesVisiveis.length} de ${totalCartoes} cartões`
-                  : `${totalCartoes} cartões`}
-              </span>
-              <span className="quadro-detalhe-page__metrics-sep" aria-hidden="true">
-                •
-              </span>
-              <span>{membros.length} membros</span>
-            </p>
-            <p className="quadro-detalhe-page__hero-meta-item">
-              <Building2 size={16} aria-hidden="true" />
-              <span>{orgNome || "Organização"}</span>
-              <span className="text-[var(--color-text-soft)]" aria-hidden="true">
-                ·
-              </span>
-              <span>Atualizado em {formatarData(quadro.atualizadoEm)}</span>
-            </p>
-          </div>
-        </header>
-
         {listas.length > 0 ? (
           <BoardQuickFilters
             filters={filters}
             onChange={setFilters}
             tags={tags}
             membros={membros}
+            actions={
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                leftIcon={<Settings size={16} aria-hidden="true" />}
+                onClick={() => openDrawer("geral")}
+                aria-expanded={drawerOpen && drawerSection === "geral"}
+              >
+                Gerenciar quadro
+              </Button>
+            }
           />
         ) : null}
 
@@ -643,16 +542,7 @@ export default function QuadroDetalhePage() {
               <EmptyState
                 icon={<ListTodo size={36} aria-hidden="true" />}
                 title="Nenhuma lista criada"
-                description="Crie colunas para organizar o fluxo de cartões neste quadro."
-                action={
-                  <Button
-                    variant="primary"
-                    leftIcon={<Plus size={16} aria-hidden="true" />}
-                    onClick={handleNovaLista}
-                  >
-                    Nova lista
-                  </Button>
-                }
+                description="Este quadro ainda não possui listas."
               />
             </div>
           ) : (
@@ -672,19 +562,6 @@ export default function QuadroDetalhePage() {
               movendoCartaoId={movendoCartaoId}
               onCriacaoRapida={handleCriacaoRapidaCartao}
               listaColumnMenuPropsByIndex={listaMenusColuna}
-              renderNovaListaColumn={() => (
-                <div className="quadro-detalhe-page__nova-lista">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="quadro-detalhe-page__nova-lista-btn"
-                    leftIcon={<Plus size={18} aria-hidden="true" />}
-                    onClick={handleNovaLista}
-                  >
-                    Nova lista
-                  </Button>
-                </div>
-              )}
             />
           )}
         </section>
