@@ -498,7 +498,8 @@
   gap: var(--space-1);
 }
 
-.cartao-tag-chip {
+.cartao-tag-chip,
+button.cartao-tag-chip {
   --tag-bg: var(--tag-color, var(--color-primary));
   display: inline-flex;
   align-items: center;
@@ -520,9 +521,11 @@
   min-width: 0;
 }
 
-.cartao-tag-chip--selector {
+.cartao-tag-chip--selector,
+button.cartao-tag-chip--selector {
   border-radius: var(--radius-md);
   text-align: left;
+  cursor: pointer;
   transition:
     filter var(--transition-fast),
     box-shadow var(--transition-fast),
@@ -536,6 +539,12 @@
 .cartao-tag-chip--selector:focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
+}
+
+.cartao-tags-list > button.cartao-tag-chip {
+  border: 1px solid color-mix(in srgb, var(--tag-bg) 70%, var(--color-border));
+  background: var(--tag-bg);
+  padding: var(--space-1) var(--space-2);
 }
 
 .cartao-tag-chip--selected {

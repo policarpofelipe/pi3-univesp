@@ -17,11 +17,13 @@ export default function TagSelector({
   const [criando, setCriando] = useState(false);
   const [mostrarForm, setMostrarForm] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState("");
 
   const selecionados = new Set((tagIds || []).map(String));
 
   async function toggle(tagId) {
     if (disabled || salvando) return;
+    setErro("");
     const id = String(tagId);
     const next = new Set(selecionados);
     if (next.has(id)) {
@@ -31,7 +33,18 @@ export default function TagSelector({
     }
     setSalvando(true);
     try {
-      await onChange?.([...next]);
+      await onChange?.(
+        [...next]
+          .map((v) => Number(v))
+          .filter((v) => Number.isInteger(v) && v > 0)
+      );
+    } catch (err) {
+      setErro(
+        err?.response?.data?.error?.message ||
+          err?.response?.data?.message ||
+          err?.message ||
+          "Não foi possível atualizar as tags do cartão."
+      );
     } finally {
       setSalvando(false);
     }
@@ -47,7 +60,11 @@ export default function TagSelector({
         const next = [...selecionados, String(nova.id)];
         setSalvando(true);
         try {
-          await onChange?.(next);
+          await onChange?.(
+            next
+              .map((v) => Number(v))
+              .filter((v) => Number.isInteger(v) && v > 0)
+          );
         } finally {
           setSalvando(false);
         }
@@ -120,6 +137,15 @@ export default function TagSelector({
           Nova tag no quadro
         </Button>
       )}
+
+      {erro ? (
+        <p
+          className="mt-2 text-[var(--font-size-xs)] text-[var(--color-danger-text)]"
+          role="alert"
+        >
+          {erro}
+        </p>
+      ) : null}
     </div>
   );
 }

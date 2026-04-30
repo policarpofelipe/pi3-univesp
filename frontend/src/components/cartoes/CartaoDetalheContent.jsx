@@ -282,8 +282,11 @@ export default function CartaoDetalheContent({
     if (!quadroId || !cartaoId) return;
     setSalvandoTags(true);
     try {
+      const tagIdsNormalizados = (Array.isArray(newIds) ? newIds : [])
+        .map((v) => Number(v))
+        .filter((v) => Number.isInteger(v) && v > 0);
       const res = await cartaoService.atualizar(quadroId, cartaoId, {
-        tagIds: newIds,
+        tagIds: tagIdsNormalizados,
       });
       const atualizado = extractObject(res) || res;
       if (atualizado) {

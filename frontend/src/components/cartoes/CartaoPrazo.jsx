@@ -112,7 +112,7 @@ export default function CartaoPrazo({
         <CalendarDays size={16} aria-hidden="true" />
         Prazo
       </label>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-3">
         <input
           id="cartao-prazo-data"
           type="date"
@@ -125,25 +125,27 @@ export default function CartaoPrazo({
           disabled={disabled || loading}
           className="rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)]"
         />
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          loading={loading}
-          disabled={disabled}
-          onClick={handleSalvar}
-        >
-          Salvar prazo
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={disabled || loading || !prazoEm}
-          onClick={handleLimpar}
-        >
-          Limpar
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            loading={loading}
+            disabled={disabled}
+            onClick={handleSalvar}
+          >
+            Salvar prazo
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={disabled || loading || !prazoEm}
+            onClick={handleLimpar}
+          >
+            Limpar
+          </Button>
+        </div>
       </div>
       {prazoEm ? (
         <p
