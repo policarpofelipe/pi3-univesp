@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCartaoOverlayReturnFocus } from "../../context/CartaoOverlayReturnFocusContext";
 import {
   CircleUserRound,
@@ -46,6 +46,7 @@ export default function CartaoCard({
   dragDisabled = false,
 }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const overlayFocus = useCartaoOverlayReturnFocus();
 
   const membrosMap =
@@ -84,6 +85,26 @@ export default function CartaoCard({
             ? "Baixa"
             : "Sem prioridade";
 
+  function handleOpenDetalhe() {
+    if (!quadroId) return;
+    overlayFocus?.setReturnFocusElement?.(document.activeElement);
+    navigate(`cartoes/${cartao.id}`, { state: { background: location } });
+  }
+
+  function handleCardClick(event) {
+    if (!quadroId) return;
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (
+      target.closest(
+        "a,button,input,textarea,select,summary,[role='button'],[role='menuitem']"
+      )
+    ) {
+      return;
+    }
+    handleOpenDetalhe();
+  }
+
   return (
     <article
       className={[
@@ -94,6 +115,7 @@ export default function CartaoCard({
         .filter(Boolean)
         .join(" ")}
       aria-label={`Cartão ${cartao.titulo}`}
+      onClick={handleCardClick}
     >
       <div className="cartao-board-card__header">
         {!dragDisabled ? (
