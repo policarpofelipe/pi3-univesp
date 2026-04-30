@@ -1,4 +1,5 @@
 import Button from "../ui/Button";
+import "../../styles/components/automacao-list.css";
 
 const GATILHO_LABELS = {
   AO_CRIAR_CARTAO: "Ao criar cartão",
@@ -15,22 +16,19 @@ const ACAO_LABELS = {
 
 export default function AutomacaoList({ automacoes = [], onEditar, onRemover }) {
   return (
-    <div className="space-y-2">
+    <div className="automacao-list">
       {automacoes.map((automacao) => (
-        <article
-          key={automacao.id}
-          className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3"
-        >
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <strong className="block text-[var(--font-size-sm)] text-[var(--color-text)]">
+        <article key={automacao.id} className="automacao-list__item">
+          <div className="automacao-list__row">
+            <div className="automacao-list__main">
+              <strong className="automacao-list__title">
                 {automacao.nome}
               </strong>
-              <p className="mt-1 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+              <p className="automacao-list__description">
                 {automacao.descricao?.trim() ||
                   `Regra para ${GATILHO_LABELS[automacao.gatilho] || automacao.gatilho}.`}
               </p>
-              <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
+              <p className="automacao-list__meta">
                 Gatilho: {GATILHO_LABELS[automacao.gatilho] || automacao.gatilho} | Ação:{" "}
                 {ACAO_LABELS[automacao.acoes?.[0]?.tipoAcao] ||
                   automacao.acoes?.[0]?.tipoAcao ||
@@ -38,7 +36,7 @@ export default function AutomacaoList({ automacoes = [], onEditar, onRemover }) 
                 | Status: {automacao.ativo ? "Ativa" : "Inativa"}
               </p>
             </div>
-            <div className="flex shrink-0 gap-2">
+            <div className="automacao-list__actions">
               <Button
                 variant="secondary"
                 onClick={() => onEditar?.(automacao)}
