@@ -22,6 +22,8 @@ import {
 import Button from "../ui/Button";
 import TagList from "./TagList";
 import TagForm from "./TagForm";
+import AutomacaoList from "../automacoes/AutomacaoList";
+import AutomacaoForm from "../automacoes/AutomacaoForm";
 
 import "../../styles/components/quadro-management-drawer.css";
 
@@ -53,10 +55,18 @@ export default function QuadroManagementDrawer({
   membros = [],
   tags = [],
   atividades = [],
+  listas = [],
+  automacoes = [],
+  automacoesLoading = false,
+  automacoesErro = "",
+  automacaoSalvando = false,
   removendoTagId = null,
   criandoTag = false,
   onCriarTag,
   onRemoverTag,
+  onCriarAutomacao,
+  onAtualizarAutomacao,
+  onRemoverAutomacao,
   onNavigateConfiguracoes,
   onNavigateMembros,
   onNavigateVisoes,
@@ -72,6 +82,7 @@ export default function QuadroManagementDrawer({
   const titleId = useId();
   const tablistId = useId();
   const [section, setSection] = useState(defaultSection);
+  const [automacaoEmEdicao, setAutomacaoEmEdicao] = useState(null);
 
   useLayoutEffect(() => {
     if (open) {
@@ -80,6 +91,7 @@ export default function QuadroManagementDrawer({
         previouslyFocused.current = document.activeElement;
       }
       setSection(defaultSection);
+      setAutomacaoEmEdicao(null);
     } else {
       drawerOpenedRef.current = false;
     }
@@ -415,17 +427,76 @@ export default function QuadroManagementDrawer({
                   <section className="quadro-detalhe-page__section" aria-label="Automações">
                     <div className="quadro-detalhe-page__section-header">
                       <h3 className="quadro-detalhe-page__section-title">Automações</h3>
-                      <Button
-                        variant="ghost"
-                        leftIcon={<Bot size={14} aria-hidden="true" />}
-                        onClick={() => onNavigateAutomacoes?.()}
-                      >
-                        Gerenciar
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="secondary"
+                          onClick={() => setAutomacaoEmEdicao(null)}
+                        >
+                          Nova automação
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          leftIcon={<Bot size={14} aria-hidden="true" />}
+                          onClick={() => onNavigateAutomacoes?.()}
+                        >
+                          Abrir página
+                        </Button>
+                      </div>
                     </div>
                     <p className="quadro-detalhe-page__section-text">
                       Automatize tarefas recorrentes com gatilhos e condições do fluxo.
                     </p>
+
+                    {automacoesErro ? (
+                      <p
+                        className="mb-3 mt-3 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+                        role="alert"
+                      >
+                        {automacoesErro}
+                      </p>
+                    ) : null}
+
+                    {automacoesLoading ? (
+                      <p className="mt-3 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+                        Carregando automações...
+                      </p>
+                    ) : (
+                      <div className="mt-3">
+                        {automacoes.length === 0 ? (
+                          <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+                            Nenhuma automação cadastrada para este quadro.
+                          </p>
+                        ) : (
+                          <AutomacaoList
+                            automacoes={automacoes}
+                            onEditar={(automacao) => setAutomacaoEmEdicao(automacao)}
+                            onRemover={onRemoverAutomacao}
+                          />
+                        )}
+                      </div>
+                    )}
+
+                    <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+                      <h4 className="mb-3 text-[var(--font-size-md)] font-semibold text-[var(--color-text)]">
+                        {automacaoEmEdicao ? "Editar automação" : "Criar automação"}
+                      </h4>
+                      <AutomacaoForm
+                        modo={automacaoEmEdicao ? "editar" : "criar"}
+                        initialValues={automacaoEmEdicao || {}}
+                        listas={listas}
+                        tags={tags}
+                        loading={automacaoSalvando}
+                        onSubmit={async (payload) => {
+                          if (automacaoEmEdicao?.id) {
+                            await onAtualizarAutomacao?.(automacaoEmEdicao.id, payload);
+                          } else {
+                            await onCriarAutomacao?.(payload);
+                          }
+                          setAutomacaoEmEdicao(null);
+                        }}
+                        onCancel={() => setAutomacaoEmEdicao(null)}
+                      />
+                    </div>
                   </section>
                 ) : null}
 

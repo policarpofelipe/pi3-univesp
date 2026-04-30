@@ -12,6 +12,7 @@ import quadroMembroService from "../../services/quadroMembroService";
 import listaService from "../../services/listaService";
 import cartaoService from "../../services/cartaoService";
 import tagService from "../../services/tagService";
+import automacaoService from "../../services/automacaoService";
 import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 import ListaModal from "../../components/listas/ListaModal";
 import CartaoModal from "../../components/cartoes/CartaoModal";
@@ -79,6 +80,10 @@ export default function QuadroDetalhePage() {
   const [cartaoSalvando, setCartaoSalvando] = useState(false);
   const [movendoCartaoId, setMovendoCartaoId] = useState(null);
   const [tags, setTags] = useState([]);
+  const [automacoes, setAutomacoes] = useState([]);
+  const [automacoesLoading, setAutomacoesLoading] = useState(false);
+  const [automacoesErro, setAutomacoesErro] = useState("");
+  const [automacaoSalvando, setAutomacaoSalvando] = useState(false);
   const [removendoTagId, setRemovendoTagId] = useState(null);
   const [criandoTag, setCriandoTag] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -99,13 +104,14 @@ export default function QuadroDetalhePage() {
     setErro("");
 
     try {
-      const [resQuadro, resMembros, resListas, resCartoes, resTags] =
+      const [resQuadro, resMembros, resListas, resCartoes, resTags, resAutomacoes] =
         await Promise.all([
           quadroService.obterPorId(quadroId),
           quadroMembroService.listar(quadroId).catch(() => ({ data: [] })),
           listaService.listar(quadroId).catch(() => ({ data: [] })),
           cartaoService.listar(quadroId).catch(() => ({ data: [] })),
           tagService.listar(quadroId).catch(() => ({ data: [] })),
+          automacaoService.listar(quadroId).catch(() => ({ data: [] })),
         ]);
 
       let data = extractObject(resQuadro) || resQuadro;
@@ -139,6 +145,8 @@ export default function QuadroDetalhePage() {
 
       setCartoes(extractList(resCartoes));
       setTags(extractList(resTags));
+      setAutomacoes(extractList(resAutomacoes));
+      setAutomacoesErro("");
     } catch (error) {
       setErro(
         error?.response?.data?.message ||
@@ -150,6 +158,8 @@ export default function QuadroDetalhePage() {
       setListas([]);
       setCartoes([]);
       setTags([]);
+      setAutomacoes([]);
+      setAutomacoesErro("");
     } finally {
       setLoading(false);
     }
@@ -214,6 +224,26 @@ export default function QuadroDetalhePage() {
     }
   }, [quadroId]);
 
+  const carregarAutomacoes = useCallback(async () => {
+    if (!quadroId) return;
+    setAutomacoesLoading(true);
+    setAutomacoesErro("");
+    try {
+      const res = await automacaoService.listar(quadroId);
+      setAutomacoes(extractList(res));
+    } catch (error) {
+      setAutomacoesErro(
+        error?.response?.data?.error?.message ||
+          error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível carregar as automações."
+      );
+      setAutomacoes([]);
+    } finally {
+      setAutomacoesLoading(false);
+    }
+  }, [quadroId]);
+
   useEffect(() => {
     const anterior = pathnameAnteriorRef.current;
     const atual = location.pathname;
@@ -272,6 +302,60 @@ export default function QuadroDetalhePage() {
       await carregarCartoes();
     } finally {
       setRemovendoTagId(null);
+    }
+  }
+
+  async function handleCriarAutomacao(payload) {
+    setAutomacaoSalvando(true);
+    setAutomacoesErro("");
+    try {
+      await automacaoService.criar(quadroId, payload);
+      await carregarAutomacoes();
+    } catch (error) {
+      setAutomacoesErro(
+        error?.response?.data?.error?.message ||
+          error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível criar a automação."
+      );
+      throw error;
+    } finally {
+      setAutomacaoSalvando(false);
+    }
+  }
+
+  async function handleAtualizarAutomacao(automacaoId, payload) {
+    setAutomacaoSalvando(true);
+    setAutomacoesErro("");
+    try {
+      await automacaoService.atualizar(quadroId, automacaoId, payload);
+      await carregarAutomacoes();
+    } catch (error) {
+      setAutomacoesErro(
+        error?.response?.data?.error?.message ||
+          error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível atualizar a automação."
+      );
+      throw error;
+    } finally {
+      setAutomacaoSalvando(false);
+    }
+  }
+
+  async function handleRemoverAutomacao(automacao) {
+    if (!window.confirm(`Remover a automação "${automacao.nome}"?`)) return;
+    setAutomacoesErro("");
+    try {
+      await automacaoService.remover(quadroId, automacao.id);
+      await carregarAutomacoes();
+    } catch (error) {
+      setAutomacoesErro(
+        error?.response?.data?.error?.message ||
+          error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível remover a automação."
+      );
     }
   }
 
@@ -588,11 +672,19 @@ export default function QuadroDetalhePage() {
         quadro={quadro}
         membros={membros}
         tags={tags}
+        listas={listas}
+        automacoes={automacoes}
+        automacoesLoading={automacoesLoading}
+        automacoesErro={automacoesErro}
+        automacaoSalvando={automacaoSalvando}
         atividades={atividades}
         removendoTagId={removendoTagId}
         criandoTag={criandoTag}
         onCriarTag={handleCriarTagQuadro}
         onRemoverTag={handleRemoverTagQuadro}
+        onCriarAutomacao={handleCriarAutomacao}
+        onAtualizarAutomacao={handleAtualizarAutomacao}
+        onRemoverAutomacao={handleRemoverAutomacao}
         onNavigateConfiguracoes={goConfiguracoesCompleto}
         onNavigateMembros={goMembros}
         onNavigateVisoes={goVisoes}
