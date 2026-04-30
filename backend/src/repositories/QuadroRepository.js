@@ -261,7 +261,12 @@ class QuadroRepository {
     `;
 
     const [rows] = await db.query(sql, [quadroId, usuarioId]);
-    return rows[0] || null;
+    const row = rows[0];
+    if (!row) return null;
+    return {
+      ...row,
+      compacto: Boolean(row.compacto),
+    };
   }
 
   async atualizarPreferenciasUsuario(quadroId, usuarioId, dados = {}) {

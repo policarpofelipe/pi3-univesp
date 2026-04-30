@@ -2,6 +2,7 @@ const QuadroRepository = require("../repositories/QuadroRepository");
 const OrganizacaoRepository = require("../repositories/OrganizacaoRepository");
 const QuadroPapelRepository = require("../repositories/QuadroPapelRepository");
 const QuadroMembroRepository = require("../repositories/QuadroMembroRepository");
+const UsuarioRepository = require("../repositories/UsuarioRepository");
 const { parseLimitOffset } = require("../utils/paginationUtils");
 
 function toPositiveInt(value) {
@@ -206,6 +207,78 @@ class QuadroService {
       arquivado: Boolean(atualizadoQuadro.arquivadoEm),
       preferenciasUsuario,
     };
+  }
+
+  async obterPreferenciasUsuario(quadroId, usuarioId) {
+    const qId = toPositiveInt(quadroId);
+    const uId = toPositiveInt(usuarioId);
+    if (!qId || !uId) {
+      const error = new Error("IDs inválidos para preferências de quadro.");
+      error.statusCode = 400;
+      error.code = "QUADRO_PREF_INVALID_IDS";
+      throw error;
+    }
+    const quadro = await QuadroRepository.obterPorId(qId);
+    if (!quadro) return null;
+    const usuario = await UsuarioRepository.findById(uId);
+    if (!usuario) {
+      const error = new Error("Usuário não encontrado.");
+      error.statusCode = 404;
+      error.code = "QUADRO_PREF_USER_NOT_FOUND";
+      throw error;
+    }
+    const pref = await QuadroRepository.obterPreferenciasUsuario(qId, uId);
+    if (pref) return pref;
+    return {
+      quadroId: qId,
+      usuarioId: uId,
+      tema: "sistema",
+      corFundo: null,
+      compacto: false,
+      atualizadoEm: null,
+    };
+  }
+
+  async atualizarPreferenciasUsuario(quadroId, usuarioId, dados = {}) {
+    const qId = toPositiveInt(quadroId);
+    const uId = toPositiveInt(usuarioId);
+    if (!qId || !uId) {
+      const error = new Error("IDs inválidos para preferências de quadro.");
+      error.statusCode = 400;
+      error.code = "QUADRO_PREF_INVALID_IDS";
+      throw error;
+    }
+    const quadro = await QuadroRepository.obterPorId(qId);
+    if (!quadro) return null;
+    const usuario = await UsuarioRepository.findById(uId);
+    if (!usuario) {
+      const error = new Error("Usuário não encontrado.");
+      error.statusCode = 404;
+      error.code = "QUADRO_PREF_USER_NOT_FOUND";
+      throw error;
+    }
+    const tema = String(dados.tema || "sistema").trim().toLowerCase();
+    if (!["claro", "escuro", "sistema"].includes(tema)) {
+      const error = new Error("Tema inválido. Use: claro, escuro ou sistema.");
+      error.statusCode = 400;
+      error.code = "QUADRO_PREF_INVALID_THEME";
+      throw error;
+    }
+    const corFundo =
+      dados.corFundo === undefined || dados.corFundo === null || dados.corFundo === ""
+        ? null
+        : String(dados.corFundo).trim();
+    if (corFundo && !/^#[0-9A-Fa-f]{6}$/.test(corFundo)) {
+      const error = new Error("Cor de fundo inválida. Use formato #RRGGBB.");
+      error.statusCode = 400;
+      error.code = "QUADRO_PREF_INVALID_COLOR";
+      throw error;
+    }
+    return QuadroRepository.atualizarPreferenciasUsuario(qId, uId, {
+      tema,
+      corFundo,
+      compacto: Boolean(dados.compacto),
+    });
   }
 }
 

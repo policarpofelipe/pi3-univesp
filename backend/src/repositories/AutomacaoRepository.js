@@ -91,9 +91,29 @@ class AutomacaoRepository {
       campos.push("descricao = ?");
       params.push(dados.descricao);
     }
+    if (dados.gatilho !== undefined) {
+      campos.push("gatilho = ?");
+      params.push(dados.gatilho);
+    }
+    if (dados.listaOrigemId !== undefined) {
+      campos.push("lista_origem_id = ?");
+      params.push(dados.listaOrigemId || null);
+    }
+    if (dados.listaDestinoId !== undefined) {
+      campos.push("lista_destino_id = ?");
+      params.push(dados.listaDestinoId || null);
+    }
+    if (dados.campoId !== undefined) {
+      campos.push("campo_id = ?");
+      params.push(dados.campoId || null);
+    }
     if (dados.condicoesJson !== undefined) {
       campos.push("condicoes_json = ?");
       params.push(dados.condicoesJson ? JSON.stringify(dados.condicoesJson) : null);
+    }
+    if (dados.executaUmaVezPorCartao !== undefined) {
+      campos.push("executa_uma_vez_por_cartao = ?");
+      params.push(dados.executaUmaVezPorCartao ? 1 : 0);
     }
     if (dados.ativo !== undefined) {
       campos.push("ativo = ?");

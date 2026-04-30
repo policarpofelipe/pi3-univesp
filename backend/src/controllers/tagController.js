@@ -1,88 +1,116 @@
-const store = require("../data/boardMemoryStore");
+const tagService = require("../services/TagService");
 
-const HEX_COR = /^#[0-9A-Fa-f]{6}$/;
-const COR_PADRAO = "#64748b";
-
-function normalizarCor(cor) {
-  if (cor == null || cor === "") {
-    return COR_PADRAO;
-  }
-  const c = String(cor).trim();
-  return HEX_COR.test(c) ? c : null;
+function errorPayload(error, fallbackCode) {
+  return {
+    success: false,
+    error: {
+      code: error.code || fallbackCode,
+      message: error.message || "Erro interno do servidor.",
+    },
+  };
 }
 
 const tagController = {
   async listar(req, res, next) {
     try {
-      const { quadroId } = req.params;
-      const tags = [...store.getTags(quadroId)].sort((a, b) =>
-        String(a.nome || "").localeCompare(String(b.nome || ""), "pt")
-      );
-      return res.status(200).json({ success: true, data: tags });
+      const data = await tagService.listar(req.params.quadroId);
+      if (!data) {
+        return res.status(404).json({
+          success: false,
+          error: {
+            code: "TAG_QUADRO_NOT_FOUND",
+            message: "Quadro não encontrado.",
+          },
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        data,
+        message: "Tags listadas com sucesso.",
+      });
     } catch (error) {
+      if (error.statusCode) {
+        return res.status(error.statusCode).json(errorPayload(error, "TAG_LISTAR_ERROR"));
+      }
       return next(error);
     }
   },
 
   async criar(req, res, next) {
     try {
-      const { quadroId } = req.params;
-      const { nome, cor } = req.body;
-
-      if (!nome || !String(nome).trim()) {
-        return res.status(400).json({
+      const data = await tagService.criar(req.params.quadroId, req.body || {});
+      if (!data) {
+        return res.status(404).json({
           success: false,
-          message: "O nome da tag é obrigatório.",
+          error: {
+            code: "TAG_QUADRO_NOT_FOUND",
+            message: "Quadro não encontrado.",
+          },
         });
       }
-
-      const corOk = normalizarCor(cor);
-      if (corOk === null) {
-        return res.status(400).json({
-          success: false,
-          message: "Cor inválida. Use formato hexadecimal #RRGGBB.",
-        });
-      }
-
-      const novo = {
-        id: store.makeTagId(),
-        quadroId: String(quadroId),
-        nome: String(nome).trim(),
-        cor: corOk,
-        criadoEm: new Date().toISOString(),
-      };
-
-      store.getTags(quadroId).push(novo);
-
       return res.status(201).json({
         success: true,
-        message: "Tag criada.",
-        data: novo,
+        data,
+        message: "Tag criada com sucesso.",
       });
     } catch (error) {
+      if (error.statusCode) {
+        return res.status(error.statusCode).json(errorPayload(error, "TAG_CRIAR_ERROR"));
+      }
+      return next(error);
+    }
+  },
+
+  async atualizar(req, res, next) {
+    try {
+      const data = await tagService.atualizar(
+        req.params.quadroId,
+        req.params.tagId,
+        req.body || {}
+      );
+      if (!data) {
+        return res.status(404).json({
+          success: false,
+          error: {
+            code: "TAG_NOT_FOUND",
+            message: "Tag não encontrada.",
+          },
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        data,
+        message: "Tag atualizada com sucesso.",
+      });
+    } catch (error) {
+      if (error.statusCode) {
+        return res.status(error.statusCode).json(errorPayload(error, "TAG_ATUALIZAR_ERROR"));
+      }
       return next(error);
     }
   },
 
   async remover(req, res, next) {
     try {
-      const { quadroId, tagId } = req.params;
-
-      if (!store.findTag(quadroId, tagId)) {
+      const removed = await tagService.remover(req.params.quadroId, req.params.tagId);
+      if (!removed) {
         return res.status(404).json({
           success: false,
-          message: "Tag não encontrada.",
+          error: {
+            code: "TAG_NOT_FOUND",
+            message: "Tag não encontrada.",
+          },
         });
       }
-
-      store.removerTagDoQuadro(quadroId, tagId);
-
       return res.status(200).json({
         success: true,
-        message: "Tag removida.",
-        data: { id: tagId },
+        data: { id: Number(req.params.tagId) },
+        message: "Tag desativada com sucesso.",
       });
     } catch (error) {
+      if (error.statusCode) {
+        return res.status(error.statusCode).json(errorPayload(error, "TAG_REMOVER_ERROR"));
+      }
       return next(error);
     }
   },

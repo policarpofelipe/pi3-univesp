@@ -6,6 +6,11 @@ import AcaoBuilder from "./AcaoBuilder";
 import HandoffConfigForm from "./HandoffConfigForm";
 
 function normalize(initialValues = {}) {
+  const primeiraAcao = Array.isArray(initialValues.acoes)
+    ? initialValues.acoes[0]
+    : null;
+  const acaoTipo = primeiraAcao?.tipoAcao || "MOVER_CARTAO";
+  const config = primeiraAcao?.configJson || {};
   return {
     nome: initialValues.nome || "",
     descricao: initialValues.descricao || "",
@@ -18,6 +23,8 @@ function normalize(initialValues = {}) {
     listaOrigemId: initialValues.listaOrigemId || null,
     listaDestinoId: initialValues.listaDestinoId || null,
     condicoesJson: initialValues.condicoesJson || null,
+    acaoTipo,
+    tagId: config.tagId || null,
   };
 }
 
@@ -25,6 +32,7 @@ export default function AutomacaoForm({
   modo = "criar",
   initialValues = {},
   listas = [],
+  tags = [],
   loading = false,
   onSubmit,
   onCancel,
@@ -34,6 +42,7 @@ export default function AutomacaoForm({
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
   const [condicoesValidas, setCondicoesValidas] = useState(true);
+  const acaoTipo = values.acaoTipo || "MOVER_CARTAO";
 
   useEffect(() => {
     setValues(base);
@@ -52,6 +61,12 @@ export default function AutomacaoForm({
     }
     if (!condicoesValidas) {
       nextErrors.condicoesJson = "Corrija o JSON das condições.";
+    }
+    if ((nextValues.acaoTipo || "MOVER_CARTAO") === "MOVER_CARTAO" && !nextValues.listaDestinoId) {
+      nextErrors.acao = "Selecione a lista de destino para mover o cartão.";
+    }
+    if ((nextValues.acaoTipo || "MOVER_CARTAO") === "ADICIONAR_TAG" && !nextValues.tagId) {
+      nextErrors.acao = "Selecione a tag para a ação automática.";
     }
     return nextErrors;
   }
@@ -73,9 +88,19 @@ export default function AutomacaoForm({
         listaOrigemId: values.listaOrigemId,
         listaDestinoId: values.listaDestinoId,
         condicoesJson: values.condicoesJson,
+        acoes: [
+          {
+            tipoAcao: values.acaoTipo || "MOVER_CARTAO",
+            configJson:
+              (values.acaoTipo || "MOVER_CARTAO") === "ADICIONAR_TAG"
+                ? { tagId: Number(values.tagId) }
+                : { listaDestinoId: Number(values.listaDestinoId) },
+          },
+        ],
       });
     } catch (error) {
       setSubmitError(
+        error?.response?.data?.error?.message ||
         error?.response?.data?.message ||
           error?.message ||
           "Não foi possível salvar a automação."
@@ -110,6 +135,11 @@ export default function AutomacaoForm({
           </p>
         ) : null}
       </div>
+      {errors.acao ? (
+        <p className="text-[var(--font-size-xs)] text-[var(--color-danger-text)]">
+          {errors.acao}
+        </p>
+      ) : null}
 
       <div>
         <label
@@ -147,6 +177,60 @@ export default function AutomacaoForm({
         disabled={loading}
         onChange={(next) => setValues((prev) => ({ ...prev, ...next }))}
       />
+      <div className="grid gap-3 md:grid-cols-2">
+        <div>
+          <label
+            htmlFor="automacao-acao-tipo"
+            className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
+          >
+            Ação principal
+          </label>
+          <select
+            id="automacao-acao-tipo"
+            value={acaoTipo}
+            disabled={loading}
+            onChange={(event) =>
+              setValues((prev) => ({
+                ...prev,
+                acaoTipo: event.target.value,
+              }))
+            }
+            className="w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)]"
+          >
+            <option value="MOVER_CARTAO">Mover cartão</option>
+            <option value="ADICIONAR_TAG">Adicionar tag</option>
+          </select>
+        </div>
+        {acaoTipo === "ADICIONAR_TAG" ? (
+          <div>
+            <label
+              htmlFor="automacao-acao-tag"
+              className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
+            >
+              Tag para adicionar
+            </label>
+            <select
+              id="automacao-acao-tag"
+              value={values.tagId || ""}
+              disabled={loading}
+              onChange={(event) =>
+                setValues((prev) => ({
+                  ...prev,
+                  tagId: event.target.value ? Number(event.target.value) : null,
+                }))
+              }
+              className="w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)]"
+            >
+              <option value="">Selecione uma tag</option>
+              {tags.map((tag) => (
+                <option key={tag.id} value={tag.id}>
+                  {tag.nome}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
+      </div>
 
       <CondicaoBuilder
         initialValue={values.condicoesJson}

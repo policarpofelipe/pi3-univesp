@@ -24,6 +24,9 @@ function validateCriarBody(body = {}) {
       "Gatilho inválido. Use: AO_CRIAR_CARTAO, AO_ENTRAR_NA_LISTA, AO_SAIR_DA_LISTA, AO_ATUALIZAR_CAMPO ou AO_VENCER_PRAZO."
     );
   }
+  if (body.acoes !== undefined && !Array.isArray(body.acoes)) {
+    errors.push("Ações da automação devem ser enviadas em um array.");
+  }
   return errors;
 }
 
@@ -40,6 +43,9 @@ function validateAtualizarBody(body = {}) {
     if (!GATILHOS.has(g)) {
       errors.push("Gatilho inválido.");
     }
+  }
+  if (body.acoes !== undefined && !Array.isArray(body.acoes)) {
+    errors.push("Ações da automação devem ser enviadas em um array.");
   }
   return errors;
 }

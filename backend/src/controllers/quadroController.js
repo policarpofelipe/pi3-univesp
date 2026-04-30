@@ -5,6 +5,13 @@ function parseId(value) {
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
+function apiError(code, message) {
+  return {
+    success: false,
+    error: { code, message },
+  };
+}
+
 const quadroController = {
   async listar(req, res, next) {
     try {
@@ -241,6 +248,66 @@ const quadroController = {
         data,
       });
     } catch (error) {
+      return next(error);
+    }
+  },
+
+  async obterPreferenciasUsuario(req, res, next) {
+    try {
+      const quadroId = parseId(req.params.quadroId);
+      const usuarioId = parseId(req.params.usuarioId);
+      if (!quadroId || !usuarioId) {
+        return res.status(400).json(apiError("QUADRO_PREF_INVALID_IDS", "IDs inválidos."));
+      }
+      const data = await quadroService.obterPreferenciasUsuario(quadroId, usuarioId);
+      if (!data) {
+        return res
+          .status(404)
+          .json(apiError("QUADRO_NOT_FOUND", "Quadro não encontrado."));
+      }
+      return res.status(200).json({
+        success: true,
+        data,
+        message: "Preferências carregadas com sucesso.",
+      });
+    } catch (error) {
+      if (error.statusCode) {
+        return res
+          .status(error.statusCode)
+          .json(apiError(error.code || "QUADRO_PREF_ERROR", error.message));
+      }
+      return next(error);
+    }
+  },
+
+  async atualizarPreferenciasUsuario(req, res, next) {
+    try {
+      const quadroId = parseId(req.params.quadroId);
+      const usuarioId = parseId(req.params.usuarioId);
+      if (!quadroId || !usuarioId) {
+        return res.status(400).json(apiError("QUADRO_PREF_INVALID_IDS", "IDs inválidos."));
+      }
+      const data = await quadroService.atualizarPreferenciasUsuario(
+        quadroId,
+        usuarioId,
+        req.body || {}
+      );
+      if (!data) {
+        return res
+          .status(404)
+          .json(apiError("QUADRO_NOT_FOUND", "Quadro não encontrado."));
+      }
+      return res.status(200).json({
+        success: true,
+        data,
+        message: "Preferências atualizadas com sucesso.",
+      });
+    } catch (error) {
+      if (error.statusCode) {
+        return res
+          .status(error.statusCode)
+          .json(apiError(error.code || "QUADRO_PREF_ERROR", error.message));
+      }
       return next(error);
     }
   },

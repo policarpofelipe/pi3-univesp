@@ -37,6 +37,14 @@ router.put(
   quadroValidator.configuracoes(),
   quadroController.atualizarConfiguracoes
 );
+router.get(
+  "/:quadroId/preferencias/:usuarioId",
+  quadroController.obterPreferenciasUsuario
+);
+router.put(
+  "/:quadroId/preferencias/:usuarioId",
+  quadroController.atualizarPreferenciasUsuario
+);
 
 // Estado do quadro
 router.patch("/:quadroId/arquivar", quadroController.arquivar);

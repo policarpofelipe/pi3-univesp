@@ -10,6 +10,8 @@ router.param("quadroId", ensureQuadroMemberParam);
 
 router.get("/:quadroId/tags", tagController.listar);
 router.post("/:quadroId/tags", tagController.criar);
+router.put("/:quadroId/tags/:tagId", tagController.atualizar);
+router.patch("/:quadroId/tags/:tagId", tagController.atualizar);
 router.delete("/:quadroId/tags/:tagId", tagController.remover);
 
 module.exports = router;

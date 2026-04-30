@@ -1,6 +1,7 @@
 const CartaoRepository = require("../repositories/CartaoRepository");
 const ListaRepository = require("../repositories/ListaRepository");
 const QuadroRepository = require("../repositories/QuadroRepository");
+const TagRepository = require("../repositories/TagRepository");
 const CartaoHistoricoService = require("./cartaoHistoricoService");
 const cartaoCriadoEvent = require("../events/cartaoCriadoEvent");
 const cartaoMovidoEvent = require("../events/cartaoMovidoEvent");
@@ -22,6 +23,22 @@ function normalizarPrioridade(val) {
 }
 
 class CartaoService {
+  async validarTagIdsDoQuadro(quadroId, tagIds = []) {
+    if (!Array.isArray(tagIds) || !tagIds.length) return [];
+    const unicos = [...new Set(tagIds.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0))];
+    if (!unicos.length) return [];
+    const tagsAtivas = await TagRepository.listar(quadroId);
+    const tagsPorId = new Set(tagsAtivas.map((tag) => Number(tag.id)));
+    const invalidas = unicos.filter((id) => !tagsPorId.has(id));
+    if (invalidas.length) {
+      const error = new Error("Há tags inválidas ou de outro quadro no cartão.");
+      error.statusCode = 400;
+      error.code = "CARTAO_TAG_INVALIDA";
+      throw error;
+    }
+    return unicos;
+  }
+
   async listar(quadroId, filtros = {}) {
     const qId = toPositiveInt(quadroId);
     if (!qId) {
@@ -87,13 +104,13 @@ class CartaoService {
       throw error;
     }
 
-    const tagIds = Array.isArray(dados.tagIds)
-      ? dados.tagIds
-          .map((id) => Number(id))
-          .filter((id) => Number.isInteger(id) && id > 0)
-      : [];
+    const tagIds = await this.validarTagIdsDoQuadro(
+      qId,
+      Array.isArray(dados.tagIds) ? dados.tagIds : []
+    );
 
     const id = await CartaoRepository.criar({
+      quadroId: qId,
       listaId,
       titulo,
       descricao: String(dados.descricao || "").trim(),
@@ -159,14 +176,13 @@ class CartaoService {
     if (!prazoEm.skip) payload.prazoEm = prazoEm.value;
 
     if (dados.tagIds !== undefined) {
-      payload.tagIds = Array.isArray(dados.tagIds)
-        ? dados.tagIds
-            .map((id) => Number(id))
-            .filter((id) => Number.isInteger(id) && id > 0)
-        : [];
+      payload.tagIds = await this.validarTagIdsDoQuadro(
+        qId,
+        Array.isArray(dados.tagIds) ? dados.tagIds : []
+      );
     }
 
-    await CartaoRepository.atualizar(cId, payload);
+    await CartaoRepository.atualizar(qId, cId, payload);
     const atualizado = await CartaoRepository.obterPorId(qId, cId);
 
     if (payload.titulo !== undefined && payload.titulo !== atual.titulo) {

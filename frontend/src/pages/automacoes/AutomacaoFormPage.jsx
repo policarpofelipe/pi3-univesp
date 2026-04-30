@@ -11,6 +11,7 @@ import useAuth from "../../hooks/useAuth";
 import quadroService from "../../services/quadroService";
 import listaService from "../../services/listaService";
 import automacaoService from "../../services/automacaoService";
+import tagService from "../../services/tagService";
 import { extractList, extractObject } from "../../utils/apiData";
 
 export default function AutomacaoFormPage() {
@@ -25,17 +26,20 @@ export default function AutomacaoFormPage() {
   const [quadro, setQuadro] = useState(null);
   const [listas, setListas] = useState([]);
   const [automacao, setAutomacao] = useState(null);
+  const [tags, setTags] = useState([]);
 
   const carregar = useCallback(async () => {
     setLoading(true);
     setErro("");
     try {
-      const [resQuadro, resListas] = await Promise.all([
+      const [resQuadro, resListas, resTags] = await Promise.all([
         quadroService.obterPorId(quadroId),
         listaService.listar(quadroId).catch(() => ({ data: [] })),
+        tagService.listar(quadroId).catch(() => ({ data: [] })),
       ]);
       setQuadro(extractObject(resQuadro) || resQuadro);
       setListas(extractList(resListas));
+      setTags(extractList(resTags));
 
       if (automacaoId) {
         const resAutomacoes = await automacaoService.listar(quadroId);
@@ -49,6 +53,7 @@ export default function AutomacaoFormPage() {
       }
     } catch (error) {
       setErro(
+        error?.response?.data?.error?.message ||
         error?.response?.data?.message ||
           error?.message ||
           "Não foi possível carregar o formulário de automação."
@@ -153,6 +158,7 @@ export default function AutomacaoFormPage() {
             modo={modo}
             initialValues={initialValues}
             listas={listas}
+            tags={tags}
             loading={salvando}
             onSubmit={handleSubmit}
             onCancel={() => navigate(`/quadros/${quadroId}/automacoes`)}

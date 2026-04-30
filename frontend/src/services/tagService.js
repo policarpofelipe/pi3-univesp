@@ -24,6 +24,14 @@ const tagService = {
     const response = await api.delete(`/quadros/${quadroId}/tags/${tagId}`);
     return response.data;
   },
+
+  async atualizar(quadroId, tagId, payload) {
+    if (!quadroId || !tagId) {
+      throw new Error("Quadro e tag são obrigatórios.");
+    }
+    const response = await api.put(`/quadros/${quadroId}/tags/${tagId}`, payload);
+    return response.data;
+  },
 };
 
 export default tagService;

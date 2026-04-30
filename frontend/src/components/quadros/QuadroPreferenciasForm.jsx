@@ -3,9 +3,9 @@ import Button from "../ui/Button";
 import quadroService from "../../services/quadroService";
 
 const DEFAULT_PREFS = {
-  mostrarContagemCartoes: true,
-  densidadeListagem: "confortavel",
-  abrirDetalheEmPainel: false,
+  tema: "sistema",
+  corFundo: "",
+  compacto: false,
 };
 
 function normalizePrefs(raw) {
@@ -14,12 +14,9 @@ function normalizePrefs(raw) {
   }
 
   return {
-    mostrarContagemCartoes:
-      raw.mostrarContagemCartoes ?? DEFAULT_PREFS.mostrarContagemCartoes,
-    densidadeListagem:
-      raw.densidadeListagem ?? DEFAULT_PREFS.densidadeListagem,
-    abrirDetalheEmPainel:
-      raw.abrirDetalheEmPainel ?? DEFAULT_PREFS.abrirDetalheEmPainel,
+    tema: raw.tema ?? DEFAULT_PREFS.tema,
+    corFundo: raw.corFundo ?? DEFAULT_PREFS.corFundo,
+    compacto: raw.compacto ?? DEFAULT_PREFS.compacto,
   };
 }
 
@@ -59,9 +56,10 @@ export default function QuadroPreferenciasForm({
       setValues(normalizePrefs(data));
     } catch (err) {
       setLoadError(
-        err?.response?.status === 404
-          ? "As preferências por usuário ainda não estão disponíveis nesta API. Os campos abaixo são locais até o endpoint ser publicado."
-          : err?.message || "Não foi possível carregar as preferências."
+        err?.response?.data?.error?.message ||
+          err?.response?.data?.message ||
+          err?.message ||
+          "Não foi possível carregar as preferências."
       );
       setValues({ ...DEFAULT_PREFS });
     } finally {
@@ -103,7 +101,8 @@ export default function QuadroPreferenciasForm({
       setSaveOk(true);
     } catch (err) {
       setSaveError(
-        err?.response?.data?.message ||
+        err?.response?.data?.error?.message ||
+          err?.response?.data?.message ||
           err?.message ||
           "Não foi possível salvar as preferências."
       );
@@ -141,58 +140,57 @@ export default function QuadroPreferenciasForm({
 
       {!loading ? (
         <form className="quadro-preferencias-form__form" onSubmit={handleSubmit}>
-          <label className="quadro-preferencias-form__check-card">
-            <input
-              type="checkbox"
-              name="mostrarContagemCartoes"
-              checked={values.mostrarContagemCartoes}
-              onChange={handleChange}
-              className="quadro-preferencias-form__checkbox"
-            />
-            <span className="quadro-preferencias-form__check-content">
-              <span className="quadro-preferencias-form__check-title">
-                Mostrar contagem de cartões nas listas
-              </span>
-              <span className="quadro-preferencias-form__check-description">
-                Exibe totais ao lado do nome de cada lista no quadro.
-              </span>
-            </span>
-          </label>
-
           <div className="quadro-preferencias-form__field">
             <label
-              htmlFor="quadro-prefs-densidade"
+              htmlFor="quadro-prefs-tema"
               className="quadro-preferencias-form__label"
             >
-              Densidade da listagem
+              Tema
             </label>
             <select
-              id="quadro-prefs-densidade"
-              name="densidadeListagem"
-              value={values.densidadeListagem}
+              id="quadro-prefs-tema"
+              name="tema"
+              value={values.tema}
               onChange={handleChange}
               className="quadro-preferencias-form__select"
             >
-              <option value="confortavel">Confortável</option>
-              <option value="compacta">Compacta</option>
+              <option value="sistema">Sistema</option>
+              <option value="claro">Claro</option>
+              <option value="escuro">Escuro</option>
             </select>
+          </div>
+
+          <div className="quadro-preferencias-form__field">
+            <label
+              htmlFor="quadro-prefs-cor-fundo"
+              className="quadro-preferencias-form__label"
+            >
+              Cor de fundo (opcional)
+            </label>
+            <input
+              id="quadro-prefs-cor-fundo"
+              type="color"
+              name="corFundo"
+              value={values.corFundo || "#000000"}
+              onChange={handleChange}
+              className="quadro-preferencias-form__select"
+            />
           </div>
 
           <label className="quadro-preferencias-form__check-card">
             <input
               type="checkbox"
-              name="abrirDetalheEmPainel"
-              checked={values.abrirDetalheEmPainel}
+              name="compacto"
+              checked={Boolean(values.compacto)}
               onChange={handleChange}
               className="quadro-preferencias-form__checkbox"
             />
             <span className="quadro-preferencias-form__check-content">
               <span className="quadro-preferencias-form__check-title">
-                Abrir detalhe do cartão em painel lateral
+                Modo compacto no quadro
               </span>
               <span className="quadro-preferencias-form__check-description">
-                Quando disponível no fluxo do quadro, prioriza painel em vez de
-                página inteira.
+                Reduz espaçamentos para maior densidade visual.
               </span>
             </span>
           </label>

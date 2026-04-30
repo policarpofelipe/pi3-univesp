@@ -1,5 +1,5 @@
-const { pool } = require("../database/connection");
 const QuadroRepository = require("../repositories/QuadroRepository");
+const TagRepository = require("../repositories/TagRepository");
 
 function toPositiveInt(value) {
   const num = Number(value);
@@ -7,63 +7,138 @@ function toPositiveInt(value) {
 }
 
 class TagService {
-  async listar(quadroId) {
+  async validarQuadro(quadroId) {
     const qId = toPositiveInt(quadroId);
-    if (!qId) throw Object.assign(new Error("ID de quadro inválido."), { statusCode: 400 });
+    if (!qId) {
+      const error = new Error("ID de quadro inválido.");
+      error.statusCode = 400;
+      error.code = "TAG_INVALID_QUADRO_ID";
+      throw error;
+    }
     const quadro = await QuadroRepository.obterPorId(qId);
     if (!quadro) return null;
+    return qId;
+  }
 
-    const [rows] = await pool.query(
-      `
-      SELECT id, quadro_id AS quadroId, nome, cor, criado_em AS criadoEm
-      FROM tags
-      WHERE quadro_id = ?
-      ORDER BY nome ASC, id ASC
-      `,
-      [qId]
-    );
-    return rows;
+  async listar(quadroId) {
+    const qId = await this.validarQuadro(quadroId);
+    if (!qId) return null;
+    return TagRepository.listar(qId);
   }
 
   async criar(quadroId, dados = {}) {
-    const qId = toPositiveInt(quadroId);
-    if (!qId) throw Object.assign(new Error("ID de quadro inválido."), { statusCode: 400 });
-    const quadro = await QuadroRepository.obterPorId(qId);
-    if (!quadro) return null;
+    const qId = await this.validarQuadro(quadroId);
+    if (!qId) return null;
 
     const nome = String(dados.nome || "").trim();
     const cor = String(dados.cor || "#64748b").trim();
-    if (!nome) throw Object.assign(new Error("O nome da tag é obrigatório."), { statusCode: 400 });
+    if (!nome) {
+      const error = new Error("O nome da tag é obrigatório.");
+      error.statusCode = 400;
+      error.code = "TAG_NOME_OBRIGATORIO";
+      throw error;
+    }
     if (!/^#[0-9A-Fa-f]{6}$/.test(cor)) {
-      throw Object.assign(new Error("Cor inválida. Use formato hexadecimal #RRGGBB."), {
-        statusCode: 400,
-      });
+      const error = new Error("Cor inválida. Use formato hexadecimal #RRGGBB.");
+      error.statusCode = 400;
+      error.code = "TAG_COR_INVALIDA";
+      throw error;
     }
 
-    const [result] = await pool.query(
-      `
-      INSERT INTO tags (quadro_id, nome, cor, criado_em)
-      VALUES (?, ?, ?, NOW())
-      `,
-      [qId, nome, cor]
-    );
-    const [rows] = await pool.query(
-      "SELECT id, quadro_id AS quadroId, nome, cor, criado_em AS criadoEm FROM tags WHERE id = ? LIMIT 1",
-      [result.insertId]
-    );
-    return rows[0] || null;
+    const jaExiste = await TagRepository.obterPorNome(qId, nome);
+    if (jaExiste && jaExiste.ativa) {
+      const error = new Error("Já existe uma tag com este nome no quadro.");
+      error.statusCode = 409;
+      error.code = "TAG_DUPLICADA";
+      throw error;
+    }
+    try {
+      if (jaExiste && !jaExiste.ativa) {
+        return TagRepository.atualizar(qId, jaExiste.id, { nome, cor, ativa: true });
+      }
+      return TagRepository.criar({ quadroId: qId, nome, cor, ativa: true });
+    } catch (error) {
+      if (error.code === "ER_DUP_ENTRY") {
+        const conflict = new Error("Já existe uma tag com este nome no quadro.");
+        conflict.statusCode = 409;
+        conflict.code = "TAG_DUPLICADA";
+        throw conflict;
+      }
+      throw error;
+    }
+  }
+
+  async atualizar(quadroId, tagId, dados = {}) {
+    const qId = await this.validarQuadro(quadroId);
+    if (!qId) return null;
+    const tId = toPositiveInt(tagId);
+    if (!tId) {
+      const error = new Error("ID de tag inválido.");
+      error.statusCode = 400;
+      error.code = "TAG_INVALID_ID";
+      throw error;
+    }
+    const atual = await TagRepository.obterPorId(qId, tId);
+    if (!atual) return null;
+
+    const payload = {};
+    if (dados.nome !== undefined) {
+      const nome = String(dados.nome || "").trim();
+      if (!nome) {
+        const error = new Error("O nome da tag é obrigatório.");
+        error.statusCode = 400;
+        error.code = "TAG_NOME_OBRIGATORIO";
+        throw error;
+      }
+      const repetida = await TagRepository.obterPorNome(qId, nome);
+      if (repetida && Number(repetida.id) !== Number(tId) && repetida.ativa) {
+        const error = new Error("Já existe uma tag com este nome no quadro.");
+        error.statusCode = 409;
+        error.code = "TAG_DUPLICADA";
+        throw error;
+      }
+      payload.nome = nome;
+    }
+    if (dados.cor !== undefined) {
+      const cor = String(dados.cor || "").trim();
+      if (!/^#[0-9A-Fa-f]{6}$/.test(cor)) {
+        const error = new Error("Cor inválida. Use formato hexadecimal #RRGGBB.");
+        error.statusCode = 400;
+        error.code = "TAG_COR_INVALIDA";
+        throw error;
+      }
+      payload.cor = cor;
+    }
+    if (dados.ativa !== undefined) {
+      payload.ativa = Boolean(dados.ativa);
+    }
+    try {
+      return TagRepository.atualizar(qId, tId, payload);
+    } catch (error) {
+      if (error.code === "ER_DUP_ENTRY") {
+        const conflict = new Error("Já existe uma tag com este nome no quadro.");
+        conflict.statusCode = 409;
+        conflict.code = "TAG_DUPLICADA";
+        throw conflict;
+      }
+      throw error;
+    }
   }
 
   async remover(quadroId, tagId) {
-    const qId = toPositiveInt(quadroId);
+    const qId = await this.validarQuadro(quadroId);
+    if (!qId) return null;
     const tId = toPositiveInt(tagId);
-    if (!qId || !tId) throw Object.assign(new Error("IDs inválidos."), { statusCode: 400 });
-
-    const [result] = await pool.query(
-      "DELETE FROM tags WHERE quadro_id = ? AND id = ?",
-      [qId, tId]
-    );
-    return result.affectedRows > 0;
+    if (!tId) {
+      const error = new Error("ID de tag inválido.");
+      error.statusCode = 400;
+      error.code = "TAG_INVALID_ID";
+      throw error;
+    }
+    const atual = await TagRepository.obterPorId(qId, tId);
+    if (!atual) return null;
+    await TagRepository.desativar(qId, tId);
+    return true;
   }
 }
 

@@ -3,7 +3,12 @@ const connectionModule = require("../database/connection");
 const db = connectionModule.pool || connectionModule.db || connectionModule;
 
 class TagRepository {
-  async listar(quadroId) {
+  mapRow(row) {
+    if (!row) return null;
+    return { ...row, ativa: Boolean(row.ativa) };
+  }
+
+  async listar(quadroId, { incluirInativas = false } = {}) {
     const [rows] = await db.query(
       `
       SELECT
@@ -16,11 +21,12 @@ class TagRepository {
         atualizado_em AS atualizadoEm
       FROM tags
       WHERE quadro_id = ?
+        ${incluirInativas ? "" : "AND ativa = 1"}
       ORDER BY nome ASC, id ASC
       `,
       [quadroId]
     );
-    return rows.map((row) => ({ ...row, ativa: Boolean(row.ativa) }));
+    return rows.map((row) => this.mapRow(row));
   }
 
   async obterPorId(quadroId, tagId) {
@@ -40,8 +46,28 @@ class TagRepository {
       `,
       [quadroId, tagId]
     );
-    const row = rows[0];
-    return row ? { ...row, ativa: Boolean(row.ativa) } : null;
+    return this.mapRow(rows[0] || null);
+  }
+
+  async obterPorNome(quadroId, nome) {
+    const [rows] = await db.query(
+      `
+      SELECT
+        id,
+        quadro_id AS quadroId,
+        nome,
+        cor,
+        ativa,
+        criado_em AS criadoEm,
+        atualizado_em AS atualizadoEm
+      FROM tags
+      WHERE quadro_id = ?
+        AND LOWER(nome) = LOWER(?)
+      LIMIT 1
+      `,
+      [quadroId, nome]
+    );
+    return this.mapRow(rows[0] || null);
   }
 
   async criar({ quadroId, nome, cor, ativa = true }) {
@@ -55,9 +81,43 @@ class TagRepository {
     return this.obterPorId(quadroId, result.insertId);
   }
 
-  async remover(quadroId, tagId) {
+  async atualizar(quadroId, tagId, dados = {}) {
+    const campos = [];
+    const params = [];
+    if (dados.nome !== undefined) {
+      campos.push("nome = ?");
+      params.push(dados.nome);
+    }
+    if (dados.cor !== undefined) {
+      campos.push("cor = ?");
+      params.push(dados.cor);
+    }
+    if (dados.ativa !== undefined) {
+      campos.push("ativa = ?");
+      params.push(dados.ativa ? 1 : 0);
+    }
+    if (!campos.length) {
+      return this.obterPorId(quadroId, tagId);
+    }
+    params.push(quadroId, tagId);
+    await db.query(
+      `
+      UPDATE tags
+      SET ${campos.join(", ")}, atualizado_em = NOW()
+      WHERE quadro_id = ? AND id = ?
+      `,
+      params
+    );
+    return this.obterPorId(quadroId, tagId);
+  }
+
+  async desativar(quadroId, tagId) {
     const [result] = await db.query(
-      "DELETE FROM tags WHERE quadro_id = ? AND id = ?",
+      `
+      UPDATE tags
+      SET ativa = 0, atualizado_em = NOW()
+      WHERE quadro_id = ? AND id = ?
+      `,
       [quadroId, tagId]
     );
     return result.affectedRows > 0;

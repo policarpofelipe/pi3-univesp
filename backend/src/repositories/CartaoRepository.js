@@ -143,7 +143,7 @@ class CartaoRepository {
     return { ...card, tagIds: tags[card.id] || [] };
   }
 
-  async criar({ listaId, titulo, descricao, prioridade, prazoEm, criadoPorUsuarioId, tagIds }) {
+  async criar({ quadroId, listaId, titulo, descricao, prioridade, prazoEm, criadoPorUsuarioId, tagIds }) {
     const [maxPosRows] = await db.query(
       "SELECT COALESCE(MAX(posicao), 0) AS maxPos FROM cartoes WHERE lista_id = ? AND arquivado_em IS NULL",
       [listaId]
@@ -160,13 +160,13 @@ class CartaoRepository {
     );
 
     if (Array.isArray(tagIds) && tagIds.length) {
-      await this.substituirTags(result.insertId, tagIds);
+      await this.substituirTags(quadroId, result.insertId, tagIds);
     }
 
     return result.insertId;
   }
 
-  async atualizar(cartaoId, dados = {}) {
+  async atualizar(quadroId, cartaoId, dados = {}) {
     const campos = [];
     const params = [];
     if (dados.titulo !== undefined) {
@@ -193,7 +193,7 @@ class CartaoRepository {
       );
     }
     if (dados.tagIds !== undefined) {
-      await this.substituirTags(cartaoId, dados.tagIds || []);
+      await this.substituirTags(quadroId, cartaoId, dados.tagIds || []);
     }
   }
 
@@ -284,12 +284,31 @@ class CartaoRepository {
     }, {});
   }
 
-  async substituirTags(cartaoId, tagIds = []) {
+  async substituirTags(quadroId, cartaoId, tagIds = []) {
     const conn = await db.getConnection();
     try {
       await conn.beginTransaction();
-      await conn.query("DELETE FROM cartao_tags WHERE cartao_id = ?", [cartaoId]);
       const unicos = [...new Set(tagIds.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0))];
+      if (unicos.length) {
+        const placeholders = unicos.map(() => "?").join(",");
+        const [rows] = await conn.query(
+          `
+          SELECT id
+          FROM tags
+          WHERE quadro_id = ?
+            AND ativa = 1
+            AND id IN (${placeholders})
+          `,
+          [quadroId, ...unicos]
+        );
+        if (rows.length !== unicos.length) {
+          const error = new Error("Há tags inválidas ou de outro quadro no cartão.");
+          error.statusCode = 400;
+          error.code = "CARTAO_TAG_INVALIDA";
+          throw error;
+        }
+      }
+      await conn.query("DELETE FROM cartao_tags WHERE cartao_id = ?", [cartaoId]);
       if (unicos.length) {
         const values = unicos.map((tagId) => [cartaoId, tagId, new Date()]);
         await conn.query(

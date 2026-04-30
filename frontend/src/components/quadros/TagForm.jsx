@@ -27,6 +27,7 @@ export default function TagForm({
       setCor("#64748b");
     } catch (err) {
       setErro(
+        err?.response?.data?.error?.message ||
         err?.response?.data?.message ||
           err?.message ||
           "Não foi possível salvar a tag."

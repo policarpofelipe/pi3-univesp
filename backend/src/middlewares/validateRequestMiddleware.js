@@ -26,6 +26,10 @@ function validateRequestMiddleware(rules = {}) {
         return res.status(400).json({
           success: false,
           message: errors[0] || "Requisição inválida.",
+          error: {
+            code: "VALIDATION_ERROR",
+            message: errors[0] || "Requisição inválida.",
+          },
           data: { errors },
         });
       }

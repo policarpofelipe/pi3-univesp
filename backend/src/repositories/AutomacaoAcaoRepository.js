@@ -3,6 +3,19 @@ const connectionModule = require("../database/connection");
 const db = connectionModule.pool || connectionModule.db || connectionModule;
 
 class AutomacaoAcaoRepository {
+  normalizeRow(row) {
+    if (!row) return null;
+    let configJson = row.configJson;
+    if (typeof configJson === "string") {
+      try {
+        configJson = JSON.parse(configJson);
+      } catch {
+        configJson = null;
+      }
+    }
+    return { ...row, ativo: Boolean(row.ativo), configJson: configJson || null };
+  }
+
   async listarPorAutomacao(automacaoId, incluirInativas = false) {
     const [rows] = await db.query(
       `
@@ -22,7 +35,7 @@ class AutomacaoAcaoRepository {
       `,
       [automacaoId]
     );
-    return rows.map((row) => ({ ...row, ativo: Boolean(row.ativo) }));
+    return rows.map((row) => this.normalizeRow(row));
   }
 
   async obterPorId(automacaoId, acaoId) {
@@ -43,8 +56,7 @@ class AutomacaoAcaoRepository {
       `,
       [automacaoId, acaoId]
     );
-    const row = rows[0];
-    return row ? { ...row, ativo: Boolean(row.ativo) } : null;
+    return this.normalizeRow(rows[0] || null);
   }
 
   async criar({ automacaoId, tipoAcao, configJson = null, ativo = true }) {
@@ -59,9 +71,47 @@ class AutomacaoAcaoRepository {
         automacao_id, ordem_execucao, tipo_acao, config_json, ativo, criado_em, atualizado_em
       ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())
       `,
-      [automacaoId, ordemExecucao, tipoAcao, configJson, ativo ? 1 : 0]
+      [
+        automacaoId,
+        ordemExecucao,
+        tipoAcao,
+        configJson ? JSON.stringify(configJson) : null,
+        ativo ? 1 : 0,
+      ]
     );
     return this.obterPorId(automacaoId, result.insertId);
+  }
+
+  async substituirAcoes(automacaoId, acoes = []) {
+    const conn = await db.getConnection();
+    try {
+      await conn.beginTransaction();
+      await conn.query("DELETE FROM automacao_acoes WHERE automacao_id = ?", [automacaoId]);
+      for (let i = 0; i < acoes.length; i += 1) {
+        const item = acoes[i];
+        await conn.query(
+          `
+          INSERT INTO automacao_acoes (
+            automacao_id, ordem_execucao, tipo_acao, config_json, ativo, criado_em, atualizado_em
+          ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+          `,
+          [
+            automacaoId,
+            i + 1,
+            item.tipoAcao,
+            item.configJson ? JSON.stringify(item.configJson) : null,
+            item.ativo === undefined ? 1 : item.ativo ? 1 : 0,
+          ]
+        );
+      }
+      await conn.commit();
+    } catch (error) {
+      await conn.rollback();
+      throw error;
+    } finally {
+      conn.release();
+    }
+    return this.listarPorAutomacao(automacaoId, true);
   }
 }
 

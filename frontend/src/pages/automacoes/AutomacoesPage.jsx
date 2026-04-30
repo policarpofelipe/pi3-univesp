@@ -38,6 +38,7 @@ export default function AutomacoesPage() {
       setAutomacoes(extractList(resAutomacoes));
     } catch (error) {
       setErro(
+        error?.response?.data?.error?.message ||
         error?.response?.data?.message ||
           error?.message ||
           "Não foi possível carregar as automações."
@@ -59,6 +60,7 @@ export default function AutomacoesPage() {
       await carregar();
     } catch (error) {
       setAcaoErro(
+        error?.response?.data?.error?.message ||
         error?.response?.data?.message ||
           error?.message ||
           "Não foi possível remover a automação."
