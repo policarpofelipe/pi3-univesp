@@ -17,7 +17,6 @@ import visaoService from "../../services/visaoService";
 import campoPersonalizadoService from "../../services/campoPersonalizadoService";
 import quadroPapelService from "../../services/quadroPapelService";
 import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
-import ListaModal from "../../components/listas/ListaModal";
 import CartaoModal from "../../components/cartoes/CartaoModal";
 import QuadroManagementDrawer from "../../components/quadros/QuadroManagementDrawer";
 import BoardQuickFilters from "../../components/quadros/board/BoardQuickFilters";
@@ -64,6 +63,12 @@ function pathnameEhSomenteQuadro(pathname) {
   return /^\/quadros\/[^/]+$/.test(p) && !p.includes("/cartoes/");
 }
 
+/** Overlay ou página de criar/editar lista sobre o quadro. */
+function pathnameEhEditorListaNoQuadro(pathname) {
+  const p = String(pathname || "");
+  return /\/quadros\/[^/]+\/listas\/nova$/.test(p) || /\/quadros\/[^/]+\/listas\/[^/]+\/editar$/.test(p);
+}
+
 export default function QuadroDetalhePage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -77,8 +82,6 @@ export default function QuadroDetalhePage() {
   const [cartoes, setCartoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
-  const [listaModal, setListaModal] = useState(null);
-  const [listaSalvando, setListaSalvando] = useState(false);
   const [cartaoModal, setCartaoModal] = useState(null);
   const [cartaoSalvando, setCartaoSalvando] = useState(false);
   const [movendoCartaoId, setMovendoCartaoId] = useState(null);
@@ -361,7 +364,17 @@ export default function QuadroDetalhePage() {
       void carregarCartoes();
       void carregarTags();
     }
-  }, [location.pathname, quadroId, carregarCartoes, carregarTags]);
+
+    if (
+      pathnameEhEditorListaNoQuadro(anterior) &&
+      pathnameEhSomenteQuadro(atual) &&
+      String(quadroId) === (atual.match(/^\/quadros\/([^/]+)/)?.[1] ?? "")
+    ) {
+      void carregarListas();
+      void carregarCartoes();
+      void carregarTags();
+    }
+  }, [location.pathname, quadroId, carregarCartoes, carregarTags, carregarListas]);
 
   useEffect(() => {
     function handleCartoesTagsAtualizados(event) {
@@ -790,7 +803,8 @@ export default function QuadroDetalhePage() {
   }
 
   function handleNovaLista() {
-    setListaModal({ mode: "criar", lista: null });
+    closeDrawer();
+    navigate(`/quadros/${quadroId}/listas/nova`, { state: { background: location } });
   }
 
   const handleCriacaoRapidaCartao = useCallback(
@@ -838,23 +852,6 @@ export default function QuadroDetalhePage() {
     const [item] = next.splice(index, 1);
     next.splice(to, 0, item);
     aplicarOrdem(next);
-  }
-
-  async function handleSalvarLista(payload) {
-    setListaSalvando(true);
-    try {
-      if (listaModal?.mode === "criar") {
-        await listaService.criar(quadroId, payload);
-      } else if (listaModal?.lista?.id) {
-        await listaService.atualizar(quadroId, listaModal.lista.id, payload);
-      }
-      setListaModal(null);
-      await carregarListas();
-    } catch (err) {
-      throw err;
-    } finally {
-      setListaSalvando(false);
-    }
   }
 
   async function handleExcluirLista(lista) {
@@ -912,14 +909,17 @@ export default function QuadroDetalhePage() {
   const listaMenusColuna = useMemo(
     () =>
       listas.map((lista, index) => ({
-        onEditar: () => setListaModal({ mode: "editar", lista }),
+        onEditar: () =>
+          navigate(`/quadros/${quadroId}/listas/${lista.id}/editar`, {
+            state: { background: location },
+          }),
         onExcluir: () => handleExcluirLista(lista),
         onMoverEsquerda: () => moverLista(index, -1),
         onMoverDireita: () => moverLista(index, 1),
         podeMoverEsquerda: index > 0,
         podeMoverDireita: index < listas.length - 1,
       })),
-    [listas]
+    [listas, navigate, location, quadroId]
   );
 
   if (loading && !quadro) {
@@ -1098,14 +1098,6 @@ export default function QuadroDetalhePage() {
         onSubmit={handleSalvarCartao}
       />
 
-      <ListaModal
-        open={Boolean(listaModal)}
-        modo={listaModal?.mode === "criar" ? "criar" : "editar"}
-        listaEmEdicao={listaModal?.lista ?? null}
-        loading={listaSalvando}
-        onClose={() => setListaModal(null)}
-        onSubmit={handleSalvarLista}
-      />
     </AppLayout>
   );
 }

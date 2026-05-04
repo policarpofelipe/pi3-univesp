@@ -18,6 +18,8 @@ import ConsultaEnderecoOverlay from "../pages/quadros/ConsultaEnderecoOverlay";
 import QuadroMembrosPage from "../pages/quadros/QuadroMembrosPage";
 import QuadroPapeisPage from "../pages/quadros/QuadroPapeisPage";
 import ListaConfiguracoesPage from "../pages/listas/ListaConfiguracoesPage";
+import ListaEditorFullPage from "../pages/listas/ListaEditorFullPage";
+import ListaEditorOverlay from "../pages/listas/ListaEditorOverlay";
 import ListaPermissoesPage from "../pages/listas/ListaPermissoesPage";
 import ListaTransicoesPage from "../pages/listas/ListaTransicoesPage";
 import VisoesPage from "../pages/visoes/VisoesPage";
@@ -93,6 +95,14 @@ export default function PrivateAuthenticatedRoutes() {
           element={<QuadroPapeisPage />}
         />
         <Route
+          path="/quadros/:quadroId/listas/nova"
+          element={<ListaEditorFullPage modo="criar" />}
+        />
+        <Route
+          path="/quadros/:quadroId/listas/:listaId/editar"
+          element={<ListaEditorFullPage modo="editar" />}
+        />
+        <Route
           path="/quadros/:quadroId/listas/:listaId/configuracoes"
           element={<ListaConfiguracoesPage />}
         />
@@ -146,6 +156,14 @@ export default function PrivateAuthenticatedRoutes() {
           <Route
             path="/quadros/:quadroId/consultas/endereco"
             element={<ConsultaEnderecoOverlay />}
+          />
+          <Route
+            path="/quadros/:quadroId/listas/nova"
+            element={<ListaEditorOverlay modo="criar" />}
+          />
+          <Route
+            path="/quadros/:quadroId/listas/:listaId/editar"
+            element={<ListaEditorOverlay modo="editar" />}
           />
         </Routes>
       ) : null}
