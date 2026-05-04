@@ -1,0 +1,27 @@
+/* Shell da consulta dentro do mesmo dialog do cartão */
+
+.consultas-dialog-root {
+  display: flex;
+  flex-direction: column;
+  max-height: min(88vh, calc(100dvh - var(--space-6)));
+  min-height: 0;
+}
+
+.consultas-dialog-root__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.consultas-dialog-root__intro {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.consultas-page--modal {
+  max-width: none;
+  margin: 0;
+}

@@ -11,10 +11,7 @@ Projeto Integrador 3 UNIVESP - Grupo 3 Alunos: 1. Isabella Aparecida Marzola 2. 
 
 ## Consultas externas via API
 
-O módulo **Gerenciar quadro** (configurações do quadro e aba **Geral** do painel lateral) inclui a seção **Consultas externas**, com atalhos para:
-
-- `/quadros/:quadroId/consultas/cnpj` — consulta de CNPJ
-- `/quadros/:quadroId/consultas/endereco` — consulta de endereço por CEP
+O módulo **Gerenciar quadro** (configurações do quadro e aba **Geral** do painel lateral) inclui a seção **Consultas externas**, com botões que abrem **dialog modal** sobre a tela atual (mesmo padrão do detalhe do cartão, com `state.background` no React Router). A URL continua sendo `/quadros/:quadroId/consultas/cnpj` ou `.../consultas/endereco`; acesso direto à URL sem `state.background` ainda abre a **página completa**.
 
 O **frontend** chama apenas a API interna (`GET /api/consultas/cnpj/:cnpj` e `GET /api/consultas/cep/:cep`), autenticada com o mesmo token das demais rotas. As chamadas a serviços públicos ficam no **backend** (evita CORS, unifica erros e permite fallback).
 

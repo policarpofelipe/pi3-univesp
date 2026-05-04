@@ -12,7 +12,9 @@ import QuadrosPage from "../pages/quadros/QuadrosPage";
 import QuadroDetalhePage from "../pages/quadros/QuadroDetalhePage";
 import QuadroConfiguracoesPage from "../pages/quadros/QuadroConfiguracoesPage";
 import ConsultaCnpjPage from "../pages/quadros/ConsultaCnpjPage";
+import ConsultaCnpjOverlay from "../pages/quadros/ConsultaCnpjOverlay";
 import ConsultaEnderecoPage from "../pages/quadros/ConsultaEnderecoPage";
+import ConsultaEnderecoOverlay from "../pages/quadros/ConsultaEnderecoOverlay";
 import QuadroMembrosPage from "../pages/quadros/QuadroMembrosPage";
 import QuadroPapeisPage from "../pages/quadros/QuadroPapeisPage";
 import ListaConfiguracoesPage from "../pages/listas/ListaConfiguracoesPage";
@@ -136,6 +138,14 @@ export default function PrivateAuthenticatedRoutes() {
           <Route
             path="/quadros/:quadroId/cartoes/:cartaoId"
             element={<CartaoDetalheOverlay />}
+          />
+          <Route
+            path="/quadros/:quadroId/consultas/cnpj"
+            element={<ConsultaCnpjOverlay />}
+          />
+          <Route
+            path="/quadros/:quadroId/consultas/endereco"
+            element={<ConsultaEnderecoOverlay />}
           />
         </Routes>
       ) : null}

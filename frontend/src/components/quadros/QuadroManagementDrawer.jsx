@@ -7,8 +7,7 @@ import React, {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
-import clsx from "clsx";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Bot,
@@ -114,6 +113,8 @@ export default function QuadroManagementDrawer({
   onNovoCartao,
   onNovaLista,
 }) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const panelRef = useRef(null);
   const previouslyFocused = useRef(null);
   const drawerOpenedRef = useRef(false);
@@ -380,56 +381,36 @@ export default function QuadroManagementDrawer({
                       >
                         Consultas externas
                       </h4>
-                      <ul className="flex flex-col gap-2">
-                        <li>
-                          <Link
-                            to={`/quadros/${quadro.id}/consultas/cnpj`}
-                            className={clsx(
-                              "button",
-                              "button--secondary",
-                              "button--full-width",
-                              "quadro-management-drawer__consulta-link"
-                            )}
-                            onClick={() => onClose?.()}
-                          >
-                            <span className="button__content quadro-management-drawer__consulta-link-inner">
-                              <span className="button__icon" aria-hidden="true">
-                                <FileDigit size={16} />
-                              </span>
-                              <span className="button__label quadro-management-drawer__consulta-link-text">
-                                <span className="font-semibold">Consultar CNPJ</span>
-                                <span className="mt-0.5 block text-left text-[var(--font-size-xs)] font-normal text-[var(--color-text-muted)]">
-                                  Busque dados públicos de uma empresa pelo CNPJ.
-                                </span>
-                              </span>
-                            </span>
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            to={`/quadros/${quadro.id}/consultas/endereco`}
-                            className={clsx(
-                              "button",
-                              "button--secondary",
-                              "button--full-width",
-                              "quadro-management-drawer__consulta-link"
-                            )}
-                            onClick={() => onClose?.()}
-                          >
-                            <span className="button__content quadro-management-drawer__consulta-link-inner">
-                              <span className="button__icon" aria-hidden="true">
-                                <MapPin size={16} />
-                              </span>
-                              <span className="button__label quadro-management-drawer__consulta-link-text">
-                                <span className="font-semibold">Consultar endereço</span>
-                                <span className="mt-0.5 block text-left text-[var(--font-size-xs)] font-normal text-[var(--color-text-muted)]">
-                                  Busque dados de endereço por CEP.
-                                </span>
-                              </span>
-                            </span>
-                          </Link>
-                        </li>
-                      </ul>
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          leftIcon={<FileDigit size={16} aria-hidden="true" />}
+                          fullWidth
+                          onClick={() => {
+                            navigate(`/quadros/${quadro.id}/consultas/cnpj`, {
+                              state: { background: location },
+                            });
+                            onClose?.();
+                          }}
+                        >
+                          Consultar CNPJ
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          leftIcon={<MapPin size={16} aria-hidden="true" />}
+                          fullWidth
+                          onClick={() => {
+                            navigate(`/quadros/${quadro.id}/consultas/endereco`, {
+                              state: { background: location },
+                            });
+                            onClose?.();
+                          }}
+                        >
+                          Consultar endereço
+                        </Button>
+                      </div>
                     </div>
                   </section>
                 ) : null}

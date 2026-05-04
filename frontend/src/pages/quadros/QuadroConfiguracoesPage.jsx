@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import clsx from "clsx";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import AppLayout from "../../components/layout/AppLayout";
 import PageHeader from "../../components/ui/PageHeader";
@@ -30,6 +29,7 @@ import "../../styles/pages/quadro-configuracoes.css";
 
 export default function QuadroConfiguracoesPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { quadroId } = useParams();
   const { usuario } = useAuth();
 
@@ -289,57 +289,31 @@ export default function QuadroConfiguracoesPage() {
               </p>
             </div>
 
-            <div className="quadro-configuracoes-page__card quadro-configuracoes-page__card--consultas">
-              <ul className="quadro-configuracoes-page__consultas-list">
-                <li>
-                  <Link
-                    className={clsx(
-                      "quadro-configuracoes-page__consulta-card",
-                      "button",
-                      "button--secondary"
-                    )}
-                    to={`/quadros/${quadroId}/consultas/cnpj`}
-                  >
-                    <span className="button__content quadro-configuracoes-page__consulta-card-inner">
-                      <span className="button__icon" aria-hidden="true">
-                        <FileDigit size={18} />
-                      </span>
-                      <span className="button__label quadro-configuracoes-page__consulta-card-text">
-                        <span className="quadro-configuracoes-page__consulta-card-title">
-                          Consultar CNPJ
-                        </span>
-                        <span className="quadro-configuracoes-page__consulta-card-desc">
-                          Busque dados públicos de uma empresa pelo CNPJ.
-                        </span>
-                      </span>
-                    </span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className={clsx(
-                      "quadro-configuracoes-page__consulta-card",
-                      "button",
-                      "button--secondary"
-                    )}
-                    to={`/quadros/${quadroId}/consultas/endereco`}
-                  >
-                    <span className="button__content quadro-configuracoes-page__consulta-card-inner">
-                      <span className="button__icon" aria-hidden="true">
-                        <MapPin size={18} />
-                      </span>
-                      <span className="button__label quadro-configuracoes-page__consulta-card-text">
-                        <span className="quadro-configuracoes-page__consulta-card-title">
-                          Consultar endereço
-                        </span>
-                        <span className="quadro-configuracoes-page__consulta-card-desc">
-                          Busque dados de endereço por CEP.
-                        </span>
-                      </span>
-                    </span>
-                  </Link>
-                </li>
-              </ul>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                leftIcon={<FileDigit size={16} aria-hidden="true" />}
+                onClick={() =>
+                  navigate(`/quadros/${quadroId}/consultas/cnpj`, {
+                    state: { background: location },
+                  })
+                }
+              >
+                Consultar CNPJ
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                leftIcon={<MapPin size={16} aria-hidden="true" />}
+                onClick={() =>
+                  navigate(`/quadros/${quadroId}/consultas/endereco`, {
+                    state: { background: location },
+                  })
+                }
+              >
+                Consultar endereço
+              </Button>
             </div>
           </section>
 
