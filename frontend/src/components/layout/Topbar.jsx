@@ -9,9 +9,11 @@ import {
   UserRound,
   LogOut,
   RotateCcw,
+  Contrast,
 } from "lucide-react";
 
 import IconButton from "../ui/IconButton";
+import Button from "../ui/Button";
 import useAuth from "../../hooks/useAuth";
 import useAccessibility from "../../hooks/useAccessibility";
 import accessibilityLogo from "../../assets/icons/Accessibility_logo.svg";
@@ -406,17 +408,22 @@ export default function Topbar({
 
               <section className="topbar__a11y-section">
                 <h3>Alto contraste</h3>
-                <button
+                <Button
                   type="button"
-                  className="topbar__a11y-toggle topbar__a11y-toggle--contrast"
+                  variant="secondary"
+                  size="md"
+                  fullWidth
                   role="switch"
                   aria-checked={theme === "high-contrast"}
                   onClick={() =>
                     setTheme(theme === "high-contrast" ? "default" : "high-contrast")
                   }
+                  leftIcon={<Contrast size={18} strokeWidth={2} />}
                 >
-                  {theme === "high-contrast" ? "Desativar" : "Ativar"}
-                </button>
+                  {theme === "high-contrast"
+                    ? "Desativar alto contraste"
+                    : "Ativar alto contraste"}
+                </Button>
               </section>
 
               <section className="topbar__a11y-section">

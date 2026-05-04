@@ -206,19 +206,6 @@
   color: var(--color-primary);
 }
 
-.topbar__a11y-toggle {
-  min-height: 44px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  padding: 0 var(--space-3);
-  width: fit-content;
-}
-
-.topbar__a11y-toggle--contrast {
-  border-color: var(--color-border-strong);
-}
-
 :root[data-theme="high-contrast"] .topbar-accessibility-button {
   color: var(--color-text);
   background: var(--color-bg);
