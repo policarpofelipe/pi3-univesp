@@ -1,7 +1,15 @@
-import { useId, useState } from "react";
+import { useCallback, useId, useState } from "react";
+import { useParams } from "react-router-dom";
 
 import Button from "../ui/Button";
 import { consultarCnpj } from "../../services/consultasService";
+import cartaoService from "../../services/cartaoService";
+import listaService from "../../services/listaService";
+import { extractList } from "../../utils/apiData";
+import {
+  montarDescricaoCartaoCnpj,
+  tituloCartaoCnpj,
+} from "../../utils/consultaCartaoTexto";
 import {
   formatarCnpj,
   formatarCnpjDigitando,
@@ -9,7 +17,7 @@ import {
   validarCnpjBasico,
 } from "../../utils/documentos";
 
-import { Copy, RefreshCw } from "lucide-react";
+import { Copy, RefreshCw, SquarePlus } from "lucide-react";
 
 import "../../styles/pages/consultas.css";
 
@@ -42,6 +50,7 @@ function montarTextoCopia(payload) {
 
 /** Formulário e resultado da consulta CNPJ (usado na página e no modal). */
 export default function ConsultaCnpjContent() {
+  const { quadroId } = useParams();
   const fieldId = useId();
   const errorId = useId();
   const hintId = `${fieldId}-hint`;
@@ -55,6 +64,9 @@ export default function ConsultaCnpjContent() {
   const [consultando, setConsultando] = useState(false);
   const [resultado, setResultado] = useState(null);
   const [copiado, setCopiado] = useState(false);
+  const [criandoCartao, setCriandoCartao] = useState(false);
+  const [erroCartao, setErroCartao] = useState("");
+  const [msgCartao, setMsgCartao] = useState("");
 
   function handleCnpjChange(event) {
     setCnpjInput(formatarCnpjDigitando(event.target.value));
@@ -66,6 +78,8 @@ export default function ConsultaCnpjContent() {
     event.preventDefault();
     setErroCampo("");
     setErroConsulta("");
+    setErroCartao("");
+    setMsgCartao("");
     setResultado(null);
     setCopiado(false);
 
@@ -112,11 +126,51 @@ export default function ConsultaCnpjContent() {
     }
   }
 
+  const handleCriarCartao = useCallback(async () => {
+    if (!quadroId || !resultado?.success) return;
+    setErroCartao("");
+    setMsgCartao("");
+    setCriandoCartao(true);
+    try {
+      const resListas = await listaService.listar(quadroId);
+      const listas = extractList(resListas).sort(
+        (a, b) => (a.posicao ?? 0) - (b.posicao ?? 0)
+      );
+      if (!listas.length) {
+        setErroCartao(
+          "Este quadro ainda não tem listas. Crie uma lista no quadro antes de adicionar o cartão."
+        );
+        return;
+      }
+      const primeiraLista = listas[0];
+      const titulo = tituloCartaoCnpj(resultado);
+      const descricao = montarDescricaoCartaoCnpj(resultado);
+      await cartaoService.criar(quadroId, {
+        listaId: primeiraLista.id,
+        titulo,
+        descricao,
+      });
+      setMsgCartao(
+        `Cartão criado na lista “${primeiraLista.nome || "primeira lista"}”.`
+      );
+    } catch (err) {
+      setErroCartao(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Não foi possível criar o cartão. Tente novamente."
+      );
+    } finally {
+      setCriandoCartao(false);
+    }
+  }, [quadroId, resultado]);
+
   function handleNovaConsulta() {
     setCnpjInput("");
     setResultado(null);
     setErroCampo("");
     setErroConsulta("");
+    setErroCartao("");
+    setMsgCartao("");
     setCopiado(false);
   }
 
@@ -288,20 +342,43 @@ export default function ConsultaCnpjContent() {
               variant="secondary"
               leftIcon={<Copy size={16} aria-hidden="true" />}
               onClick={handleCopiar}
-              disabled={consultando}
+              disabled={consultando || criandoCartao}
             >
               {copiado ? "Copiado" : "Copiar dados"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              leftIcon={<SquarePlus size={16} aria-hidden="true" />}
+              onClick={handleCriarCartao}
+              disabled={consultando || criandoCartao}
+              loading={criandoCartao}
+            >
+              Criar Cartão com esses dados
             </Button>
             <Button
               type="button"
               variant="ghost"
               leftIcon={<RefreshCw size={16} aria-hidden="true" />}
               onClick={handleNovaConsulta}
-              disabled={consultando}
+              disabled={consultando || criandoCartao}
             >
               Nova consulta
             </Button>
           </div>
+          {erroCartao ? (
+            <p className="consultas-page__alert mt-3" role="alert">
+              {erroCartao}
+            </p>
+          ) : null}
+          {msgCartao ? (
+            <p
+              className="consultas-page__alert consultas-page__alert--info mt-3"
+              role="status"
+            >
+              {msgCartao}
+            </p>
+          ) : null}
         </section>
       ) : null}
     </>
