@@ -158,6 +158,18 @@
   gap: var(--space-4);
 }
 
+.home-page__section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.home-page__section-header .home-page__section-title {
+  flex: 1;
+  min-width: min(12rem, 100%);
+}
+
 .home-page__section-title {
   margin: 0;
   display: flex;
@@ -287,6 +299,36 @@
 .home-page__step-button:focus-visible {
   outline: none;
   box-shadow: 0 0 0 var(--focus-ring-width) var(--color-focus-ring);
+}
+
+.home-page__steps:has(.home-page__step--current)
+  .home-page__step:not(.home-page__step--current)
+  .home-page__step-button,
+.home-page__steps:has(.home-page__step--current)
+  .home-page__step:not(.home-page__step--current)
+  .home-page__step-static {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
+.home-page__steps:has(.home-page__step--current)
+  .home-page__step:not(.home-page__step--current)
+  .home-page__step-index {
+  background: color-mix(in srgb, var(--color-primary) 55%, var(--color-surface-alt));
+  color: var(--color-on-primary);
+}
+
+.home-page__step--current .home-page__step-button,
+.home-page__step--current .home-page__step-static {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 28%, transparent);
+  background: var(--color-surface-alt);
+}
+
+.home-page__step--current .home-page__step-index {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
 }
 
 .home-page__step-index {

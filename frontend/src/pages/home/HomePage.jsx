@@ -12,7 +12,7 @@ import listaService from "../../services/listaService";
 import cartaoService from "../../services/cartaoService";
 import { extractList } from "../../utils/apiData";
 
-import { Plus, Building2, KanbanSquare, ListTodo, CheckSquare } from "lucide-react";
+import { Building2, KanbanSquare, ListTodo, CheckSquare } from "lucide-react";
 
 import "../../styles/pages/home.css";
 
@@ -170,6 +170,16 @@ export default function HomePage() {
     ];
   }, [counts]);
 
+  /** Passo em destaque na ordem 1 → 2 → 3 conforme o progresso real do usuário. */
+  const passoDestaque = useMemo(() => {
+    const { organizacoes: nOrg, quadros: nQuad, listas: nLista, cartoes: nCard } =
+      counts;
+    if (nOrg === 0) return 1;
+    if (nQuad === 0) return 2;
+    if (nLista === 0 || nCard === 0) return 3;
+    return null;
+  }, [counts]);
+
   function handleCreateOrganization() {
     navigate("/organizacoes");
   }
@@ -261,61 +271,54 @@ export default function HomePage() {
                 className="home-page__section"
                 aria-labelledby="home-orgs-title"
               >
-                <h3 id="home-orgs-title" className="home-page__section-title">
-                  Suas Organizações
-                </h3>
+                <div className="home-page__section-header">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => navigate("/organizacoes")}
+                  >
+                    Ver Organizações
+                  </Button>
+                  <h3 id="home-orgs-title" className="home-page__section-title">
+                    Suas Organizações
+                  </h3>
+                </div>
                 {organizacoes.length === 0 ? (
-                  <>
-                    <p className="home-page__empty-hint">
-                      Você ainda não participa de nenhuma organização. Crie ou
-                      acesse uma organização para vincular quadros e equipes.
-                    </p>
-                    <Button
-                      variant="secondary"
-                      onClick={() => navigate("/organizacoes")}
-                    >
-                      Ir para organizações
-                    </Button>
-                  </>
+                  <p className="home-page__empty-hint">
+                    Você ainda não participa de nenhuma organização. Crie ou acesse
+                    uma organização para vincular quadros e equipes.
+                  </p>
                 ) : (
-                  <>
-                    <ul className="home-page__quadro-list">
-                      {organizacoes.map((o) => {
-                        const id = o.id;
-                        const nome = o.nome || "Organização sem nome";
-                        const slug = o.slug ? String(o.slug) : "";
+                  <ul className="home-page__quadro-list">
+                    {organizacoes.map((o) => {
+                      const id = o.id;
+                      const nome = o.nome || "Organização sem nome";
+                      const slug = o.slug ? String(o.slug) : "";
 
-                        return (
-                          <li key={id} className="home-page__quadro-row">
-                            <Link
-                              to={`/organizacoes/${id}`}
-                              className="home-page__quadro-link"
-                            >
-                              <span className="home-page__quadro-link-text">
-                                {nome}
-                                {slug ? (
-                                  <span className="home-page__quadro-org">
-                                    {slug}
-                                  </span>
-                                ) : null}
-                              </span>
-                              <Building2
-                                size={18}
-                                className="home-page__quadro-link-icon"
-                                aria-hidden="true"
-                              />
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                    <Button
-                      variant="secondary"
-                      onClick={() => navigate("/organizacoes")}
-                    >
-                      Ver todas as organizações
-                    </Button>
-                  </>
+                      return (
+                        <li key={id} className="home-page__quadro-row">
+                          <Link
+                            to={`/organizacoes/${id}`}
+                            className="home-page__quadro-link"
+                          >
+                            <span className="home-page__quadro-link-text">
+                              {nome}
+                              {slug ? (
+                                <span className="home-page__quadro-org">
+                                  {slug}
+                                </span>
+                              ) : null}
+                            </span>
+                            <Building2
+                              size={18}
+                              className="home-page__quadro-link-icon"
+                              aria-hidden="true"
+                            />
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 )}
               </section>
 
@@ -323,67 +326,59 @@ export default function HomePage() {
                 className="home-page__section"
                 aria-labelledby="home-quadros-title"
               >
-                <h3 id="home-quadros-title" className="home-page__section-title">
-                  Seus Quadros
-                </h3>
+                <div className="home-page__section-header">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => navigate("/quadros")}
+                  >
+                    Ver Quadros
+                  </Button>
+                  <h3 id="home-quadros-title" className="home-page__section-title">
+                    Seus Quadros
+                  </h3>
+                </div>
                 {quadros.length === 0 ? (
-                  <>
-                    <p className="home-page__empty-hint">
-                      Nenhum quadro ainda. Crie um quadro no contexto de uma
-                      organização para começar a organizar tarefas.
-                    </p>
-                    <Button
-                      variant="primary"
-                      leftIcon={<Plus size={16} />}
-                      onClick={handleCreateBoard}
-                    >
-                      Ver quadros
-                    </Button>
-                  </>
+                  <p className="home-page__empty-hint">
+                    Nenhum quadro ainda. Crie um quadro no contexto de uma
+                    organização para começar a organizar tarefas.
+                  </p>
                 ) : (
-                  <>
-                    <ul className="home-page__quadro-list">
-                      {quadros.map((q) => {
-                        const id = q.id;
-                        const nome = q.nome || "Quadro sem nome";
-                        const org =
-                          q.organizacaoNome ||
-                          q.organizacao?.nome ||
-                          (q.organizacaoId
-                            ? `Organização #${q.organizacaoId}`
-                            : "");
+                  <ul className="home-page__quadro-list">
+                    {quadros.map((q) => {
+                      const id = q.id;
+                      const nome = q.nome || "Quadro sem nome";
+                      const org =
+                        q.organizacaoNome ||
+                        q.organizacao?.nome ||
+                        (q.organizacaoId
+                          ? `Organização #${q.organizacaoId}`
+                          : "");
 
-                        return (
-                          <li key={id} className="home-page__quadro-row">
-                            <Link
-                              to={`/quadros/${id}`}
-                              className="home-page__quadro-link"
-                            >
-                              <span className="home-page__quadro-link-text">
-                                {nome}
-                                {org ? (
-                                  <span className="home-page__quadro-org">
-                                    {org}
-                                  </span>
-                                ) : null}
-                              </span>
-                              <KanbanSquare
-                                size={18}
-                                className="home-page__quadro-link-icon"
-                                aria-hidden="true"
-                              />
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                    <Button
-                      variant="secondary"
-                      onClick={() => navigate("/quadros")}
-                    >
-                      Ver todos os quadros
-                    </Button>
-                  </>
+                      return (
+                        <li key={id} className="home-page__quadro-row">
+                          <Link
+                            to={`/quadros/${id}`}
+                            className="home-page__quadro-link"
+                          >
+                            <span className="home-page__quadro-link-text">
+                              {nome}
+                              {org ? (
+                                <span className="home-page__quadro-org">
+                                  {org}
+                                </span>
+                              ) : null}
+                            </span>
+                            <KanbanSquare
+                              size={18}
+                              className="home-page__quadro-link-icon"
+                              aria-hidden="true"
+                            />
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 )}
               </section>
             </div>
@@ -399,7 +394,12 @@ export default function HomePage() {
               </h3>
 
               <ol className="home-page__steps">
-                <li className="home-page__step">
+                <li
+                  className={`home-page__step${
+                    passoDestaque === 1 ? " home-page__step--current" : ""
+                  }`}
+                  aria-current={passoDestaque === 1 ? "step" : undefined}
+                >
                   <button
                     type="button"
                     className="home-page__step-button"
@@ -417,7 +417,12 @@ export default function HomePage() {
                   </button>
                 </li>
 
-                <li className="home-page__step">
+                <li
+                  className={`home-page__step${
+                    passoDestaque === 2 ? " home-page__step--current" : ""
+                  }`}
+                  aria-current={passoDestaque === 2 ? "step" : undefined}
+                >
                   <button
                     type="button"
                     className="home-page__step-button"
@@ -435,7 +440,12 @@ export default function HomePage() {
                   </button>
                 </li>
 
-                <li className="home-page__step">
+                <li
+                  className={`home-page__step${
+                    passoDestaque === 3 ? " home-page__step--current" : ""
+                  }`}
+                  aria-current={passoDestaque === 3 ? "step" : undefined}
+                >
                   <div className="home-page__step-static">
                     <span className="home-page__step-index" aria-hidden="true">
                       3
