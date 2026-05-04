@@ -76,10 +76,72 @@
   padding: var(--space-12);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
+  justify-content: flex-start;
+  min-height: 100%;
   position: relative;
   z-index: 2;
+}
+
+.login__hero-copy {
+  max-width: 32rem;
+  max-height: calc(100vh - var(--space-12) * 2);
+  overflow-y: auto;
+  padding-right: var(--space-2);
+}
+
+.login__hero-copy__institution {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: -0.02em;
+  color: inherit;
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--color-text) 12%, transparent);
+}
+
+.login__hero-copy__meta {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  opacity: 0.98;
+  line-height: var(--line-height-relaxed);
+  color: inherit;
+}
+
+.login__hero-copy__tema {
+  margin: 0 0 var(--space-6);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-relaxed);
+  opacity: 0.95;
+  color: inherit;
+}
+
+.login__hero-copy__grupo {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-heading-3);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: inherit;
+}
+
+.login__hero-copy__membros {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--font-size-sm);
+  line-height: 1.55;
+  opacity: 0.96;
+  color: inherit;
+}
+
+.login__hero-copy__membros li {
+  padding: 0.2rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-on-primary) 18%, transparent);
+}
+
+.login__hero-copy__membros li:last-child {
+  border-bottom: none;
 }
 
 .login__brand {
@@ -372,8 +434,12 @@
     margin: var(--space-4);
   }
 
-  .login__hero-text h2 {
-    font-size: var(--font-size-heading-3);
+  .login__hero-copy__institution {
+    font-size: var(--font-size-lg);
+  }
+
+  .login__hero-copy__grupo {
+    font-size: var(--font-size-heading-4);
   }
 }
 

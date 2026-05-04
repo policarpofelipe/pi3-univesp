@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, LogIn, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 
 import useAuth from "../../hooks/useAuth";
 import Button from "../../components/ui/Button";
@@ -25,6 +25,18 @@ function validateLoginForm({ email, senha }) {
 
   return errors;
 }
+
+const MEMBROS_GRUPO_3_ALFABETICO = [
+  "Ana Flavia Damasceno Silva",
+  "Cesar Yukio Kato",
+  "Diogo Katto Mimatani",
+  "Edenilson Cordeiro Joares",
+  "Felipe Martins Policarpo",
+  "Isabella Aparecida Marzola",
+  "Jair Waldo Jara Palomino",
+  "Julio Cesar Monteiro dos Santos",
+  "Norma Terezinha da Silva",
+];
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -127,24 +139,22 @@ export default function LoginPage() {
           aria-label="Apresentação do sistema"
         >
           <div className="login__hero-content">
-            <div className="login__brand">
-              <ShieldCheck size={28} aria-hidden="true" />
-              <div>
-                <h1>Projeto Integrador 3</h1>
-                <span>UNIVESP 2026</span>
-              </div>
-            </div>
-
-            <div className="login__hero-text">
-              <h2>
-                Gestão de tarefas
-                <br />
-                com estrutura e clareza
-              </h2>
-              <p>
-                Organize quadros, listas e cartões com controle de acesso,
-                consistência visual e arquitetura preparada para evolução.
+            <div className="login__hero-copy">
+              <p className="login__hero-copy__institution">
+                Universidade Virtual do Estado de São Paulo
               </p>
+              <p className="login__hero-copy__meta">
+                Projeto integrador 3 - 2026
+              </p>
+              <p className="login__hero-copy__tema">
+                Otimização do Fluxo de Trabalho e Gestão de Prazos
+              </p>
+              <h2 className="login__hero-copy__grupo">Grupo 3</h2>
+              <ul className="login__hero-copy__membros">
+                {MEMBROS_GRUPO_3_ALFABETICO.map((nome) => (
+                  <li key={nome}>{nome}</li>
+                ))}
+              </ul>
             </div>
           </div>
         </section>
