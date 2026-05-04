@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import clsx from "clsx";
 
 import AppLayout from "../../components/layout/AppLayout";
 import PageHeader from "../../components/ui/PageHeader";
@@ -14,7 +15,16 @@ import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 import { extractObject } from "../../utils/apiData";
 import useAuth from "../../hooks/useAuth";
 
-import { Save, Settings, KanbanSquare, Archive, ShieldCheck, Users, ArrowRightLeft } from "lucide-react";
+import {
+  Save,
+  Settings,
+  KanbanSquare,
+  Archive,
+  ShieldCheck,
+  ArrowRightLeft,
+  FileDigit,
+  MapPin,
+} from "lucide-react";
 
 import "../../styles/pages/quadro-configuracoes.css";
 
@@ -266,6 +276,71 @@ export default function QuadroConfiguracoesPage() {
             </div>
 
             <QuadroPreferenciasForm quadroId={quadroId} usuarioId={usuarioId} />
+          </section>
+
+          <section className="quadro-configuracoes-page__section">
+            <div className="quadro-configuracoes-page__section-header">
+              <h3 className="quadro-configuracoes-page__section-title">
+                <FileDigit size={18} aria-hidden="true" />
+                <span>Consultas externas</span>
+              </h3>
+              <p className="quadro-configuracoes-page__section-description">
+                Consulte dados públicos sem alterar cartões, listas ou campos do quadro.
+              </p>
+            </div>
+
+            <div className="quadro-configuracoes-page__card quadro-configuracoes-page__card--consultas">
+              <ul className="quadro-configuracoes-page__consultas-list">
+                <li>
+                  <Link
+                    className={clsx(
+                      "quadro-configuracoes-page__consulta-card",
+                      "button",
+                      "button--secondary"
+                    )}
+                    to={`/quadros/${quadroId}/consultas/cnpj`}
+                  >
+                    <span className="button__content quadro-configuracoes-page__consulta-card-inner">
+                      <span className="button__icon" aria-hidden="true">
+                        <FileDigit size={18} />
+                      </span>
+                      <span className="button__label quadro-configuracoes-page__consulta-card-text">
+                        <span className="quadro-configuracoes-page__consulta-card-title">
+                          Consultar CNPJ
+                        </span>
+                        <span className="quadro-configuracoes-page__consulta-card-desc">
+                          Busque dados públicos de uma empresa pelo CNPJ.
+                        </span>
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className={clsx(
+                      "quadro-configuracoes-page__consulta-card",
+                      "button",
+                      "button--secondary"
+                    )}
+                    to={`/quadros/${quadroId}/consultas/endereco`}
+                  >
+                    <span className="button__content quadro-configuracoes-page__consulta-card-inner">
+                      <span className="button__icon" aria-hidden="true">
+                        <MapPin size={18} />
+                      </span>
+                      <span className="button__label quadro-configuracoes-page__consulta-card-text">
+                        <span className="quadro-configuracoes-page__consulta-card-title">
+                          Consultar endereço
+                        </span>
+                        <span className="quadro-configuracoes-page__consulta-card-desc">
+                          Busque dados de endereço por CEP.
+                        </span>
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
           </section>
 
           <section className="quadro-configuracoes-page__section">

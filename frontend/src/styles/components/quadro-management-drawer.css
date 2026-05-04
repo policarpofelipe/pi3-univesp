@@ -146,3 +146,22 @@
     transform: translateX(0);
   }
 }
+
+.quadro-management-drawer__consulta-link {
+  text-decoration: none;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.quadro-management-drawer__consulta-link-inner {
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.quadro-management-drawer__consulta-link-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  white-space: normal;
+}

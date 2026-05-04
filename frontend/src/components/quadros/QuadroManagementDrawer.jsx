@@ -7,13 +7,17 @@ import React, {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
+import clsx from "clsx";
 import {
   ArrowRight,
   Bot,
   Building2,
   Clock3,
   Eye,
+  FileDigit,
   LayoutList,
+  MapPin,
   Mail,
   Plus,
   Settings,
@@ -364,6 +368,68 @@ export default function QuadroManagementDrawer({
                       >
                         Abrir configurações completas
                       </Button>
+                    </div>
+
+                    <div
+                      className="mt-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-4"
+                      aria-labelledby="quadro-drawer-consultas-heading"
+                    >
+                      <h4
+                        id="quadro-drawer-consultas-heading"
+                        className="mb-3 text-[var(--font-size-sm)] font-semibold text-[var(--color-text)]"
+                      >
+                        Consultas externas
+                      </h4>
+                      <ul className="flex flex-col gap-2">
+                        <li>
+                          <Link
+                            to={`/quadros/${quadro.id}/consultas/cnpj`}
+                            className={clsx(
+                              "button",
+                              "button--secondary",
+                              "button--full-width",
+                              "quadro-management-drawer__consulta-link"
+                            )}
+                            onClick={() => onClose?.()}
+                          >
+                            <span className="button__content quadro-management-drawer__consulta-link-inner">
+                              <span className="button__icon" aria-hidden="true">
+                                <FileDigit size={16} />
+                              </span>
+                              <span className="button__label quadro-management-drawer__consulta-link-text">
+                                <span className="font-semibold">Consultar CNPJ</span>
+                                <span className="mt-0.5 block text-left text-[var(--font-size-xs)] font-normal text-[var(--color-text-muted)]">
+                                  Busque dados públicos de uma empresa pelo CNPJ.
+                                </span>
+                              </span>
+                            </span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            to={`/quadros/${quadro.id}/consultas/endereco`}
+                            className={clsx(
+                              "button",
+                              "button--secondary",
+                              "button--full-width",
+                              "quadro-management-drawer__consulta-link"
+                            )}
+                            onClick={() => onClose?.()}
+                          >
+                            <span className="button__content quadro-management-drawer__consulta-link-inner">
+                              <span className="button__icon" aria-hidden="true">
+                                <MapPin size={16} />
+                              </span>
+                              <span className="button__label quadro-management-drawer__consulta-link-text">
+                                <span className="font-semibold">Consultar endereço</span>
+                                <span className="mt-0.5 block text-left text-[var(--font-size-xs)] font-normal text-[var(--color-text-muted)]">
+                                  Busque dados de endereço por CEP.
+                                </span>
+                              </span>
+                            </span>
+                          </Link>
+                        </li>
+                      </ul>
                     </div>
                   </section>
                 ) : null}
