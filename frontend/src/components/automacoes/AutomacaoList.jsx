@@ -14,9 +14,15 @@ const ACAO_LABELS = {
   ADICIONAR_TAG: "Adicionar tag",
 };
 
-export default function AutomacaoList({ automacoes = [], onEditar, onRemover }) {
+export default function AutomacaoList({
+  automacoes = [],
+  onEditar,
+  onRemover,
+  rootClassName = "",
+}) {
+  const rootCls = ["automacao-list", rootClassName].filter(Boolean).join(" ");
   return (
-    <div className="automacao-list">
+    <div className={rootCls}>
       {automacoes.map((automacao) => (
         <article key={automacao.id} className="automacao-list__item">
           <div className="automacao-list__row">

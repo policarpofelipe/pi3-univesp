@@ -253,6 +253,53 @@ export default function QuadroManagementDrawer({
   const orgNome =
     quadro.organizacao?.nome || quadro.organizacaoNome || "Organização";
 
+  /** Atalhos em azul (variant primary) nas abas Membros, Tags, Visões, etc. */
+  const renderAtalhosAzuis = () => (
+    <div
+      className="quadro-management-drawer__quick-actions"
+      role="group"
+      aria-label="Atalhos: nova lista e consultas externas"
+    >
+      <Button
+        type="button"
+        variant="primary"
+        size="sm"
+        leftIcon={<LayoutList size={14} aria-hidden="true" />}
+        onClick={() => onNovaLista?.()}
+      >
+        Nova lista
+      </Button>
+      <Button
+        type="button"
+        variant="primary"
+        size="sm"
+        leftIcon={<FileDigit size={14} aria-hidden="true" />}
+        onClick={() => {
+          navigate(`/quadros/${quadro.id}/consultas/cnpj`, {
+            state: { background: location },
+          });
+          onClose?.();
+        }}
+      >
+        Consulta CNPJ
+      </Button>
+      <Button
+        type="button"
+        variant="primary"
+        size="sm"
+        leftIcon={<MapPin size={14} aria-hidden="true" />}
+        onClick={() => {
+          navigate(`/quadros/${quadro.id}/consultas/endereco`, {
+            state: { background: location },
+          });
+          onClose?.();
+        }}
+      >
+        Consulta CEP
+      </Button>
+    </div>
+  );
+
   const drawer = (
     <div className="quadro-management-drawer quadro-management-drawer--open">
       <button
@@ -349,31 +396,21 @@ export default function QuadroManagementDrawer({
                         {quadro.descricao}
                       </p>
                     ) : null}
-                    <div className="mt-4">
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          leftIcon={<LayoutList size={16} aria-hidden="true" />}
-                          onClick={() => onNovaLista?.()}
-                        >
-                          Nova lista
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="mt-3">
+
+                    <div className="quadro-management-drawer__btn-stack mt-6">
                       <Button
                         type="button"
                         variant="secondary"
-                        leftIcon={<Settings size={16} aria-hidden="true" />}
-                        onClick={() => onNavigateConfiguracoes?.()}
+                        leftIcon={<LayoutList size={16} aria-hidden="true" />}
+                        fullWidth
+                        onClick={() => onNovaLista?.()}
                       >
-                        Abrir configurações completas
+                        Nova lista
                       </Button>
                     </div>
 
                     <div
-                      className="mt-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-4"
+                      className="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-4"
                       aria-labelledby="quadro-drawer-consultas-heading"
                     >
                       <h4
@@ -382,7 +419,7 @@ export default function QuadroManagementDrawer({
                       >
                         Consultas externas
                       </h4>
-                      <div className="flex flex-col gap-2">
+                      <div className="quadro-management-drawer__btn-stack">
                         <Button
                           type="button"
                           variant="secondary"
@@ -427,25 +464,42 @@ export default function QuadroManagementDrawer({
                       <p className="mb-3 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
                         Veja exemplos para consultar dados e criar cartões via API.
                       </p>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        leftIcon={<Braces size={16} aria-hidden="true" />}
-                        fullWidth
-                        onClick={() => {
-                          navigate(`/quadros/${quadro.id}/api-rest`);
-                          onClose?.();
-                        }}
-                        aria-label="Abrir documentação API REST do quadro"
-                      >
-                        API REST do Quadro
-                      </Button>
+                      <div className="quadro-management-drawer__btn-stack">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          leftIcon={<Braces size={16} aria-hidden="true" />}
+                          fullWidth
+                          onClick={() => {
+                            navigate(`/quadros/${quadro.id}/api-rest`);
+                            onClose?.();
+                          }}
+                          aria-label="Abrir documentação API REST do quadro"
+                        >
+                          API REST do Quadro
+                        </Button>
+                      </div>
                     </div>
+
+                    <footer className="quadro-management-drawer__geral-footer">
+                      <div className="quadro-management-drawer__btn-stack">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          leftIcon={<Settings size={16} aria-hidden="true" />}
+                          fullWidth
+                          onClick={() => onNavigateConfiguracoes?.()}
+                        >
+                          Abrir configurações completas
+                        </Button>
+                      </div>
+                    </footer>
                   </section>
                 ) : null}
 
                 {s.key === "membros" ? (
                   <section className="quadro-detalhe-page__section" aria-label="Membros">
+                    {renderAtalhosAzuis()}
                     <div className="quadro-detalhe-page__section-header">
                       <h3 className="quadro-detalhe-page__section-title">
                         Membros do quadro
@@ -479,7 +533,7 @@ export default function QuadroManagementDrawer({
                           Nenhum membro listado.
                         </p>
                       ) : (
-                        <ul className="mt-3 flex flex-col gap-2">
+                        <ul className="quadro-management-drawer__record-stack">
                           {membros.map((membro) => {
                             const nomeMembro = membro.nome || "Sem nome";
                             const papeisMembro =
@@ -489,7 +543,7 @@ export default function QuadroManagementDrawer({
                             return (
                               <li
                                 key={membro.id}
-                                className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-3"
+                                className="quadro-management-drawer__record-card"
                               >
                                 <div className="flex flex-wrap items-start justify-between gap-3">
                                   <div className="min-w-0 flex-1">
@@ -665,6 +719,7 @@ export default function QuadroManagementDrawer({
 
                 {s.key === "tags" ? (
                   <section className="quadro-detalhe-page__section" aria-label="Tags">
+                    {renderAtalhosAzuis()}
                     <div className="quadro-detalhe-page__section-header">
                       <h3 className="quadro-detalhe-page__section-title">
                         Tags do quadro
@@ -699,6 +754,8 @@ export default function QuadroManagementDrawer({
                     {tagsMode === "lista" ? (
                       <TagList
                         tags={tags}
+                        listClassName="quadro-management-drawer__record-stack quadro-management-drawer__record-stack--tags"
+                        itemClassName="quadro-management-drawer__record-card"
                         onEditar={(tag) => {
                           setTagEmEdicao(tag);
                           setTagsMode("editar");
@@ -736,6 +793,7 @@ export default function QuadroManagementDrawer({
 
                 {s.key === "visoes" ? (
                   <section className="quadro-detalhe-page__section" aria-label="Visões">
+                    {renderAtalhosAzuis()}
                     <div className="quadro-detalhe-page__section-header">
                       <h3 className="quadro-detalhe-page__section-title">Visões</h3>
                       <div className="flex flex-wrap gap-2">
@@ -777,11 +835,11 @@ export default function QuadroManagementDrawer({
                           Nenhuma visão cadastrada.
                         </p>
                       ) : (
-                        <ul className="mt-3 flex flex-col gap-2">
+                        <ul className="quadro-management-drawer__record-stack">
                           {visoes.map((visao) => (
                             <li
                               key={visao.id}
-                              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-3"
+                              className="quadro-management-drawer__record-card"
                             >
                               <div className="flex flex-wrap items-start justify-between gap-2">
                                 <div className="min-w-0 flex-1">
@@ -851,6 +909,7 @@ export default function QuadroManagementDrawer({
                     className="quadro-detalhe-page__section"
                     aria-label="Campos personalizados"
                   >
+                    {renderAtalhosAzuis()}
                     <div className="quadro-detalhe-page__section-header">
                       <h3 className="quadro-detalhe-page__section-title">
                         Campos personalizados
@@ -897,6 +956,7 @@ export default function QuadroManagementDrawer({
                         <div className="mt-3">
                           <CampoPersonalizadoList
                             campos={campos}
+                            rootClassName="quadro-management-drawer__record-stack"
                             onEditar={(campo) => {
                               setCampoEmEdicao(campo);
                               setCamposMode("editar");
@@ -937,6 +997,7 @@ export default function QuadroManagementDrawer({
 
                 {s.key === "automacoes" ? (
                   <section className="quadro-detalhe-page__section" aria-label="Automações">
+                    {renderAtalhosAzuis()}
                     <div className="quadro-detalhe-page__section-header">
                       <h3 className="quadro-detalhe-page__section-title">Automações</h3>
                       <div className="flex flex-wrap gap-2">
@@ -985,6 +1046,7 @@ export default function QuadroManagementDrawer({
                           ) : (
                             <AutomacaoList
                               automacoes={automacoes}
+                              rootClassName="quadro-management-drawer__record-stack--automacoes"
                               onEditar={(automacao) => {
                                 setAutomacaoEmEdicao(automacao);
                                 setAutomacoesMode("editar");
@@ -1026,6 +1088,7 @@ export default function QuadroManagementDrawer({
 
                 {s.key === "papeis" ? (
                   <section className="quadro-detalhe-page__section" aria-label="Papéis">
+                    {renderAtalhosAzuis()}
                     <div className="quadro-detalhe-page__section-header">
                       <h3 className="quadro-detalhe-page__section-title">
                         Papéis do quadro
@@ -1065,11 +1128,11 @@ export default function QuadroManagementDrawer({
                           Nenhum papel cadastrado.
                         </p>
                       ) : (
-                        <ul className="mt-3 flex flex-col gap-2">
+                        <ul className="quadro-management-drawer__record-stack">
                           {papeis.map((papel) => (
                             <li
                               key={papel.id}
-                              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-3"
+                              className="quadro-management-drawer__record-card"
                             >
                               <div className="flex flex-wrap items-start justify-between gap-3">
                                 <div className="min-w-0 flex-1">

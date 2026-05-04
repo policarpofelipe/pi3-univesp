@@ -9,6 +9,8 @@ export default function TagList({
   onEditar,
   onRemover,
   removendoId = null,
+  listClassName = "",
+  itemClassName = "",
 }) {
   if (!tags.length) {
     return (
@@ -18,13 +20,28 @@ export default function TagList({
     );
   }
 
+  const listCls = listClassName?.trim()
+    ? listClassName
+    : "flex flex-col gap-2";
+  const itemCls = itemClassName?.trim()
+    ? itemClassName
+    : [
+        "flex",
+        "items-center",
+        "justify-between",
+        "gap-2",
+        "rounded-lg",
+        "border",
+        "border-[var(--color-border)]",
+        "bg-[var(--color-surface-alt)]",
+        "px-3",
+        "py-2",
+      ].join(" ");
+
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className={listCls}>
       {tags.map((t) => (
-        <li
-          key={t.id}
-          className="flex items-center justify-between gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2"
-        >
+        <li key={t.id} className={itemCls}>
           <TagBadge nome={t.nome} cor={t.cor} />
           <div className="flex items-center gap-2">
             {typeof onEditar === "function" ? (

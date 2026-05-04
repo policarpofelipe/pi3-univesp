@@ -17,9 +17,11 @@ export default function CampoPersonalizadoList({
   campos = [],
   onEditar,
   onRemover,
+  rootClassName = "",
 }) {
+  const rootCls = rootClassName?.trim() ? rootClassName : "space-y-2";
   return (
-    <div className="space-y-2">
+    <div className={rootCls}>
       {campos.map((campo) => (
         <article
           key={campo.id}
