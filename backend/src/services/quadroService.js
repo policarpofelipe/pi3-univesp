@@ -12,6 +12,9 @@ function toPositiveInt(value) {
 
 class QuadroService {
   async listar(filtros = {}) {
+    const usuarioId = filtros.usuarioId
+      ? toPositiveInt(filtros.usuarioId)
+      : undefined;
     const organizacaoId = filtros.organizacaoId
       ? toPositiveInt(filtros.organizacaoId)
       : undefined;
@@ -33,6 +36,7 @@ class QuadroService {
 
     return QuadroRepository.listar({
       organizacaoId,
+      usuarioId,
       busca: filtros.busca || "",
       arquivado,
       limit,

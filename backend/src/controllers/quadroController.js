@@ -5,6 +5,10 @@ function parseId(value) {
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
+function parseUsuarioId(req) {
+  return parseId(req.usuario?.id ?? req.user?.id);
+}
+
 function apiError(code, message) {
   return {
     success: false,
@@ -15,7 +19,16 @@ function apiError(code, message) {
 const quadroController = {
   async listar(req, res, next) {
     try {
+      const usuarioId = parseUsuarioId(req);
+      if (!usuarioId) {
+        return res.status(401).json({
+          success: false,
+          message: "Não autenticado.",
+        });
+      }
+
       const data = await quadroService.listar({
+        usuarioId,
         organizacaoId: req.query.organizacaoId,
         arquivado: req.query.arquivado,
         busca: req.query.busca,

@@ -26,6 +26,7 @@ class QuadroRepository {
     const {
       organizacaoId,
       criadoPorUsuarioId,
+      usuarioId,
       arquivado,
       busca,
       limit,
@@ -34,6 +35,16 @@ class QuadroRepository {
 
     const where = [];
     const params = [];
+
+    let joinMembroAtual = "";
+    if (usuarioId) {
+      joinMembroAtual = `
+      INNER JOIN quadro_membros qm_self
+        ON qm_self.quadro_id = q.id
+       AND qm_self.usuario_id = ?
+       AND qm_self.status = 'ativo'`;
+      params.push(usuarioId);
+    }
 
     if (organizacaoId) {
       where.push("q.organizacao_id = ?");
@@ -68,6 +79,7 @@ class QuadroRepository {
         COUNT(DISTINCT qp.id) AS totalPapeis,
         COUNT(DISTINCT l.id) AS totalListas
       FROM quadros q
+      ${joinMembroAtual}
       LEFT JOIN quadro_membros qm
         ON qm.quadro_id = q.id
        AND qm.status = 'ativo'

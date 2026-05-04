@@ -10,6 +10,12 @@ const organizacaoController = {
   async listar(req, res, next) {
     try {
       const usuarioId = req.usuario?.id || req.user?.id || null;
+      if (!usuarioId) {
+        return res.status(401).json({
+          success: false,
+          message: "Não autenticado.",
+        });
+      }
 
       const resultado = await organizacaoService.listar({
         usuarioId,
