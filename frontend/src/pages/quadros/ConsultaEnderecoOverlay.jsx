@@ -47,7 +47,7 @@ export default function ConsultaEnderecoOverlay() {
             são salvos no sistema.
           </p>
           <div className="consultas-page consultas-page--modal">
-            <ConsultaEnderecoContent />
+            <ConsultaEnderecoContent onFecharAposCartaoCriado={handleClose} />
           </div>
         </div>
       </div>

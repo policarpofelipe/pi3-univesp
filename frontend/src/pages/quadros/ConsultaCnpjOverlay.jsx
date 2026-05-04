@@ -50,7 +50,7 @@ export default function ConsultaCnpjOverlay() {
             serviços externos; os dados não são salvos no sistema.
           </p>
           <div className="consultas-page consultas-page--modal">
-            <ConsultaCnpjContent />
+            <ConsultaCnpjContent onFecharAposCartaoCriado={handleClose} />
           </div>
         </div>
       </div>

@@ -25,6 +25,7 @@ import cartaoService from "../../services/cartaoService";
 import tagService from "../../services/tagService";
 import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 import { extractList, extractObject } from "../../utils/apiData";
+import { emitQuadroListasCartoesTagsAtualizados } from "../../utils/quadroSyncEvents";
 import useAuth from "../../hooks/useAuth";
 
 import { FileText, ListTodo, Trash2 } from "lucide-react";
@@ -222,6 +223,7 @@ export default function CartaoDetalheContent({
     setExcluindo(true);
     try {
       await cartaoService.remover(quadroId, cartaoId);
+      emitQuadroListasCartoesTagsAtualizados(quadroId);
       if (variant === "modal" && typeof onRequestClose === "function") {
         onRequestClose();
       } else {

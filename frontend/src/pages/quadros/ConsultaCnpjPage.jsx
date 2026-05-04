@@ -127,7 +127,9 @@ export default function ConsultaCnpjPage() {
           empresas brasileiras. Os dados não são salvos automaticamente no sistema.
         </p>
 
-        <ConsultaCnpjContent />
+        <ConsultaCnpjContent
+          onFecharAposCartaoCriado={() => navigate(`/quadros/${quadroId}`)}
+        />
       </div>
     </AppLayout>
   );

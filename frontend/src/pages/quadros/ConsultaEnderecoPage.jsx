@@ -126,7 +126,9 @@ export default function ConsultaEnderecoPage() {
           dados não são salvos automaticamente no sistema.
         </p>
 
-        <ConsultaEnderecoContent />
+        <ConsultaEnderecoContent
+          onFecharAposCartaoCriado={() => navigate(`/quadros/${quadroId}`)}
+        />
       </div>
     </AppLayout>
   );

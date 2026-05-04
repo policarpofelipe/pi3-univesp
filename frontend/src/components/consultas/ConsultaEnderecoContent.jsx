@@ -10,6 +10,7 @@ import {
   montarDescricaoCartaoCep,
   tituloCartaoCep,
 } from "../../utils/consultaCartaoTexto";
+import { emitQuadroListasCartoesTagsAtualizados } from "../../utils/quadroSyncEvents";
 import {
   formatarCep,
   formatarCepDigitando,
@@ -38,7 +39,7 @@ function montarTextoCopiaEndereco(payload) {
 }
 
 /** Formulário e resultado da consulta de CEP (página e modal). */
-export default function ConsultaEnderecoContent() {
+export default function ConsultaEnderecoContent({ onFecharAposCartaoCriado }) {
   const { quadroId } = useParams();
   const fieldId = useId();
   const errorId = useId();
@@ -154,6 +155,12 @@ export default function ConsultaEnderecoContent() {
       setCriandoCartao(false);
     }
   }, [quadroId, resultado]);
+
+  function handleConfirmarCartaoCriado() {
+    if (quadroId) emitQuadroListasCartoesTagsAtualizados(quadroId);
+    setMsgCartao("");
+    onFecharAposCartaoCriado?.();
+  }
 
   function handleNovaConsulta() {
     setCepInput("");
@@ -306,12 +313,16 @@ export default function ConsultaEnderecoContent() {
             </p>
           ) : null}
           {msgCartao ? (
-            <p
-              className="consultas-page__alert consultas-page__alert--info mt-3"
+            <div
+              className="consultas-page__sucesso-cartao mt-3"
               role="status"
+              aria-live="polite"
             >
-              {msgCartao}
-            </p>
+              <p className="consultas-page__sucesso-cartao-texto">{msgCartao}</p>
+              <Button type="button" variant="primary" onClick={handleConfirmarCartaoCriado}>
+                Ok
+              </Button>
+            </div>
           ) : null}
         </section>
       ) : null}

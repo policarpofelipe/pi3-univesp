@@ -10,6 +10,7 @@ import {
   montarDescricaoCartaoCnpj,
   tituloCartaoCnpj,
 } from "../../utils/consultaCartaoTexto";
+import { emitQuadroListasCartoesTagsAtualizados } from "../../utils/quadroSyncEvents";
 import {
   formatarCnpj,
   formatarCnpjDigitando,
@@ -49,7 +50,7 @@ function montarTextoCopia(payload) {
 }
 
 /** Formulário e resultado da consulta CNPJ (usado na página e no modal). */
-export default function ConsultaCnpjContent() {
+export default function ConsultaCnpjContent({ onFecharAposCartaoCriado }) {
   const { quadroId } = useParams();
   const fieldId = useId();
   const errorId = useId();
@@ -163,6 +164,12 @@ export default function ConsultaCnpjContent() {
       setCriandoCartao(false);
     }
   }, [quadroId, resultado]);
+
+  function handleConfirmarCartaoCriado() {
+    if (quadroId) emitQuadroListasCartoesTagsAtualizados(quadroId);
+    setMsgCartao("");
+    onFecharAposCartaoCriado?.();
+  }
 
   function handleNovaConsulta() {
     setCnpjInput("");
@@ -372,12 +379,16 @@ export default function ConsultaCnpjContent() {
             </p>
           ) : null}
           {msgCartao ? (
-            <p
-              className="consultas-page__alert consultas-page__alert--info mt-3"
+            <div
+              className="consultas-page__sucesso-cartao mt-3"
               role="status"
+              aria-live="polite"
             >
-              {msgCartao}
-            </p>
+              <p className="consultas-page__sucesso-cartao-texto">{msgCartao}</p>
+              <Button type="button" variant="primary" onClick={handleConfirmarCartaoCriado}>
+                Ok
+              </Button>
+            </div>
           ) : null}
         </section>
       ) : null}
