@@ -33,7 +33,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  width: min(72rem, 100vw);
+  /* ~704px: costuma comportar as 8 abas em linha; barra horizontal se zoom/fonte exigir */
+  width: min(44rem, 100vw);
   max-height: 100%;
   margin: 0;
   padding: 0;
