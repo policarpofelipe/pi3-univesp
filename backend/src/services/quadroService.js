@@ -48,6 +48,16 @@ class QuadroService {
     return QuadroRepository.obterPorId(quadroId);
   }
 
+  async obterResumo(quadroId) {
+    const qId = toPositiveInt(quadroId);
+    if (!qId) {
+      const error = new Error("ID do quadro inválido.");
+      error.statusCode = 400;
+      throw error;
+    }
+    return QuadroRepository.obterResumo(qId);
+  }
+
   async criar(dados = {}) {
     const organizacaoId = toPositiveInt(dados.organizacaoId);
     if (!organizacaoId) {

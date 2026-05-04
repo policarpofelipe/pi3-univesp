@@ -72,6 +72,33 @@ const quadroController = {
     }
   },
 
+  async obterResumo(req, res, next) {
+    try {
+      const quadroId = parseId(req.params.quadroId);
+      if (!quadroId) {
+        return res.status(400).json({
+          success: false,
+          message: "ID do quadro inválido.",
+        });
+      }
+
+      const data = await quadroService.obterResumo(quadroId);
+      if (!data) {
+        return res.status(404).json({
+          success: false,
+          message: "Quadro não encontrado.",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        data,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+
   async criar(req, res, next) {
     try {
       const data = await quadroService.criar({

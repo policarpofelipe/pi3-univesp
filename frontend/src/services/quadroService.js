@@ -18,6 +18,15 @@ const quadroService = {
     return response.data;
   },
 
+  async obterResumo(quadroId) {
+    if (!quadroId) {
+      throw new Error("O identificador do quadro é obrigatório.");
+    }
+
+    const response = await api.get(`/quadros/${quadroId}/resumo`);
+    return response.data;
+  },
+
   async criar(payload) {
     const response = await api.post("/quadros", payload);
     return response.data;

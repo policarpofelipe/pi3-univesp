@@ -25,6 +25,7 @@ router.param("quadroId", ensureQuadroMemberParam);
 
 // CRUD
 router.get("/", quadroController.listar);
+router.get("/:quadroId/resumo", quadroController.obterResumo);
 router.get("/:quadroId", quadroController.obterPorId);
 router.post("/", quadroValidator.criar(), quadroController.criar);
 router.put("/:quadroId", quadroValidator.atualizar(), quadroController.atualizar);

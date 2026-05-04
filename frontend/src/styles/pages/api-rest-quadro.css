@@ -1,0 +1,108 @@
+.api-rest-quadro-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.api-rest-quadro-page__back {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.api-rest-quadro-page__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.api-rest-quadro-page__card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  padding: var(--space-4);
+}
+
+.api-rest-quadro-page__card h2 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.api-rest-quadro-page__card h3 {
+  margin: 0;
+  font-size: var(--font-size-md);
+}
+
+.api-rest-quadro-page__intro {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.api-rest-quadro-page pre {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.api-rest-quadro-page code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+.api-rest-quadro-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.api-rest-quadro-page__copy-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.api-rest-quadro-page__copy-status {
+  min-width: 8rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.api-rest-quadro-page__list {
+  margin: 0;
+  padding-left: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.api-rest-quadro-page__muted {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.api-rest-quadro-page__error {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-surface);
+  color: var(--color-danger-text);
+}
+
+@media (max-width: 720px) {
+  .api-rest-quadro-page__copy-wrap {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .api-rest-quadro-page__copy-status {
+    min-width: 0;
+  }
+}

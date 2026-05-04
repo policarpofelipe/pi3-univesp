@@ -11,6 +11,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Bot,
+  Braces,
   Building2,
   Clock3,
   Eye,
@@ -411,6 +412,34 @@ export default function QuadroManagementDrawer({
                           Consultar endereço
                         </Button>
                       </div>
+                    </div>
+
+                    <div
+                      className="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-4"
+                      aria-labelledby="quadro-drawer-api-heading"
+                    >
+                      <h4
+                        id="quadro-drawer-api-heading"
+                        className="mb-2 text-[var(--font-size-sm)] font-semibold text-[var(--color-text)]"
+                      >
+                        API REST do Quadro
+                      </h4>
+                      <p className="mb-3 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+                        Veja exemplos para consultar dados e criar cartões via API.
+                      </p>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        leftIcon={<Braces size={16} aria-hidden="true" />}
+                        fullWidth
+                        onClick={() => {
+                          navigate(`/quadros/${quadro.id}/api-rest`);
+                          onClose?.();
+                        }}
+                        aria-label="Abrir documentação API REST do quadro"
+                      >
+                        API REST do Quadro
+                      </Button>
                     </div>
                   </section>
                 ) : null}

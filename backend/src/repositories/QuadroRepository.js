@@ -155,6 +155,103 @@ class QuadroRepository {
     return this.mapRowToEntity(rows[0] || null);
   }
 
+  async obterResumo(quadroId) {
+    const quadro = await this.obterPorId(quadroId);
+    if (!quadro) return null;
+
+    const [totalsRows] = await db.query(
+      `
+      SELECT
+        COUNT(DISTINCT l.id) AS totalListas,
+        COUNT(c.id) AS totalCartoes,
+        COALESCE(SUM(
+          CASE
+            WHEN c.prazo_em IS NOT NULL
+              AND c.prazo_em < NOW()
+              AND c.concluido_em IS NULL
+              AND c.arquivado_em IS NULL
+            THEN 1
+            ELSE 0
+          END
+        ), 0) AS cartoesVencidos
+      FROM listas l
+      LEFT JOIN cartoes c
+        ON c.lista_id = l.id
+       AND c.arquivado_em IS NULL
+      WHERE l.quadro_id = ?
+        AND l.ativa = 1
+      `,
+      [quadroId]
+    );
+
+    const [porListaRows] = await db.query(
+      `
+      SELECT
+        l.id AS listaId,
+        l.nome AS lista,
+        COUNT(c.id) AS total
+      FROM listas l
+      LEFT JOIN cartoes c
+        ON c.lista_id = l.id
+       AND c.arquivado_em IS NULL
+      WHERE l.quadro_id = ?
+        AND l.ativa = 1
+      GROUP BY l.id, l.nome, l.posicao_padrao
+      ORDER BY l.posicao_padrao ASC, l.id ASC
+      `,
+      [quadroId]
+    );
+
+    const [porPrioridadeRows] = await db.query(
+      `
+      SELECT
+        c.prioridade AS prioridade,
+        COUNT(c.id) AS total
+      FROM cartoes c
+      INNER JOIN listas l
+        ON l.id = c.lista_id
+      WHERE l.quadro_id = ?
+        AND l.ativa = 1
+        AND c.arquivado_em IS NULL
+      GROUP BY c.prioridade
+      `,
+      [quadroId]
+    );
+
+    const cartoesPorPrioridade = {
+      baixa: 0,
+      media: 0,
+      alta: 0,
+      urgente: 0,
+    };
+
+    porPrioridadeRows.forEach((row) => {
+      const chave = String(row.prioridade || "").toLowerCase();
+      if (Object.prototype.hasOwnProperty.call(cartoesPorPrioridade, chave)) {
+        cartoesPorPrioridade[chave] = Number(row.total) || 0;
+      }
+    });
+
+    const totals = totalsRows[0] || {};
+
+    return {
+      quadro: {
+        id: quadro.id,
+        nome: quadro.nome,
+        descricao: quadro.descricao,
+      },
+      totalListas: Number(totals.totalListas) || 0,
+      totalCartoes: Number(totals.totalCartoes) || 0,
+      cartoesPorLista: porListaRows.map((row) => ({
+        listaId: Number(row.listaId),
+        lista: row.lista,
+        total: Number(row.total) || 0,
+      })),
+      cartoesPorPrioridade,
+      cartoesVencidos: Number(totals.cartoesVencidos) || 0,
+    };
+  }
+
   async criar(dados) {
     const {
       organizacaoId,

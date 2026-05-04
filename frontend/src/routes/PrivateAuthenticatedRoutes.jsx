@@ -15,6 +15,7 @@ import ConsultaCnpjPage from "../pages/quadros/ConsultaCnpjPage";
 import ConsultaCnpjOverlay from "../pages/quadros/ConsultaCnpjOverlay";
 import ConsultaEnderecoPage from "../pages/quadros/ConsultaEnderecoPage";
 import ConsultaEnderecoOverlay from "../pages/quadros/ConsultaEnderecoOverlay";
+import ApiRestQuadroPage from "../pages/quadros/ApiRestQuadroPage";
 import QuadroMembrosPage from "../pages/quadros/QuadroMembrosPage";
 import QuadroPapeisPage from "../pages/quadros/QuadroPapeisPage";
 import ListaConfiguracoesPage from "../pages/listas/ListaConfiguracoesPage";
@@ -85,6 +86,10 @@ export default function PrivateAuthenticatedRoutes() {
         <Route
           path="/quadros/:quadroId/consultas/endereco"
           element={<ConsultaEnderecoPage />}
+        />
+        <Route
+          path="/quadros/:quadroId/api-rest"
+          element={<ApiRestQuadroPage />}
         />
         <Route
           path="/quadros/:quadroId/membros"
