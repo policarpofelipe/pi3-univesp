@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { CartaoOverlayReturnFocusProvider } from "../context/CartaoOverlayReturnFocusContext";
 
 import HomePage from "../pages/home/HomePage";
+import AssistenteCriacaoPage from "../pages/AssistenteCriacaoPage";
 import OrganizacoesPage from "../pages/organizacoes/OrganizacoesPage";
 import OrganizacaoDetalhePage from "../pages/organizacoes/OrganizacaoDetalhePage";
 import OrganizacaoMembrosPage from "../pages/organizacoes/OrganizacaoMembrosPage";
@@ -36,6 +37,11 @@ export default function PrivateAuthenticatedRoutes() {
     <CartaoOverlayReturnFocusProvider>
       <Routes location={background ?? location}>
         <Route path="/home" element={<HomePage />} />
+        <Route path="/assistente-criacao" element={<AssistenteCriacaoPage />} />
+        <Route
+          path="/assistente"
+          element={<Navigate to="/assistente-criacao" replace />}
+        />
 
         <Route path="/organizacoes" element={<OrganizacoesPage />} />
         <Route

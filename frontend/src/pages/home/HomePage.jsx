@@ -459,6 +459,17 @@ export default function HomePage() {
                   </div>
                 </li>
               </ol>
+
+              <button
+                type="button"
+                className="home-page__assistente-cta"
+                onClick={() => navigate("/assistente-criacao")}
+              >
+                <span className="home-page__assistente-cta-label">Assistente ✨</span>
+                <span className="home-page__assistente-cta-hint">
+                  Entenda o fluxo: Organização → Quadros → Listas → Cartões
+                </span>
+              </button>
             </section>
 
             <section
