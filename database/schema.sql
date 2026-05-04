@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Tempo de geração: 13/04/2026 às 15:16
--- Versão do servidor: 8.0.45
--- Versão do PHP: 8.4.19
+-- Tempo de geração: 04/05/2026 às 16:37
+-- Versão do servidor: 8.0.46
+-- Versão do PHP: 8.4.20
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -375,6 +375,24 @@ CREATE TABLE `lista_regras_transicao` (
 -- --------------------------------------------------------
 
 --
+-- Estrutura para tabela `notificacoes`
+--
+
+CREATE TABLE `notificacoes` (
+  `id` int UNSIGNED NOT NULL,
+  `usuario_id` int UNSIGNED NOT NULL,
+  `tipo` varchar(80) NOT NULL,
+  `titulo` varchar(160) NOT NULL,
+  `mensagem` varchar(500) NOT NULL,
+  `link` varchar(500) DEFAULT NULL,
+  `dados_json` json DEFAULT NULL,
+  `lida_em` datetime DEFAULT NULL,
+  `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estrutura para tabela `organizacao_membros`
 --
 
@@ -420,6 +438,38 @@ CREATE TABLE `quadros` (
   `arquivado_em` datetime DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `quadro_convites`
+--
+
+CREATE TABLE `quadro_convites` (
+  `id` int UNSIGNED NOT NULL,
+  `quadro_id` int UNSIGNED NOT NULL,
+  `usuario_convidado_id` int UNSIGNED NOT NULL,
+  `email_convidado` varchar(190) NOT NULL,
+  `convidado_por_usuario_id` int UNSIGNED DEFAULT NULL,
+  `status` enum('pendente','aceito','recusado','cancelado','expirado') NOT NULL DEFAULT 'pendente',
+  `mensagem` varchar(500) DEFAULT NULL,
+  `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `respondido_em` datetime DEFAULT NULL,
+  `expira_em` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `quadro_convite_papeis`
+--
+
+CREATE TABLE `quadro_convite_papeis` (
+  `id` int UNSIGNED NOT NULL,
+  `convite_id` int UNSIGNED NOT NULL,
+  `papel_id` int UNSIGNED NOT NULL,
+  `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -741,6 +791,15 @@ ALTER TABLE `lista_regras_transicao`
   ADD KEY `idx_lista_regras_transicao_papel` (`papel_id`);
 
 --
+-- Índices de tabela `notificacoes`
+--
+ALTER TABLE `notificacoes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_notificacoes_usuario_lida` (`usuario_id`,`lida_em`,`criado_em`),
+  ADD KEY `idx_notificacoes_usuario_criado` (`usuario_id`,`criado_em`),
+  ADD KEY `idx_notificacoes_tipo` (`tipo`);
+
+--
 -- Índices de tabela `organizacao_membros`
 --
 ALTER TABLE `organizacao_membros`
@@ -764,6 +823,25 @@ ALTER TABLE `quadros`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_quadros_organizacao` (`organizacao_id`),
   ADD KEY `idx_quadros_criado_por` (`criado_por_usuario_id`);
+
+--
+-- Índices de tabela `quadro_convites`
+--
+ALTER TABLE `quadro_convites`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_quadro_convites_quadro_status` (`quadro_id`,`status`),
+  ADD KEY `idx_quadro_convites_usuario_status` (`usuario_convidado_id`,`status`),
+  ADD KEY `idx_quadro_convites_convidado_por` (`convidado_por_usuario_id`),
+  ADD KEY `idx_quadro_convites_email` (`email_convidado`),
+  ADD KEY `idx_quadro_convites_criado_em` (`criado_em`);
+
+--
+-- Índices de tabela `quadro_convite_papeis`
+--
+ALTER TABLE `quadro_convite_papeis`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_quadro_convite_papel` (`convite_id`,`papel_id`),
+  ADD KEY `idx_quadro_convite_papeis_papel` (`papel_id`);
 
 --
 -- Índices de tabela `quadro_membros`
@@ -946,6 +1024,12 @@ ALTER TABLE `lista_regras_transicao`
   MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de tabela `notificacoes`
+--
+ALTER TABLE `notificacoes`
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de tabela `organizacao_membros`
 --
 ALTER TABLE `organizacao_membros`
@@ -961,6 +1045,18 @@ ALTER TABLE `organizacoes`
 -- AUTO_INCREMENT de tabela `quadros`
 --
 ALTER TABLE `quadros`
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `quadro_convites`
+--
+ALTER TABLE `quadro_convites`
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `quadro_convite_papeis`
+--
+ALTER TABLE `quadro_convite_papeis`
   MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
@@ -1162,6 +1258,12 @@ ALTER TABLE `lista_regras_transicao`
   ADD CONSTRAINT `fk_lista_regras_transicao_papel` FOREIGN KEY (`papel_id`) REFERENCES `quadro_papeis` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
+-- Restrições para tabelas `notificacoes`
+--
+ALTER TABLE `notificacoes`
+  ADD CONSTRAINT `fk_notificacoes_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Restrições para tabelas `organizacao_membros`
 --
 ALTER TABLE `organizacao_membros`
@@ -1180,6 +1282,21 @@ ALTER TABLE `organizacoes`
 ALTER TABLE `quadros`
   ADD CONSTRAINT `fk_quadros_criado_por` FOREIGN KEY (`criado_por_usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_quadros_organizacao` FOREIGN KEY (`organizacao_id`) REFERENCES `organizacoes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Restrições para tabelas `quadro_convites`
+--
+ALTER TABLE `quadro_convites`
+  ADD CONSTRAINT `fk_quadro_convites_convidado_por` FOREIGN KEY (`convidado_por_usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_quadro_convites_quadro` FOREIGN KEY (`quadro_id`) REFERENCES `quadros` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_quadro_convites_usuario_convidado` FOREIGN KEY (`usuario_convidado_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Restrições para tabelas `quadro_convite_papeis`
+--
+ALTER TABLE `quadro_convite_papeis`
+  ADD CONSTRAINT `fk_quadro_convite_papeis_convite` FOREIGN KEY (`convite_id`) REFERENCES `quadro_convites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_quadro_convite_papeis_papel` FOREIGN KEY (`papel_id`) REFERENCES `quadro_papeis` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Restrições para tabelas `quadro_membros`
