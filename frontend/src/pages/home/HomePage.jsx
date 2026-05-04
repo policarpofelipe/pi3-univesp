@@ -386,6 +386,31 @@ export default function HomePage() {
 
           <aside className="home-page__panel home-page__panel--side">
             <section
+              className="home-page__section home-page__section--assistente"
+              aria-label="Assistente de Criação"
+            >
+              <Link
+                to="/assistente-criacao"
+                className="home-page__assistente-card"
+                aria-label="Abrir Assistente de Criação"
+                aria-describedby="home-assistente-card-desc"
+              >
+                <h3 className="home-page__assistente-card-title">
+                  Assistente de Criação ✨
+                </h3>
+                <p
+                  id="home-assistente-card-desc"
+                  className="home-page__assistente-card-desc"
+                >
+                  Entenda o fluxo: Organização → Quadros → Listas → Cartões
+                </p>
+                <span className="home-page__assistente-card-cta">
+                  Começar agora
+                </span>
+              </Link>
+            </section>
+
+            <section
               className="home-page__section"
               aria-labelledby="home-steps-title"
             >
@@ -411,7 +436,8 @@ export default function HomePage() {
                     <span className="home-page__step-content">
                       <strong>Criar organização</strong>
                       <span>
-                        Defina a estrutura inicial do workspace e convide membros.
+                        Defina o espaço principal onde seus quadros ficarão
+                        agrupados.
                       </span>
                     </span>
                   </button>
@@ -434,7 +460,7 @@ export default function HomePage() {
                     <span className="home-page__step-content">
                       <strong>Criar quadro</strong>
                       <span>
-                        Organize o fluxo de trabalho principal com colunas personalizadas.
+                        Crie uma área de trabalho dentro da organização.
                       </span>
                     </span>
                   </button>
@@ -453,39 +479,12 @@ export default function HomePage() {
                     <span className="home-page__step-content">
                       <strong>Adicionar listas e cartões</strong>
                       <span>
-                        Monte a operação mínima do sistema com tarefas detalhadas.
+                        Monte as etapas do quadro e adicione as tarefas.
                       </span>
                     </span>
                   </div>
                 </li>
               </ol>
-
-              <button
-                type="button"
-                className="home-page__assistente-cta"
-                onClick={() => navigate("/assistente-criacao")}
-              >
-                <span className="home-page__assistente-cta-label">Assistente ✨</span>
-                <span className="home-page__assistente-cta-hint">
-                  Entenda o fluxo: Organização → Quadros → Listas → Cartões
-                </span>
-              </button>
-            </section>
-
-            <section
-              className="home-page__section"
-              aria-labelledby="home-tip-title"
-            >
-              <h3 id="home-tip-title" className="home-page__section-title">
-                Dica rápida
-              </h3>
-
-              <p className="home-page__note">
-                Comece criando uma organização para representar sua empresa ou
-                projeto. Em seguida, adicione quadros para diferentes áreas ou
-                fluxos de trabalho. As listas e cartões ajudarão a detalhar as
-                tarefas do dia a dia.
-              </p>
             </section>
           </aside>
         </section>
