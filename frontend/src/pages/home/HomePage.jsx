@@ -272,6 +272,9 @@ export default function HomePage() {
                 aria-labelledby="home-orgs-title"
               >
                 <div className="home-page__section-header">
+                  <h3 id="home-orgs-title" className="home-page__section-title">
+                    Suas Organizações
+                  </h3>
                   <Button
                     variant="secondary"
                     size="sm"
@@ -279,9 +282,6 @@ export default function HomePage() {
                   >
                     Ver Organizações
                   </Button>
-                  <h3 id="home-orgs-title" className="home-page__section-title">
-                    Suas Organizações
-                  </h3>
                 </div>
                 {organizacoes.length === 0 ? (
                   <p className="home-page__empty-hint">
@@ -327,6 +327,9 @@ export default function HomePage() {
                 aria-labelledby="home-quadros-title"
               >
                 <div className="home-page__section-header">
+                  <h3 id="home-quadros-title" className="home-page__section-title">
+                    Seus Quadros
+                  </h3>
                   <Button
                     variant="secondary"
                     size="sm"
@@ -334,9 +337,6 @@ export default function HomePage() {
                   >
                     Ver Quadros
                   </Button>
-                  <h3 id="home-quadros-title" className="home-page__section-title">
-                    Seus Quadros
-                  </h3>
                 </div>
                 {quadros.length === 0 ? (
                   <p className="home-page__empty-hint">

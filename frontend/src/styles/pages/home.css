@@ -166,8 +166,12 @@
 }
 
 .home-page__section-header .home-page__section-title {
-  flex: 1;
-  min-width: min(12rem, 100%);
+  min-width: 0;
+}
+
+.home-page__section-header .button {
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .home-page__section-title {
