@@ -22,6 +22,8 @@ const visaoRoutes = require("./routes/visaoRoutes");
 const campoPersonalizadoRoutes = require("./routes/campoPersonalizadoRoutes");
 const automacaoRoutes = require("./routes/automacaoRoutes");
 const consultasRoutes = require("./routes/consultas.routes");
+const notificacaoRoutes = require("./routes/notificacaoRoutes");
+const conviteRoutes = require("./routes/conviteRoutes");
 const errorMiddleware = require("./middlewares/errorMiddleware");
 
 const app = express();
@@ -65,6 +67,8 @@ app.use("/api/quadros", visaoRoutes);
 app.use("/api/quadros", campoPersonalizadoRoutes);
 app.use("/api/quadros", automacaoRoutes);
 app.use("/api/consultas", consultasRoutes);
+app.use("/api/notificacoes", notificacaoRoutes);
+app.use("/api/convites", conviteRoutes);
 
 app.use((req, res) => {
   return res.status(404).json({

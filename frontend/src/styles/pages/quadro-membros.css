@@ -464,6 +464,67 @@
   font-size: var(--font-size-sm);
 }
 
+.quadro-membros-page__modal-sucesso {
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md, 8px);
+  background: color-mix(in srgb, var(--color-success, #0d7a3e) 12%, transparent);
+  color: var(--color-text, inherit);
+  font-size: var(--font-size-sm, 0.875rem);
+}
+
+.quadro-membros-page__modal-fieldset {
+  margin: 0 0 1rem;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+.quadro-membros-page__modal-hint {
+  margin: 0.25rem 0 0.5rem;
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, inherit);
+  opacity: 0.95;
+}
+
+.quadro-membros-page__modal-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 12rem;
+  overflow: auto;
+  padding: 0.25rem 0;
+}
+
+.quadro-membros-page__modal-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: var(--font-size-sm, 0.875rem);
+  cursor: pointer;
+}
+
+.quadro-membros-page__modal-check input {
+  margin-top: 0.2rem;
+}
+
+.quadro-membros-page__modal-textarea {
+  width: 100%;
+  min-height: 4.5rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: var(--radius-md, 8px);
+  font: inherit;
+  resize: vertical;
+  background: var(--color-surface, #fff);
+  color: var(--color-text, inherit);
+}
+
+.quadro-membros-page__modal-textarea:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #06c);
+  outline-offset: 2px;
+}
+
 .quadro-membros-page__modal-actions {
   display: flex;
   justify-content: flex-end;

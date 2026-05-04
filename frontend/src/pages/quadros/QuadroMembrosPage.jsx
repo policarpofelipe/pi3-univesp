@@ -11,6 +11,7 @@ import QuadroMembrosTable from "../../components/quadros/QuadroMembrosTable";
 
 import quadroService from "../../services/quadroService";
 import quadroMembroService from "../../services/quadroMembroService";
+import conviteService from "../../services/conviteService";
 import quadroPapelService from "../../services/quadroPapelService";
 import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 import { extractList, extractObject } from "../../utils/apiData";
@@ -38,9 +39,11 @@ export default function QuadroMembrosPage() {
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [modalConvite, setModalConvite] = useState(false);
   const [emailConvite, setEmailConvite] = useState("");
-  const [papelConvite, setPapelConvite] = useState("");
+  const [papelIdsConvite, setPapelIdsConvite] = useState([]);
+  const [mensagemConvite, setMensagemConvite] = useState("");
   const [convidando, setConvidando] = useState(false);
   const [acaoErro, setAcaoErro] = useState("");
+  const [conviteSucesso, setConviteSucesso] = useState("");
 
   const carregar = useCallback(async () => {
     if (!quadroId) return;
@@ -94,11 +97,19 @@ export default function QuadroMembrosPage() {
   }, [carregar]);
 
   useEffect(() => {
-    if (papeis.length && !papelConvite) {
-      const padrao = papeis.find((p) => p.nome === "Colaborador") || papeis[0];
-      setPapelConvite(padrao?.nome || "");
+    if (!papeis.length || papelIdsConvite.length) return;
+    const padrao = papeis.find((p) => p.nome === "Colaborador") || papeis[0];
+    if (padrao?.id != null) {
+      setPapelIdsConvite([Number(padrao.id)]);
     }
-  }, [papeis, papelConvite]);
+  }, [papeis, papelIdsConvite.length]);
+
+  function togglePapelConvite(papelId) {
+    const id = Number(papelId);
+    setPapelIdsConvite((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
 
   const membrosFiltrados = useMemo(() => {
     return membros.filter((membro) => {
@@ -182,14 +193,23 @@ export default function QuadroMembrosPage() {
   async function handleEnviarConvite(event) {
     event.preventDefault();
     setAcaoErro("");
+    setConviteSucesso("");
+    if (!papelIdsConvite.length) {
+      setAcaoErro("Selecione ao menos um papel do quadro.");
+      return;
+    }
     setConvidando(true);
     try {
-      await quadroMembroService.convidar(quadroId, {
+      await conviteService.criarConviteQuadro(quadroId, {
         email: emailConvite.trim(),
-        papel: papelConvite || "Colaborador",
+        papelIds: papelIdsConvite,
+        mensagem: mensagemConvite.trim() || undefined,
       });
-      setModalConvite(false);
+      setConviteSucesso("Convite enviado com sucesso.");
       setEmailConvite("");
+      setMensagemConvite("");
+      const padrao = papeis.find((p) => p.nome === "Colaborador") || papeis[0];
+      setPapelIdsConvite(padrao?.id != null ? [Number(padrao.id)] : []);
       await carregar();
     } catch (e) {
       setAcaoErro(
@@ -271,7 +291,11 @@ export default function QuadroMembrosPage() {
               <Button
                 variant="primary"
                 leftIcon={<UserPlus size={16} />}
-                onClick={() => setModalConvite(true)}
+                onClick={() => {
+                  setAcaoErro("");
+                  setConviteSucesso("");
+                  setModalConvite(true);
+                }}
               >
                 Convidar membro
               </Button>
@@ -425,43 +449,77 @@ export default function QuadroMembrosPage() {
             <h2 id="convite-titulo" className="quadro-membros-page__modal-title">
               Convidar membro
             </h2>
+            <p className="sr-only" aria-live="polite">
+              {convidando ? "Enviando convite…" : ""}
+            </p>
+            {conviteSucesso ? (
+              <p className="quadro-membros-page__modal-sucesso" aria-live="polite">
+                {conviteSucesso}
+              </p>
+            ) : null}
             <form className="quadro-membros-page__modal-form" onSubmit={handleEnviarConvite}>
               <div className="quadro-membros-page__modal-field">
                 <label
                   htmlFor="convite-email"
                   className="quadro-membros-page__modal-label"
                 >
-                  E-mail
+                  E-mail do usuário cadastrado
                 </label>
                 <input
                   id="convite-email"
                   type="email"
                   required
+                  autoComplete="email"
                   value={emailConvite}
                   onChange={(e) => setEmailConvite(e.target.value)}
                   className="quadro-membros-page__modal-input"
                   placeholder="nome@exemplo.com"
                 />
               </div>
+              <fieldset className="quadro-membros-page__modal-fieldset">
+                <legend className="quadro-membros-page__modal-label">
+                  Papéis do quadro
+                </legend>
+                <p id="convite-papeis-ajuda" className="quadro-membros-page__modal-hint">
+                  Selecione um ou mais papéis. Pelo menos um é obrigatório.
+                </p>
+                <div
+                  className="quadro-membros-page__modal-checklist"
+                  role="group"
+                  aria-describedby="convite-papeis-ajuda"
+                >
+                  {papeis
+                    .filter((p) => p.ativo !== false)
+                    .map((p) => {
+                      const id = Number(p.id);
+                      return (
+                        <label key={id} className="quadro-membros-page__modal-check">
+                          <input
+                            type="checkbox"
+                            checked={papelIdsConvite.includes(id)}
+                            onChange={() => togglePapelConvite(id)}
+                          />
+                          <span>{p.nome}</span>
+                        </label>
+                      );
+                    })}
+                </div>
+              </fieldset>
               <div className="quadro-membros-page__modal-field">
                 <label
-                  htmlFor="convite-papel"
+                  htmlFor="convite-mensagem"
                   className="quadro-membros-page__modal-label"
                 >
-                  Papel inicial
+                  Mensagem (opcional)
                 </label>
-                <select
-                  id="convite-papel"
-                  value={papelConvite}
-                  onChange={(e) => setPapelConvite(e.target.value)}
-                  className="quadro-membros-page__modal-select"
-                >
-                  {papeis.map((p) => (
-                    <option key={p.id || p.nome} value={p.nome}>
-                      {p.nome}
-                    </option>
-                  ))}
-                </select>
+                <textarea
+                  id="convite-mensagem"
+                  rows={3}
+                  value={mensagemConvite}
+                  onChange={(e) => setMensagemConvite(e.target.value)}
+                  className="quadro-membros-page__modal-textarea"
+                  placeholder="Opcional"
+                />
               </div>
               <div className="quadro-membros-page__modal-actions">
                 <Button
@@ -469,10 +527,21 @@ export default function QuadroMembrosPage() {
                   variant="ghost"
                   onClick={() => !convidando && setModalConvite(false)}
                 >
-                  Cancelar
+                  {conviteSucesso ? "Fechar" : "Cancelar"}
                 </Button>
-                <Button type="submit" variant="primary" loading={convidando}>
-                  Enviar convite
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={convidando}
+                  onClick={() => {
+                    setConviteSucesso("");
+                    setAcaoErro("");
+                  }}
+                >
+                  Convidar outro
+                </Button>
+                <Button type="submit" variant="primary" loading={convidando} disabled={convidando}>
+                  {convidando ? "Enviando convite…" : "Enviar convite"}
                 </Button>
               </div>
             </form>

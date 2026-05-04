@@ -1,4 +1,5 @@
 const quadroMembroService = require("../services/quadroMembroService");
+const conviteService = require("../services/conviteService");
 
 const quadroMembroController = {
   async listar(req, res, next) {
@@ -52,7 +53,31 @@ const quadroMembroController = {
 
   async convidar(req, res, next) {
     try {
-      const data = await quadroMembroService.convidar(req.params.quadroId, req.body || {});
+      const data = await quadroMembroService.convidar(
+        req.params.quadroId,
+        req.body || {},
+        req.usuario.id,
+        req.quadroContext
+      );
+
+      return res.status(201).json({
+        success: true,
+        message: "Convite enviado com sucesso.",
+        data,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+
+  async criarConviteQuadro(req, res, next) {
+    try {
+      const data = await conviteService.criarConviteQuadro(
+        req.params.quadroId,
+        req.body || {},
+        req.usuario.id,
+        req.quadroContext
+      );
 
       return res.status(201).json({
         success: true,

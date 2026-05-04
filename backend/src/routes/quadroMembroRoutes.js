@@ -1,6 +1,9 @@
 const express = require("express");
 const authMiddleware = require("../middlewares/authMiddleware");
-const { ensureQuadroMemberParam } = require("../middlewares/permissionMiddleware");
+const {
+  ensureQuadroMemberParam,
+  requireQuadroPermission,
+} = require("../middlewares/permissionMiddleware");
 const quadroMembroController = require("../controllers/quadroMembroController");
 
 const router = express.Router();
@@ -26,7 +29,16 @@ router.get("/:quadroId/membros", quadroMembroController.listar);
 router.get("/:quadroId/membros/:membroId", quadroMembroController.obterPorId);
 
 router.post("/:quadroId/membros", quadroMembroController.adicionar);
-router.post("/:quadroId/membros/convites", quadroMembroController.convidar);
+router.post(
+  "/:quadroId/convites",
+  requireQuadroPermission("podeConvidarMembros"),
+  quadroMembroController.criarConviteQuadro
+);
+router.post(
+  "/:quadroId/membros/convites",
+  requireQuadroPermission("podeConvidarMembros"),
+  quadroMembroController.convidar
+);
 
 router.put("/:quadroId/membros/:membroId", quadroMembroController.atualizar);
 router.patch(

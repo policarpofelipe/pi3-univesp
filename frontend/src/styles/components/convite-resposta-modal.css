@@ -1,0 +1,77 @@
+.convite-resposta-modal__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--color-surface-900, #111) 45%, transparent);
+}
+
+.convite-resposta-modal {
+  width: min(100%, 28rem);
+  max-height: min(90vh, 32rem);
+  overflow: auto;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--color-border-subtle, #ddd);
+  background: var(--color-surface-elevated, #fff);
+  color: var(--color-text-primary, #111);
+  box-shadow: var(--shadow-lg, 0 12px 40px rgba(0, 0, 0, 0.15));
+}
+
+.convite-resposta-modal__title {
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.convite-resposta-modal__loading {
+  margin: 0 0 0.75rem;
+}
+
+.convite-resposta-modal__erro {
+  margin: 0 0 0.75rem;
+  color: var(--color-danger, #b42318);
+}
+
+.convite-resposta-modal__sucesso {
+  margin: 0 0 0.75rem;
+}
+
+.convite-resposta-modal__corpo {
+  margin-bottom: 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.convite-resposta-modal__corpo p {
+  margin: 0 0 0.65rem;
+}
+
+.convite-resposta-modal__label {
+  font-weight: 600;
+}
+
+.convite-resposta-modal__lista-papeis {
+  margin: 0.25rem 0 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.convite-resposta-modal__info-status {
+  font-weight: 500;
+}
+
+.convite-resposta-modal__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+@media (prefers-contrast: more) {
+  .convite-resposta-modal {
+    border-width: 2px;
+  }
+}

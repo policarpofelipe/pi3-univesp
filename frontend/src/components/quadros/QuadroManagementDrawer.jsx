@@ -573,12 +573,20 @@ export default function QuadroManagementDrawer({
                           className="flex flex-col gap-3"
                           onSubmit={async (event) => {
                             event.preventDefault();
+                            const nomePapel =
+                              conviteMembro.papel ||
+                              papeis.find((p) => p.nome)?.nome ||
+                              "Colaborador";
+                            const papelSel = papeis.find(
+                              (p) => String(p.nome) === String(nomePapel)
+                            );
                             await onConvidarMembro?.({
                               email: conviteMembro.email.trim(),
-                              papel:
-                                conviteMembro.papel ||
-                                papeis.find((p) => p.nome)?.nome ||
-                                "Colaborador",
+                              papel: nomePapel,
+                              papelIds:
+                                papelSel?.id != null
+                                  ? [Number(papelSel.id)]
+                                  : [],
                             });
                             setConviteMembro({ email: "", papel: "" });
                             setMembrosMode("lista");

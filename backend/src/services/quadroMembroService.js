@@ -110,27 +110,17 @@ class QuadroMembroService {
     return adaptMembro(criado);
   }
 
-  async convidar(quadroId, dados = {}) {
-    const email = String(dados.email || "").trim();
-    if (!email) {
-      const error = new Error("E-mail é obrigatório para convite.");
-      error.statusCode = 400;
-      throw error;
-    }
-
-    const usuario = await UsuarioRepository.findByEmail(email);
-    if (!usuario) {
-      const error = new Error("Usuário com este e-mail não encontrado.");
-      error.statusCode = 404;
-      throw error;
-    }
-
-    const criado = await this.adicionar(quadroId, {
-      usuarioId: usuario.id,
-      status: "convidado",
-    });
-
-    return criado;
+  /**
+   * Compatível com POST /membros/convites (e-mail + papel opcional por nome).
+   */
+  async convidar(quadroId, dados = {}, remetenteUsuarioId, quadroContext) {
+    const conviteService = require("./conviteService");
+    return conviteService.criarDesdeFluxoLegado(
+      quadroId,
+      dados,
+      remetenteUsuarioId,
+      quadroContext
+    );
   }
 
   async atualizar(quadroId, membroId, dados = {}) {

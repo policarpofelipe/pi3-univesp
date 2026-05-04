@@ -304,33 +304,41 @@ class QuadroMembroRepository {
     }, {});
   }
 
+  /**
+   * Substitui papéis usando uma conexão já em transação (sem begin/commit).
+   * @param {import("mysql2/promise").PoolConnection} conn
+   */
+  async substituirPapeisNaConexao(conn, membroId, papelIds = []) {
+    await conn.query(
+      `
+        DELETE FROM quadro_membro_papeis
+        WHERE quadro_membro_id = ?
+      `,
+      [membroId]
+    );
+
+    if (Array.isArray(papelIds) && papelIds.length > 0) {
+      const sql = `
+        INSERT INTO quadro_membro_papeis (
+          quadro_membro_id,
+          papel_id,
+          criado_em
+        )
+        VALUES ?
+      `;
+
+      const values = papelIds.map((papelId) => [membroId, papelId, new Date()]);
+      await conn.query(sql, [values]);
+    }
+  }
+
   async substituirPapeis(membroId, papelIds = []) {
     const conn = await db.getConnection();
 
     try {
       await conn.beginTransaction();
 
-      await conn.query(
-        `
-          DELETE FROM quadro_membro_papeis
-          WHERE quadro_membro_id = ?
-        `,
-        [membroId]
-      );
-
-      if (Array.isArray(papelIds) && papelIds.length > 0) {
-        const sql = `
-          INSERT INTO quadro_membro_papeis (
-            quadro_membro_id,
-            papel_id,
-            criado_em
-          )
-          VALUES ?
-        `;
-
-        const values = papelIds.map((papelId) => [membroId, papelId, new Date()]);
-        await conn.query(sql, [values]);
-      }
+      await this.substituirPapeisNaConexao(conn, membroId, papelIds);
 
       await conn.commit();
     } catch (error) {

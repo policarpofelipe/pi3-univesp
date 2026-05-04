@@ -20,3 +20,7 @@ O **frontend** chama apenas a API interna (`GET /api/consultas/cnpj/:cnpj` e `GE
 **CEP:** ViaCEP primeiro; se não houver resultado útil, fallback BrasilAPI CEP v2.
 
 Variáveis de ambiente sugeridas estão em `backend/.env.example`. Não commite credenciais reais. **Google Maps** não está implementado nesta versão (exigiria chave e faturamento); há apenas comentário opcional no `.env.example` para evolução futura.
+
+## Convites e notificações
+
+Convites de participação em **quadro** usam as tabelas `quadro_convites` (status pendente até resposta) e `quadro_convite_papeis` (papéis propostos). O convidado precisa **aceitar** no app para virar membro ativo em `quadro_membros` e receber os papéis em `quadro_membro_papeis`. Notificações ficam em `notificacoes` (ex.: convite recebido, aceite ou recusa); o remetente recebe feedback quando o convidado responde. Não há e-mail externo neste fluxo: tudo é in-app (sino na barra superior).

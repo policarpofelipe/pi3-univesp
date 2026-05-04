@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import { useNavigate } from "react-router-dom";
 import {
@@ -15,6 +15,8 @@ import {
 import IconButton from "../ui/IconButton";
 import Button from "../ui/Button";
 import useAuth from "../../hooks/useAuth";
+import notificacaoService from "../../services/notificacaoService";
+import ConviteRespostaModal from "../convites/ConviteRespostaModal";
 import useAccessibility from "../../hooks/useAccessibility";
 import accessibilityLogo from "../../assets/icons/Accessibility_logo.svg";
 
@@ -35,7 +37,7 @@ export default function Topbar({
   className = "",
 }) {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, usuario } = useAuth();
   const {
     theme,
     setTheme,
@@ -55,9 +57,15 @@ export default function Topbar({
   } = useAccessibility();
   const menuWrapRef = useRef(null);
   const menuButtonRef = useRef(null);
+  const notifWrapRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [accessibilityOpen, setAccessibilityOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifList, setNotifList] = useState([]);
+  const [notifCarregando, setNotifCarregando] = useState(false);
+  const [internalUnread, setInternalUnread] = useState(0);
+  const [conviteModal, setConviteModal] = useState({ open: false, conviteId: null });
   const fontScaleSteps = ["sm", "md", "lg", "xl"];
   const fontScaleIndex = Math.max(0, fontScaleSteps.indexOf(fontScale));
 
@@ -65,8 +73,108 @@ export default function Topbar({
     const idx = Math.max(0, Math.min(fontScaleSteps.length - 1, Number(nextIndex)));
     setFontScale(fontScaleSteps[idx]);
   }
+  const refreshUnread = useCallback(async () => {
+    if (!usuario?.id) {
+      setInternalUnread(0);
+      return;
+    }
+    try {
+      const total = await notificacaoService.obterTotalNaoLidas();
+      setInternalUnread(total);
+    } catch {
+      setInternalUnread(0);
+    }
+  }, [usuario?.id]);
+
+  useEffect(() => {
+    refreshUnread();
+  }, [refreshUnread]);
+
+  useEffect(() => {
+    if (!notifOpen) return undefined;
+    function handleClickOutside(event) {
+      const root = notifWrapRef.current;
+      if (!root || root.contains(event.target)) return;
+      setNotifOpen(false);
+    }
+    function handleEscape(event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setNotifOpen(false);
+        notifWrapRef.current
+          ?.querySelector("[data-topbar-notif-trigger]")
+          ?.focus();
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [notifOpen]);
+
+  async function handleToggleNotificacoes() {
+    const next = !notifOpen;
+    setNotifOpen(next);
+    if (next) {
+      setNotifCarregando(true);
+      try {
+        const list = await notificacaoService.listarNotificacoes({ limit: 20 });
+        setNotifList(list);
+      } catch {
+        setNotifList([]);
+      } finally {
+        setNotifCarregando(false);
+      }
+      await refreshUnread();
+    }
+  }
+
+  function formatarDataNotificacao(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  }
+
+  async function handleClicNotificacao(n) {
+    if (!n?.id) return;
+    const tipo = n.tipo || "";
+
+    if (tipo === "CONVITE_QUADRO_RECEBIDO") {
+      const cid = n.dadosJson?.conviteId;
+      if (cid) {
+        setNotifOpen(false);
+        setConviteModal({ open: true, conviteId: Number(cid) });
+      }
+      return;
+    }
+
+    if (tipo === "CONVITE_QUADRO_ACEITO" || tipo === "CONVITE_QUADRO_RECUSADO") {
+      try {
+        await notificacaoService.marcarComoLida(n.id);
+      } catch {
+        /* mantém lista */
+      }
+      await refreshUnread();
+      setNotifList((prev) =>
+        prev.map((item) =>
+          item.id === n.id ? { ...item, lidaEm: item.lidaEm || new Date().toISOString() } : item
+        )
+      );
+    }
+  }
+
+  function handleAbrirQuadroNotificacao(e, quadroId) {
+    e.stopPropagation();
+    if (!quadroId) return;
+    navigate(`/quadros/${quadroId}`);
+    setNotifOpen(false);
+  }
+
   const hasSearch = typeof onSearchChange === "function";
-  const userName = user?.name || user?.nome || "Usuário";
+  const userName = user?.name || user?.nome || usuario?.nomeExibicao || "Usuário";
   const userAvatar = user?.avatarUrl || null;
   const navMenuItems = useMemo(() => {
     const flatGroups = (navigationGroups || []).flatMap((group) => group?.items || []);
@@ -267,21 +375,94 @@ export default function Topbar({
             />
           </button>
 
-          <div className="topbar__notifications">
+          <div className="topbar__notifications" ref={notifWrapRef}>
             <IconButton
               icon={<Bell size={18} />}
-              label="Notificações"
+              label="Abrir notificações"
               variant="ghost"
+              aria-haspopup="dialog"
+              aria-expanded={notifOpen}
+              aria-controls="topbar-notificacoes-panel"
+              active={notifOpen}
+              onClick={handleToggleNotificacoes}
+              data-topbar-notif-trigger
             />
 
-            {notificationCount > 0 && (
+            {(internalUnread > 0 || notificationCount > 0) && (
               <span
                 className="topbar__notification-badge"
-                aria-label={`${notificationCount} notificações não lidas`}
+                aria-label={`${Math.max(internalUnread, notificationCount)} notificações não lidas`}
               >
-                {notificationCount > 99 ? "99+" : notificationCount}
+                {Math.max(internalUnread, notificationCount) > 99
+                  ? "99+"
+                  : Math.max(internalUnread, notificationCount)}
               </span>
             )}
+
+            <div
+              id="topbar-notificacoes-panel"
+              className="topbar__notif-dropdown"
+              hidden={!notifOpen}
+              role="region"
+              aria-label="Lista de notificações"
+            >
+              <p className="topbar__notif-dropdown-header">Notificações</p>
+              {notifCarregando ? (
+                <p className="topbar__notif-vazio" aria-live="polite">
+                  Carregando notificações…
+                </p>
+              ) : notifList.length === 0 ? (
+                <p className="topbar__notif-vazio">Nenhuma notificação recente.</p>
+              ) : (
+                <ul className="topbar__notif-list">
+                  {notifList.map((n) => {
+                    const naoLida = !n.lidaEm;
+                    const quadroIdFeedback = n.dadosJson?.quadroId;
+                    const mostrarAbrirQuadro =
+                      (n.tipo === "CONVITE_QUADRO_ACEITO" ||
+                        n.tipo === "CONVITE_QUADRO_RECUSADO") &&
+                      quadroIdFeedback;
+
+                    return (
+                      <li key={n.id}>
+                        <button
+                          type="button"
+                          className={clsx(
+                            "topbar__notif-item",
+                            naoLida && "topbar__notif-item--unread"
+                          )}
+                          onClick={() => handleClicNotificacao(n)}
+                        >
+                          <p className="topbar__notif-item-title">{n.titulo}</p>
+                          {n.mensagem ? (
+                            <p className="topbar__notif-item-msg">{n.mensagem}</p>
+                          ) : null}
+                          <div className="topbar__notif-item-meta">
+                            <span>{formatarDataNotificacao(n.criadoEm)}</span>
+                            <span className="topbar__notif-item-status">
+                              {naoLida ? "Não lida" : "Lida"}
+                            </span>
+                          </div>
+                          {mostrarAbrirQuadro ? (
+                            <div className="topbar__notif-item-actions">
+                              <button
+                                type="button"
+                                className="topbar__notif-abrir-quadro"
+                                onClick={(e) =>
+                                  handleAbrirQuadroNotificacao(e, quadroIdFeedback)
+                                }
+                              >
+                                Abrir quadro
+                              </button>
+                            </div>
+                          ) : null}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
           </div>
 
           <div className="topbar__user" aria-label="Sessão do usuário">
@@ -329,6 +510,25 @@ export default function Topbar({
           </form>
         </div>
       )}
+
+      <ConviteRespostaModal
+        conviteId={conviteModal.conviteId}
+        aberto={conviteModal.open}
+        onClose={() => setConviteModal({ open: false, conviteId: null })}
+        onRespondido={async () => {
+          await refreshUnread();
+          if (notifOpen) {
+            try {
+              const list = await notificacaoService.listarNotificacoes({
+                limit: 20,
+              });
+              setNotifList(list);
+            } catch {
+              /* ignore */
+            }
+          }
+        }}
+      />
 
       {accessibilityOpen ? (
         <div
