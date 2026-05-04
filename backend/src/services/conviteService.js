@@ -112,16 +112,25 @@ class ConviteService {
       throw err;
     }
 
-    const vinculoOrg = await OrganizacaoRepository.obterMembroPorUsuarioId(
+    /* Convite pelo quadro: garante vínculo na organização do quadro (novo = convidado na org). */
+    let vinculoOrg = await OrganizacaoRepository.obterMembroPorUsuarioId(
       quadro.organizacaoId,
       convidadoId
     );
-    if (!vinculoOrg || String(vinculoOrg.status || "").toLowerCase() !== "ativo") {
-      const err = new Error(
-        "Este usuário precisa pertencer à organização antes de ser convidado para o quadro."
-      );
-      err.statusCode = 409;
-      throw err;
+    if (!vinculoOrg) {
+      vinculoOrg = await OrganizacaoRepository.adicionarMembro({
+        organizacaoId: quadro.organizacaoId,
+        usuarioId: convidadoId,
+        papel: "membro",
+        status: "convidado",
+      });
+    } else {
+      const orgSt = String(vinculoOrg.status || "").toLowerCase();
+      if (orgSt === "suspenso") {
+        const err = new Error("Este usuário está suspenso nesta organização.");
+        err.statusCode = 409;
+        throw err;
+      }
     }
 
     const membroExistente = await QuadroMembroRepository.obterPorUsuarioId(qId, convidadoId);
@@ -397,9 +406,25 @@ class ConviteService {
         );
       }
 
+      const quadroAceito = await QuadroRepository.obterPorId(quadroId);
+      const orgIdQuadro = quadroAceito?.organizacaoId;
+      if (orgIdQuadro) {
+        await conn.query(
+          `
+          UPDATE organizacao_membros
+          SET status = 'ativo',
+              atualizado_em = NOW()
+          WHERE organizacao_id = ?
+            AND usuario_id = ?
+            AND status = 'convidado'
+          `,
+          [orgIdQuadro, uId]
+        );
+      }
+
       await ConviteRepository.finalizarConvite(cId, "aceito", conn);
 
-      const quadro = await QuadroRepository.obterPorId(quadroId);
+      const quadro = quadroAceito || (await QuadroRepository.obterPorId(quadroId));
       const aceitador = await UsuarioRepository.findById(uId);
       const nomeAceitador =
         aceitador?.nome_exibicao || aceitador?.nomeExibicao || aceitador?.email || "Usuário";
