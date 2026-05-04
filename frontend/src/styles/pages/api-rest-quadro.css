@@ -96,6 +96,87 @@
   color: var(--color-danger-text);
 }
 
+.api-rest-quadro-page__success {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-success-border);
+  border-radius: var(--radius-md);
+  background: var(--color-success-surface);
+  color: var(--color-success-text);
+}
+
+.api-rest-quadro-page__warning {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-surface);
+  color: var(--color-warning-text);
+  font-size: var(--font-size-sm);
+}
+
+.api-rest-quadro-page__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.api-rest-quadro-page__details summary {
+  cursor: pointer;
+  font-weight: var(--font-weight-semibold);
+}
+
+.api-rest-quadro-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.api-rest-quadro-page__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.api-rest-quadro-page__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.api-rest-quadro-page__field label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.api-rest-quadro-page__field input,
+.api-rest-quadro-page__field select,
+.api-rest-quadro-page__field textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.api-rest-quadro-page__field textarea {
+  resize: vertical;
+  min-height: 7rem;
+}
+
+.api-rest-quadro-page__field-error {
+  color: var(--color-danger-text);
+  font-size: var(--font-size-xs);
+}
+
+.api-rest-quadro-page__card--inner {
+  background: var(--color-surface-alt);
+  border-style: dashed;
+}
+
 @media (max-width: 720px) {
   .api-rest-quadro-page__copy-wrap {
     width: 100%;
@@ -104,5 +185,9 @@
 
   .api-rest-quadro-page__copy-status {
     min-width: 0;
+  }
+
+  .api-rest-quadro-page__grid {
+    grid-template-columns: 1fr;
   }
 }

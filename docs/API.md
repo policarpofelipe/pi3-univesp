@@ -129,6 +129,14 @@ Fluxo recomendado:
 2. Serviço chama `GET /api/quadros/:quadroId/listas` para identificar a lista de destino.
 3. Serviço chama `POST /api/quadros/:quadroId/cartoes` com os dados do formulário.
 
+## Demonstração pelo navegador
+
+A tela `API REST do Quadro` possui um simulador de formulário externo. Esse formulário usa a sessão autenticada do usuário e envia uma requisição `POST` para o endpoint de criação de cartões.
+
+Dessa forma, é possível demonstrar no navegador como uma integração externa poderia transformar uma entrada de formulário em um cartão no quadro.
+
+Em uma integração externa real, o sistema externo precisa autenticar e enviar token Bearer no header `Authorization`.
+
 ## Observações de segurança
 
 - Não compartilhe o token.
