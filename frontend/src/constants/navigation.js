@@ -11,16 +11,16 @@ export const sidebarItems = [
     icon: LayoutDashboard,
   },
   {
-    key: "organizacoes",
-    label: "Organizações",
-    href: "/organizacoes",
-    icon: Building2,
-  },
-  {
     key: "quadros",
     label: "Quadros",
     href: "/quadros",
     icon: KanbanSquare,
+  },
+  {
+    key: "organizacoes",
+    label: "Organizações",
+    href: "/organizacoes",
+    icon: Building2,
   },
 ];
 
