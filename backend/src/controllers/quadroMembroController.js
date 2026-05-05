@@ -89,6 +89,52 @@ const quadroMembroController = {
     }
   },
 
+  async listarConvitesQuadro(req, res, next) {
+    try {
+      const data = await conviteService.listarPorQuadro(req.params.quadroId, req.query);
+      return res.status(200).json({
+        success: true,
+        data,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+
+  async reenviarConviteQuadro(req, res, next) {
+    try {
+      const data = await conviteService.reenviarPorQuadro(
+        req.params.quadroId,
+        req.params.conviteId,
+        req.usuario.id,
+        req.quadroContext
+      );
+      return res.status(200).json({
+        success: true,
+        message: "Convite reenviado com sucesso.",
+        data,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+
+  async removerConviteQuadro(req, res, next) {
+    try {
+      const data = await conviteService.removerPorQuadro(
+        req.params.quadroId,
+        req.params.conviteId
+      );
+      return res.status(200).json({
+        success: true,
+        message: "Convite removido com sucesso.",
+        data,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+
   async atualizar(req, res, next) {
     try {
       const data = await quadroMembroService.atualizar(

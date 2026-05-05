@@ -16,6 +16,7 @@ import automacaoService from "../../services/automacaoService";
 import visaoService from "../../services/visaoService";
 import campoPersonalizadoService from "../../services/campoPersonalizadoService";
 import quadroPapelService from "../../services/quadroPapelService";
+import conviteService from "../../services/conviteService";
 import { buscarOrganizacaoPorId } from "../../services/organizacaoService";
 import CartaoModal from "../../components/cartoes/CartaoModal";
 import QuadroManagementDrawer from "../../components/quadros/QuadroManagementDrawer";
@@ -78,6 +79,7 @@ export default function QuadroDetalhePage() {
 
   const [quadro, setQuadro] = useState(null);
   const [membros, setMembros] = useState([]);
+  const [convitesMembros, setConvitesMembros] = useState([]);
   const [listas, setListas] = useState([]);
   const [cartoes, setCartoes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -133,6 +135,7 @@ export default function QuadroDetalhePage() {
         resVisoes,
         resCampos,
         resPapeis,
+        resConvites,
       ] =
         await Promise.all([
           quadroService.obterPorId(quadroId),
@@ -144,6 +147,9 @@ export default function QuadroDetalhePage() {
           visaoService.listar(quadroId).catch(() => ({ data: [] })),
           campoPersonalizadoService.listar(quadroId).catch(() => ({ data: [] })),
           quadroPapelService.listar(quadroId).catch(() => ({ data: [] })),
+          conviteService
+            .listarConvitesQuadro(quadroId, { statuses: "pendente,recusado" })
+            .catch(() => []),
         ]);
 
       let data = extractObject(resQuadro) || resQuadro;
@@ -181,6 +187,7 @@ export default function QuadroDetalhePage() {
       setVisoes(extractList(resVisoes));
       setCamposPersonalizados(extractList(resCampos));
       setPapeisQuadro(extractList(resPapeis));
+      setConvitesMembros(Array.isArray(resConvites) ? resConvites : extractList(resConvites));
       setAutomacoesErro("");
       setMembrosErro("");
       setVisoesErro("");
@@ -202,6 +209,7 @@ export default function QuadroDetalhePage() {
       setVisoes([]);
       setCamposPersonalizados([]);
       setPapeisQuadro([]);
+      setConvitesMembros([]);
       setAutomacoesErro("");
     } finally {
       setLoading(false);
@@ -280,6 +288,18 @@ export default function QuadroDetalhePage() {
           "Não foi possível carregar os membros."
       );
       setMembros([]);
+    }
+  }, [quadroId]);
+
+  const carregarConvitesMembros = useCallback(async () => {
+    if (!quadroId) return;
+    try {
+      const lista = await conviteService.listarConvitesQuadro(quadroId, {
+        statuses: "pendente,recusado",
+      });
+      setConvitesMembros(lista);
+    } catch {
+      setConvitesMembros([]);
     }
   }, [quadroId]);
 
@@ -462,6 +482,7 @@ export default function QuadroDetalhePage() {
     try {
       await quadroMembroService.convidar(quadroId, payload);
       await carregarMembros();
+      await carregarConvitesMembros();
     } catch (error) {
       setMembrosErro(
         error?.response?.data?.message ||
@@ -515,6 +536,7 @@ export default function QuadroDetalhePage() {
     try {
       await quadroMembroService.reenviarConvite(quadroId, membroId);
       await carregarMembros();
+      await carregarConvitesMembros();
     } catch (error) {
       setMembrosErro(
         error?.response?.data?.message ||
@@ -922,6 +944,42 @@ export default function QuadroDetalhePage() {
     [listas, navigate, location, quadroId]
   );
 
+  async function handleReenviarConviteQuadro(conviteId) {
+    setMembroSalvando(true);
+    setMembrosErro("");
+    try {
+      await conviteService.reenviarConviteQuadro(quadroId, conviteId);
+      await carregarMembros();
+      await carregarConvitesMembros();
+    } catch (error) {
+      setMembrosErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível reenviar o convite."
+      );
+    } finally {
+      setMembroSalvando(false);
+    }
+  }
+
+  async function handleRemoverConviteQuadro(conviteId) {
+    if (!window.confirm("Remover este convite da lista?")) return;
+    setMembroSalvando(true);
+    setMembrosErro("");
+    try {
+      await conviteService.removerConviteQuadro(quadroId, conviteId);
+      await carregarConvitesMembros();
+    } catch (error) {
+      setMembrosErro(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Não foi possível remover o convite."
+      );
+    } finally {
+      setMembroSalvando(false);
+    }
+  }
+
   if (loading && !quadro) {
     return (
       <AppLayout
@@ -1036,6 +1094,7 @@ export default function QuadroDetalhePage() {
         defaultSection={drawerSection}
         quadro={quadro}
         membros={membros}
+        convitesMembros={convitesMembros}
         tags={tags}
         visoes={visoes}
         campos={camposPersonalizados}
@@ -1065,6 +1124,8 @@ export default function QuadroDetalhePage() {
         onAlterarPapelMembro={handleAlterarPapelMembroQuadro}
         onRemoverMembro={handleRemoverMembroQuadro}
         onReenviarConviteMembro={handleReenviarConviteMembroQuadro}
+        onReenviarConviteQuadro={handleReenviarConviteQuadro}
+        onRemoverConviteQuadro={handleRemoverConviteQuadro}
         onCriarVisao={handleCriarVisaoQuadro}
         onAtualizarVisao={handleAtualizarVisaoQuadro}
         onRemoverVisao={handleRemoverVisaoQuadro}

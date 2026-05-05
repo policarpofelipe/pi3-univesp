@@ -34,6 +34,38 @@ function normalizarPapelIds(body) {
 }
 
 class ConviteService {
+  async listarPorQuadro(quadroId, query = {}) {
+    const qId = toPositiveInt(quadroId);
+    if (!qId) {
+      const err = new Error("Quadro inválido.");
+      err.statusCode = 400;
+      throw err;
+    }
+    const statuses = String(query.statuses || "pendente,recusado")
+      .split(",")
+      .map((s) => String(s || "").trim().toLowerCase())
+      .filter(Boolean);
+    const rows = await ConviteRepository.listarPorQuadroId(qId, statuses);
+    const withPapeis = await Promise.all(
+      rows.map(async (r) => ({
+        id: Number(r.id),
+        quadroId: Number(r.quadroId),
+        usuarioConvidadoId: Number(r.usuarioConvidadoId),
+        emailConvidado: r.emailConvidado,
+        convidadoNomeExibicao: r.convidadoNomeExibicao || null,
+        convidadoPorUsuarioId: r.convidadoPorUsuarioId ? Number(r.convidadoPorUsuarioId) : null,
+        convidadoPorNomeExibicao: r.remetenteNomeExibicao || null,
+        status: r.status,
+        mensagem: r.mensagem,
+        criadoEm: r.criadoEm,
+        respondidoEm: r.respondidoEm,
+        expiraEm: r.expiraEm,
+        papeis: await ConviteRepository.listarPapeisPorConviteId(Number(r.id)),
+      }))
+    );
+    return withPapeis;
+  }
+
   async resolverPapelIdsPorNomeQuadro(quadroId, nomePapel) {
     const nome = String(nomePapel || "").trim();
     if (!nome) return [];
@@ -533,6 +565,62 @@ class ConviteService {
     } finally {
       conn.release();
     }
+  }
+
+  async reenviarPorQuadro(quadroId, conviteId, remetenteUsuarioId, quadroContext) {
+    const qId = toPositiveInt(quadroId);
+    const cId = toPositiveInt(conviteId);
+    const rId = toPositiveInt(remetenteUsuarioId);
+    if (!qId || !cId || !rId) {
+      const err = new Error("IDs inválidos.");
+      err.statusCode = 400;
+      throw err;
+    }
+    const convite = await ConviteRepository.obterPorId(cId);
+    if (!convite || Number(convite.quadroId) !== qId) {
+      const err = new Error("Convite não encontrado para este quadro.");
+      err.statusCode = 404;
+      throw err;
+    }
+    if (!["recusado", "pendente"].includes(String(convite.status || "").toLowerCase())) {
+      const err = new Error("Só é possível reenviar convites pendentes ou recusados.");
+      err.statusCode = 409;
+      throw err;
+    }
+    const papeis = await ConviteRepository.listarPapeisPorConviteId(cId);
+    return this.criarConviteQuadro(
+      qId,
+      {
+        email: convite.emailConvidado,
+        papelIds: papeis.map((p) => Number(p.id)),
+        mensagem: convite.mensagem || undefined,
+      },
+      rId,
+      quadroContext
+    );
+  }
+
+  async removerPorQuadro(quadroId, conviteId) {
+    const qId = toPositiveInt(quadroId);
+    const cId = toPositiveInt(conviteId);
+    if (!qId || !cId) {
+      const err = new Error("IDs inválidos.");
+      err.statusCode = 400;
+      throw err;
+    }
+    const convite = await ConviteRepository.obterPorId(cId);
+    if (!convite || Number(convite.quadroId) !== qId) {
+      const err = new Error("Convite não encontrado para este quadro.");
+      err.statusCode = 404;
+      throw err;
+    }
+    if (String(convite.status || "").toLowerCase() === "aceito") {
+      const err = new Error("Não é possível remover convite aceito.");
+      err.statusCode = 409;
+      throw err;
+    }
+    const ok = await ConviteRepository.removerPorIdEQuadro(cId, qId);
+    return { removido: ok };
   }
 }
 

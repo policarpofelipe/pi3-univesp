@@ -82,6 +82,42 @@ class ConviteRepository {
     return rows;
   }
 
+  async listarPorQuadroId(quadroId, statuses = []) {
+    const allowed = new Set(["pendente", "recusado", "aceito", "cancelado", "expirado"]);
+    const list = Array.isArray(statuses)
+      ? statuses.filter((s) => allowed.has(String(s || "").toLowerCase()))
+      : [];
+    const whereStatus = list.length
+      ? `AND qc.status IN (${list.map(() => "?").join(", ")})`
+      : "";
+
+    const [rows] = await db.query(
+      `
+      SELECT
+        qc.id,
+        qc.quadro_id AS quadroId,
+        qc.usuario_convidado_id AS usuarioConvidadoId,
+        qc.email_convidado AS emailConvidado,
+        qc.convidado_por_usuario_id AS convidadoPorUsuarioId,
+        qc.status,
+        qc.mensagem,
+        qc.criado_em AS criadoEm,
+        qc.respondido_em AS respondidoEm,
+        qc.expira_em AS expiraEm,
+        uv.nome_exibicao AS convidadoNomeExibicao,
+        uc.nome_exibicao AS remetenteNomeExibicao
+      FROM quadro_convites qc
+      INNER JOIN usuarios uv ON uv.id = qc.usuario_convidado_id
+      LEFT JOIN usuarios uc ON uc.id = qc.convidado_por_usuario_id
+      WHERE qc.quadro_id = ?
+      ${whereStatus}
+      ORDER BY qc.criado_em DESC
+      `,
+      [quadroId, ...list]
+    );
+    return rows;
+  }
+
   /**
    * @param {import("mysql2/promise").PoolConnection} conn
    */
@@ -147,6 +183,19 @@ class ConviteRepository {
       `,
       [status, conviteId]
     );
+  }
+
+  async removerPorIdEQuadro(conviteId, quadroId, conn = null) {
+    const runner = conn || db;
+    const [result] = await runner.query(
+      `
+      DELETE FROM quadro_convites
+      WHERE id = ?
+        AND quadro_id = ?
+      `,
+      [conviteId, quadroId]
+    );
+    return result.affectedRows > 0;
   }
 }
 

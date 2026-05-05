@@ -208,6 +208,17 @@
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
 }
 
+.quadro-management-drawer__convites-bloco {
+  margin-top: var(--space-4);
+}
+
+.quadro-management-drawer__convites-titulo {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+}
+
 .quadro-management-drawer .automacao-list.quadro-management-drawer__record-stack--automacoes {
   display: flex;
   flex-direction: column;

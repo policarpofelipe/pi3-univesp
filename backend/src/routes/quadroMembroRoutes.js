@@ -34,6 +34,21 @@ router.post(
   requireQuadroPermission("podeConvidarMembros"),
   quadroMembroController.criarConviteQuadro
 );
+router.get(
+  "/:quadroId/convites",
+  requireQuadroPermission("podeConvidarMembros"),
+  quadroMembroController.listarConvitesQuadro
+);
+router.post(
+  "/:quadroId/convites/:conviteId/reenviar",
+  requireQuadroPermission("podeConvidarMembros"),
+  quadroMembroController.reenviarConviteQuadro
+);
+router.delete(
+  "/:quadroId/convites/:conviteId",
+  requireQuadroPermission("podeConvidarMembros"),
+  quadroMembroController.removerConviteQuadro
+);
 router.post(
   "/:quadroId/membros/convites",
   requireQuadroPermission("podeConvidarMembros"),

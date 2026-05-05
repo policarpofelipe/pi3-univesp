@@ -64,6 +64,7 @@ export default function QuadroManagementDrawer({
   defaultSection = "geral",
   quadro,
   membros = [],
+  convitesMembros = [],
   tags = [],
   visoes = [],
   campos = [],
@@ -93,6 +94,8 @@ export default function QuadroManagementDrawer({
   onAlterarPapelMembro,
   onRemoverMembro,
   onReenviarConviteMembro,
+  onReenviarConviteQuadro,
+  onRemoverConviteQuadro,
   onCriarVisao,
   onAtualizarVisao,
   onRemoverVisao,
@@ -244,6 +247,21 @@ export default function QuadroManagementDrawer({
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
+      }).format(new Date(data));
+    } catch {
+      return data;
+    }
+  };
+
+  const formatarDataHora = (data) => {
+    if (!data) return "Não informado";
+    try {
+      return new Intl.DateTimeFormat("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       }).format(new Date(data));
     } catch {
       return data;
@@ -528,95 +546,176 @@ export default function QuadroManagementDrawer({
                     ) : null}
 
                     {membrosMode === "lista" ? (
-                      membros.length === 0 ? (
+                      membros.length === 0 && convitesMembros.length === 0 ? (
                         <p className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-                          Nenhum membro listado.
+                          Nenhum membro ou convite listado.
                         </p>
                       ) : (
-                        <ul className="quadro-management-drawer__record-stack">
-                          {membros.map((membro) => {
-                            const nomeMembro = membro.nome || "Sem nome";
-                            const papeisMembro =
-                              Array.isArray(membro.papeis) && membro.papeis.length
-                                ? membro.papeis
-                                : [];
-                            return (
-                              <li
-                                key={membro.id}
-                                className="quadro-management-drawer__record-card"
-                              >
-                                <div className="flex flex-wrap items-start justify-between gap-3">
-                                  <div className="min-w-0 flex-1">
-                                    <strong className="block text-[var(--font-size-sm)] text-[var(--color-text)]">
-                                      {nomeMembro}
-                                    </strong>
-                                    {membro.email ? (
-                                      <p className="mt-1 flex items-center gap-1 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
-                                        <Mail size={12} aria-hidden="true" />
-                                        <span>{membro.email}</span>
-                                      </p>
-                                    ) : null}
-                                    <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
-                                      Papel:{" "}
-                                      {papeisMembro.length
-                                        ? papeisMembro.join(", ")
-                                        : "Sem papel"}
-                                    </p>
-                                  </div>
-                                  <div className="flex flex-wrap gap-2">
-                                    {papeis.length ? (
-                                      <select
-                                        aria-label={`Papel de ${nomeMembro}`}
-                                        disabled={membrosSalvando}
-                                        defaultValue={papeisMembro[0] || ""}
-                                        onChange={(event) =>
-                                          onAlterarPapelMembro?.(
-                                            membro.id,
-                                            event.target.value
-                                          )
-                                        }
-                                      >
-                                        <option value="">Selecionar papel</option>
-                                        {papeis.map((papel) => (
-                                          <option
-                                            key={papel.id || papel.nome}
-                                            value={papel.nome}
+                        <>
+                          {membros.length > 0 ? (
+                            <ul className="quadro-management-drawer__record-stack">
+                              {membros.map((membro) => {
+                                const nomeMembro = membro.nome || "Sem nome";
+                                const papeisMembro =
+                                  Array.isArray(membro.papeis) && membro.papeis.length
+                                    ? membro.papeis
+                                    : [];
+                                return (
+                                  <li
+                                    key={membro.id}
+                                    className="quadro-management-drawer__record-card"
+                                  >
+                                    <div className="flex flex-wrap items-start justify-between gap-3">
+                                      <div className="min-w-0 flex-1">
+                                        <strong className="block text-[var(--font-size-sm)] text-[var(--color-text)]">
+                                          {nomeMembro}
+                                        </strong>
+                                        {membro.email ? (
+                                          <p className="mt-1 flex items-center gap-1 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
+                                            <Mail size={12} aria-hidden="true" />
+                                            <span>{membro.email}</span>
+                                          </p>
+                                        ) : null}
+                                        <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
+                                          Papel:{" "}
+                                          {papeisMembro.length
+                                            ? papeisMembro.join(", ")
+                                            : "Sem papel"}
+                                        </p>
+                                      </div>
+                                      <div className="flex flex-wrap gap-2">
+                                        {papeis.length ? (
+                                          <select
+                                            aria-label={`Papel de ${nomeMembro}`}
+                                            disabled={membrosSalvando}
+                                            defaultValue={papeisMembro[0] || ""}
+                                            onChange={(event) =>
+                                              onAlterarPapelMembro?.(
+                                                membro.id,
+                                                event.target.value
+                                              )
+                                            }
                                           >
-                                            {papel.nome}
-                                          </option>
-                                        ))}
-                                      </select>
-                                    ) : null}
-                                    {String(membro.status || "").toLowerCase() ===
-                                    "pendente" ? (
-                                      <Button
-                                        type="button"
-                                        variant="secondary"
-                                        size="sm"
-                                        disabled={membrosSalvando}
-                                        onClick={() =>
-                                          onReenviarConviteMembro?.(membro.id)
-                                        }
-                                      >
-                                        Reenviar
-                                      </Button>
-                                    ) : null}
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="sm"
-                                      disabled={membrosSalvando}
-                                      onClick={() => onRemoverMembro?.(membro.id)}
-                                      aria-label={`Remover membro ${nomeMembro}`}
+                                            <option value="">Selecionar papel</option>
+                                            {papeis.map((papel) => (
+                                              <option
+                                                key={papel.id || papel.nome}
+                                                value={papel.nome}
+                                              >
+                                                {papel.nome}
+                                              </option>
+                                            ))}
+                                          </select>
+                                        ) : null}
+                                        {String(membro.status || "").toLowerCase() ===
+                                        "pendente" ? (
+                                          <Button
+                                            type="button"
+                                            variant="secondary"
+                                            size="sm"
+                                            disabled={membrosSalvando}
+                                            onClick={() =>
+                                              onReenviarConviteMembro?.(membro.id)
+                                            }
+                                          >
+                                            Reenviar
+                                          </Button>
+                                        ) : null}
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          disabled={membrosSalvando}
+                                          onClick={() => onRemoverMembro?.(membro.id)}
+                                          aria-label={`Remover membro ${nomeMembro}`}
+                                        >
+                                          Remover
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          ) : null}
+                          {convitesMembros.length > 0 ? (
+                            <div className="quadro-management-drawer__convites-bloco">
+                              <h4 className="quadro-management-drawer__convites-titulo">
+                                Convites enviados
+                              </h4>
+                              <ul className="quadro-management-drawer__record-stack">
+                                {convitesMembros.map((convite) => {
+                                  const status = String(convite.status || "").toLowerCase();
+                                  const papeisConvite = Array.isArray(convite.papeis)
+                                    ? convite.papeis
+                                        .map((p) => (typeof p === "string" ? p : p?.nome))
+                                        .filter(Boolean)
+                                    : [];
+                                  return (
+                                    <li
+                                      key={`convite-${convite.id}`}
+                                      className="quadro-management-drawer__record-card"
                                     >
-                                      Remover
-                                    </Button>
-                                  </div>
-                                </div>
-                              </li>
-                            );
-                          })}
-                        </ul>
+                                      <div className="flex flex-wrap items-start justify-between gap-3">
+                                        <div className="min-w-0 flex-1">
+                                          <strong className="block text-[var(--font-size-sm)] text-[var(--color-text)]">
+                                            {convite.convidadoNomeExibicao ||
+                                              convite.emailConvidado ||
+                                              "Convidado"}
+                                          </strong>
+                                          {convite.emailConvidado ? (
+                                            <p className="mt-1 flex items-center gap-1 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
+                                              <Mail size={12} aria-hidden="true" />
+                                              <span>{convite.emailConvidado}</span>
+                                            </p>
+                                          ) : null}
+                                          <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
+                                            Status: {status === "pendente" ? "Pendente" : "Recusado"}
+                                          </p>
+                                          <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
+                                            Enviado em: {formatarDataHora(convite.criadoEm)}
+                                          </p>
+                                          <p className="mt-1 text-[var(--font-size-xs)] text-[var(--color-text-soft)]">
+                                            Papéis:{" "}
+                                            {papeisConvite.length
+                                              ? papeisConvite.join(", ")
+                                              : "Sem papel"}
+                                          </p>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                          {status === "recusado" ? (
+                                            <Button
+                                              type="button"
+                                              variant="secondary"
+                                              size="sm"
+                                              disabled={membrosSalvando}
+                                              onClick={() =>
+                                                onReenviarConviteQuadro?.(convite.id)
+                                              }
+                                            >
+                                              Reenviar
+                                            </Button>
+                                          ) : null}
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            disabled={membrosSalvando}
+                                            onClick={() =>
+                                              onRemoverConviteQuadro?.(convite.id)
+                                            }
+                                          >
+                                            Remover
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            </div>
+                          ) : null}
+                        </>
                       )
                     ) : (
                       <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
