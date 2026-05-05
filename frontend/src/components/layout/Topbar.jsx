@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
   Menu,
@@ -477,68 +478,80 @@ export default function Topbar({
         }}
       />
 
-      {notifOpen ? (
-        <div className="topbar__notif-overlay" role="presentation" onClick={() => setNotifOpen(false)}>
-          <div
-            id="topbar-notificacoes-panel"
-            className="topbar__notif-dropdown"
-            role="region"
-            aria-label="Lista de notificações"
-            ref={notifPanelRef}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <p className="topbar__notif-dropdown-header">Notificações</p>
-            {notifCarregando ? (
-              <p className="topbar__notif-vazio" aria-live="polite">
-                Carregando notificações…
-              </p>
-            ) : notifList.length === 0 ? (
-              <p className="topbar__notif-vazio">Nenhuma notificação recente.</p>
-            ) : (
-              <ul className="topbar__notif-list">
-                {notifList.map((n) => {
-                  const naoLida = !n.lidaEm;
-                  const quadroIdFeedback = n.dadosJson?.quadroId;
-                  const mostrarAbrirQuadro =
-                    (n.tipo === "CONVITE_QUADRO_ACEITO" ||
-                      n.tipo === "CONVITE_QUADRO_RECUSADO") &&
-                    quadroIdFeedback;
+      {notifOpen
+        ? createPortal(
+            <div
+              className="topbar__notif-overlay"
+              role="presentation"
+              onClick={() => setNotifOpen(false)}
+            >
+              <div
+                id="topbar-notificacoes-panel"
+                className="topbar__notif-dropdown"
+                role="region"
+                aria-label="Lista de notificações"
+                ref={notifPanelRef}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <p className="topbar__notif-dropdown-header">Notificações</p>
+                {notifCarregando ? (
+                  <p className="topbar__notif-vazio" aria-live="polite">
+                    Carregando notificações…
+                  </p>
+                ) : notifList.length === 0 ? (
+                  <p className="topbar__notif-vazio">Nenhuma notificação recente.</p>
+                ) : (
+                  <ul className="topbar__notif-list">
+                    {notifList.map((n) => {
+                      const naoLida = !n.lidaEm;
+                      const quadroIdFeedback = n.dadosJson?.quadroId;
+                      const mostrarAbrirQuadro =
+                        (n.tipo === "CONVITE_QUADRO_ACEITO" ||
+                          n.tipo === "CONVITE_QUADRO_RECUSADO") &&
+                        quadroIdFeedback;
 
-                  return (
-                    <li key={n.id}>
-                      <button
-                        type="button"
-                        className={clsx("topbar__notif-item", naoLida && "topbar__notif-item--unread")}
-                        onClick={() => handleClicNotificacao(n)}
-                      >
-                        <p className="topbar__notif-item-title">{n.titulo}</p>
-                        {obterMensagemNotificacao(n) ? (
-                          <p className="topbar__notif-item-msg">{obterMensagemNotificacao(n)}</p>
-                        ) : null}
-                        <div className="topbar__notif-item-meta">
-                          <span>{formatarDataNotificacao(n.criadoEm)}</span>
-                          <span className="topbar__notif-item-status">{naoLida ? "Não lida" : "Lida"}</span>
-                        </div>
-                        {mostrarAbrirQuadro ? (
-                          <div className="topbar__notif-item-actions">
-                            <button
-                              type="button"
-                              className="topbar__notif-abrir-quadro"
-                              onClick={(e) => handleAbrirQuadroNotificacao(e, quadroIdFeedback)}
-                            >
-                              Abrir quadro
-                            </button>
-                          </div>
-                        ) : null}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-        </div>
-      ) : null}
+                      return (
+                        <li key={n.id}>
+                          <button
+                            type="button"
+                            className={clsx(
+                              "topbar__notif-item",
+                              naoLida && "topbar__notif-item--unread"
+                            )}
+                            onClick={() => handleClicNotificacao(n)}
+                          >
+                            <p className="topbar__notif-item-title">{n.titulo}</p>
+                            {obterMensagemNotificacao(n) ? (
+                              <p className="topbar__notif-item-msg">{obterMensagemNotificacao(n)}</p>
+                            ) : null}
+                            <div className="topbar__notif-item-meta">
+                              <span>{formatarDataNotificacao(n.criadoEm)}</span>
+                              <span className="topbar__notif-item-status">
+                                {naoLida ? "Não lida" : "Lida"}
+                              </span>
+                            </div>
+                            {mostrarAbrirQuadro ? (
+                              <div className="topbar__notif-item-actions">
+                                <button
+                                  type="button"
+                                  className="topbar__notif-abrir-quadro"
+                                  onClick={(e) => handleAbrirQuadroNotificacao(e, quadroIdFeedback)}
+                                >
+                                  Abrir quadro
+                                </button>
+                              </div>
+                            ) : null}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
 
       {accessibilityOpen ? (
         <div

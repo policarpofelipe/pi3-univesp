@@ -449,7 +449,7 @@
 .topbar__notif-overlay {
   position: fixed;
   inset: 0;
-  z-index: var(--z-modal);
+  z-index: 1000;
   background: var(--color-scrim);
   display: flex;
   align-items: center;
