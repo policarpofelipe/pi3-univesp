@@ -99,49 +99,50 @@
   text-shadow: 0 1px 2px color-mix(in srgb, var(--color-text) 12%, transparent);
 }
 
-.login__hero-copy__meta {
-  margin: 0 0 var(--space-3);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
-  opacity: 0.98;
-  line-height: var(--line-height-relaxed);
-  color: inherit;
-}
-
 .login__hero-copy__tema {
-  margin: 0 0 var(--space-6);
+  margin: var(--space-8) 0 var(--space-4);
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-bold);
   line-height: var(--line-height-relaxed);
-  opacity: 0.95;
-  color: inherit;
+  color: var(--color-on-primary);
 }
 
 .login__hero-copy__grupo {
-  margin: 0 0 var(--space-3);
-  font-size: var(--font-size-heading-3);
+  margin: var(--space-2) 0 var(--space-3);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
-  color: inherit;
+  color: var(--color-on-primary);
 }
 
 .login__hero-copy__membros {
   list-style: none;
   margin: 0;
   padding: 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
   line-height: 1.55;
-  opacity: 0.96;
-  color: inherit;
+  opacity: 1;
+  color: var(--color-on-primary);
 }
 
 .login__hero-copy__membros li {
-  padding: 0.2rem 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-on-primary) 18%, transparent);
+  padding: 0.28rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-on-primary) 25%, transparent);
 }
 
 .login__hero-copy__membros li:last-child {
   border-bottom: none;
+}
+
+.login__hero-copy__data {
+  margin: var(--space-4) 0 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-transform: capitalize;
+  letter-spacing: 0.01em;
+  color: var(--color-on-primary);
+  opacity: 0.98;
 }
 
 .login__brand {

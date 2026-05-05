@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 
@@ -41,6 +41,14 @@ const MEMBROS_GRUPO_3_ALFABETICO = [
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const dataCapa = useMemo(() => {
+    return new Intl.DateTimeFormat("pt-BR", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(new Date());
+  }, []);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -138,18 +146,16 @@ export default function LoginPage() {
               <p className="login__hero-copy__institution">
                 Universidade Virtual do Estado de São Paulo
               </p>
-              <p className="login__hero-copy__meta">
-                Projeto integrador 3 - 2026
-              </p>
-              <p className="login__hero-copy__tema">
-                Otimização do Fluxo de Trabalho e Gestão de Prazos
-              </p>
-              <h2 className="login__hero-copy__grupo">Grupo 3</h2>
+              <h2 className="login__hero-copy__grupo">Autores (Grupo 3)</h2>
               <ul className="login__hero-copy__membros">
                 {MEMBROS_GRUPO_3_ALFABETICO.map((nome) => (
                   <li key={nome}>{nome}</li>
                 ))}
               </ul>
+              <p className="login__hero-copy__tema">
+                Otimização do Fluxo de Trabalho e Gestão de Prazos
+              </p>
+              <p className="login__hero-copy__data">{dataCapa}</p>
             </div>
           </div>
         </section>
