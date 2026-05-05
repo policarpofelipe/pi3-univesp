@@ -170,28 +170,29 @@ export default function QuadroPapelForm({
         <legend className="px-1 text-[var(--font-size-sm)] font-semibold text-[var(--color-text)]">
           Permissões
         </legend>
-        <ul className="mt-2 flex flex-col gap-3">
+        <div className="mt-2 flex flex-col gap-3">
           {PERMISSOES_QUADRO_PADRAO.map(({ key, label, description }) => (
-            <li key={key}>
-              <label className="flex cursor-pointer items-start gap-3">
+            <label
+              key={key}
+              className="flex cursor-pointer items-start gap-3 rounded-md px-1 py-1"
+            >
                 <input
                   type="checkbox"
                   checked={Boolean(permissoes[key])}
                   onChange={() => togglePermissao(key)}
                   className="mt-1 h-4 w-4 rounded border-[var(--color-border)]"
                 />
-                <span>
-                  <span className="block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]">
+                <span className="flex min-w-0 flex-col gap-1">
+                  <span className="block leading-5 text-[var(--font-size-sm)] font-medium text-[var(--color-text)]">
                     {label}
                   </span>
-                  <span className="mt-0.5 block text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
+                  <span className="block leading-5 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
                     {description}
                   </span>
                 </span>
-              </label>
-            </li>
+            </label>
           ))}
-        </ul>
+        </div>
       </fieldset>
 
       {submitError ? (
