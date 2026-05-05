@@ -133,6 +133,10 @@ class ConviteService {
       }
     }
 
+    const remetente = await UsuarioRepository.findById(remetenteId);
+    const nomeRemetente =
+      remetente?.nome_exibicao || remetente?.nomeExibicao || remetente?.email || "Alguém";
+
     const membroExistente = await QuadroMembroRepository.obterPorUsuarioId(qId, convidadoId);
     if (membroExistente && String(membroExistente.status || "").toLowerCase() === "ativo") {
       const err = new Error("Este usuário já é membro do quadro.");
@@ -175,12 +179,15 @@ class ConviteService {
           usuarioId: convidadoId,
           tipo: TIPO_CONVITE_RECEBIDO,
           titulo: "Convite para quadro",
-          mensagem: `Você recebeu um convite para participar do quadro ${quadro.nome || ""}.`.trim(),
+          mensagem:
+            `${nomeRemetente} convidou você para participar do quadro ${quadro.nome || ""}.`.trim(),
           link: null,
           dadosJson: {
             conviteId,
             quadroId: qId,
             convidadoPorUsuarioId: remetenteId,
+            convidadoPorNomeExibicao: nomeRemetente,
+            quadroNome: quadro.nome || null,
           },
         },
         conn

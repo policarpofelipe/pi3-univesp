@@ -434,23 +434,27 @@
 }
 
 .topbar__notif-dropdown {
-  position: absolute;
-  top: calc(100% + var(--space-2));
-  right: 0;
-  z-index: 130;
-  width: min(92vw, 22rem);
-  max-height: min(70vh, 24rem);
+  position: relative;
+  width: min(92vw, 34rem);
+  max-height: min(82vh, 38rem);
   display: flex;
   flex-direction: column;
-  padding: var(--space-2);
+  padding: var(--space-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   background: var(--color-surface);
   box-shadow: var(--shadow-lg);
 }
 
-.topbar__notif-dropdown[hidden] {
-  display: none;
+.topbar__notif-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: var(--color-scrim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
 }
 
 .topbar__notif-dropdown-header {

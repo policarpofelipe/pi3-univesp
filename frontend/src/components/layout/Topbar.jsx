@@ -58,6 +58,7 @@ export default function Topbar({
   const menuWrapRef = useRef(null);
   const menuButtonRef = useRef(null);
   const notifWrapRef = useRef(null);
+  const notifPanelRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [accessibilityOpen, setAccessibilityOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -93,8 +94,9 @@ export default function Topbar({
   useEffect(() => {
     if (!notifOpen) return undefined;
     function handleClickOutside(event) {
-      const root = notifWrapRef.current;
-      if (!root || root.contains(event.target)) return;
+      const triggerRoot = notifWrapRef.current;
+      const panelRoot = notifPanelRef.current;
+      if (triggerRoot?.contains(event.target) || panelRoot?.contains(event.target)) return;
       setNotifOpen(false);
     }
     function handleEscape(event) {
@@ -136,6 +138,15 @@ export default function Topbar({
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return "";
     return d.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  }
+
+  function obterMensagemNotificacao(n) {
+    if (!n) return "";
+    if (n.mensagem) return n.mensagem;
+    if (n.tipo !== "CONVITE_QUADRO_RECEBIDO") return "";
+    const remetente = n.dadosJson?.convidadoPorNomeExibicao || "Alguém";
+    const quadro = n.dadosJson?.quadroNome || "um quadro";
+    return `${remetente} convidou você para participar do quadro ${quadro}.`;
   }
 
   async function handleClicNotificacao(n) {
@@ -399,70 +410,6 @@ export default function Topbar({
               </span>
             )}
 
-            <div
-              id="topbar-notificacoes-panel"
-              className="topbar__notif-dropdown"
-              hidden={!notifOpen}
-              role="region"
-              aria-label="Lista de notificações"
-            >
-              <p className="topbar__notif-dropdown-header">Notificações</p>
-              {notifCarregando ? (
-                <p className="topbar__notif-vazio" aria-live="polite">
-                  Carregando notificações…
-                </p>
-              ) : notifList.length === 0 ? (
-                <p className="topbar__notif-vazio">Nenhuma notificação recente.</p>
-              ) : (
-                <ul className="topbar__notif-list">
-                  {notifList.map((n) => {
-                    const naoLida = !n.lidaEm;
-                    const quadroIdFeedback = n.dadosJson?.quadroId;
-                    const mostrarAbrirQuadro =
-                      (n.tipo === "CONVITE_QUADRO_ACEITO" ||
-                        n.tipo === "CONVITE_QUADRO_RECUSADO") &&
-                      quadroIdFeedback;
-
-                    return (
-                      <li key={n.id}>
-                        <button
-                          type="button"
-                          className={clsx(
-                            "topbar__notif-item",
-                            naoLida && "topbar__notif-item--unread"
-                          )}
-                          onClick={() => handleClicNotificacao(n)}
-                        >
-                          <p className="topbar__notif-item-title">{n.titulo}</p>
-                          {n.mensagem ? (
-                            <p className="topbar__notif-item-msg">{n.mensagem}</p>
-                          ) : null}
-                          <div className="topbar__notif-item-meta">
-                            <span>{formatarDataNotificacao(n.criadoEm)}</span>
-                            <span className="topbar__notif-item-status">
-                              {naoLida ? "Não lida" : "Lida"}
-                            </span>
-                          </div>
-                          {mostrarAbrirQuadro ? (
-                            <div className="topbar__notif-item-actions">
-                              <button
-                                type="button"
-                                className="topbar__notif-abrir-quadro"
-                                onClick={(e) =>
-                                  handleAbrirQuadroNotificacao(e, quadroIdFeedback)
-                                }
-                              >
-                                Abrir quadro
-                              </button>
-                            </div>
-                          ) : null}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
           </div>
 
           <div className="topbar__user" aria-label="Sessão do usuário">
@@ -529,6 +476,69 @@ export default function Topbar({
           }
         }}
       />
+
+      {notifOpen ? (
+        <div className="topbar__notif-overlay" role="presentation" onClick={() => setNotifOpen(false)}>
+          <div
+            id="topbar-notificacoes-panel"
+            className="topbar__notif-dropdown"
+            role="region"
+            aria-label="Lista de notificações"
+            ref={notifPanelRef}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <p className="topbar__notif-dropdown-header">Notificações</p>
+            {notifCarregando ? (
+              <p className="topbar__notif-vazio" aria-live="polite">
+                Carregando notificações…
+              </p>
+            ) : notifList.length === 0 ? (
+              <p className="topbar__notif-vazio">Nenhuma notificação recente.</p>
+            ) : (
+              <ul className="topbar__notif-list">
+                {notifList.map((n) => {
+                  const naoLida = !n.lidaEm;
+                  const quadroIdFeedback = n.dadosJson?.quadroId;
+                  const mostrarAbrirQuadro =
+                    (n.tipo === "CONVITE_QUADRO_ACEITO" ||
+                      n.tipo === "CONVITE_QUADRO_RECUSADO") &&
+                    quadroIdFeedback;
+
+                  return (
+                    <li key={n.id}>
+                      <button
+                        type="button"
+                        className={clsx("topbar__notif-item", naoLida && "topbar__notif-item--unread")}
+                        onClick={() => handleClicNotificacao(n)}
+                      >
+                        <p className="topbar__notif-item-title">{n.titulo}</p>
+                        {obterMensagemNotificacao(n) ? (
+                          <p className="topbar__notif-item-msg">{obterMensagemNotificacao(n)}</p>
+                        ) : null}
+                        <div className="topbar__notif-item-meta">
+                          <span>{formatarDataNotificacao(n.criadoEm)}</span>
+                          <span className="topbar__notif-item-status">{naoLida ? "Não lida" : "Lida"}</span>
+                        </div>
+                        {mostrarAbrirQuadro ? (
+                          <div className="topbar__notif-item-actions">
+                            <button
+                              type="button"
+                              className="topbar__notif-abrir-quadro"
+                              onClick={(e) => handleAbrirQuadroNotificacao(e, quadroIdFeedback)}
+                            >
+                              Abrir quadro
+                            </button>
+                          </div>
+                        ) : null}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </div>
+      ) : null}
 
       {accessibilityOpen ? (
         <div
