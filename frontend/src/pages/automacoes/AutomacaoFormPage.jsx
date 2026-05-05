@@ -12,6 +12,7 @@ import quadroService from "../../services/quadroService";
 import listaService from "../../services/listaService";
 import automacaoService from "../../services/automacaoService";
 import tagService from "../../services/tagService";
+import quadroMembroService from "../../services/quadroMembroService";
 import { extractList, extractObject } from "../../utils/apiData";
 
 export default function AutomacaoFormPage() {
@@ -27,19 +28,22 @@ export default function AutomacaoFormPage() {
   const [listas, setListas] = useState([]);
   const [automacao, setAutomacao] = useState(null);
   const [tags, setTags] = useState([]);
+  const [membros, setMembros] = useState([]);
 
   const carregar = useCallback(async () => {
     setLoading(true);
     setErro("");
     try {
-      const [resQuadro, resListas, resTags] = await Promise.all([
+      const [resQuadro, resListas, resTags, resMembros] = await Promise.all([
         quadroService.obterPorId(quadroId),
         listaService.listar(quadroId).catch(() => ({ data: [] })),
         tagService.listar(quadroId).catch(() => ({ data: [] })),
+        quadroMembroService.listar(quadroId).catch(() => ({ data: [] })),
       ]);
       setQuadro(extractObject(resQuadro) || resQuadro);
       setListas(extractList(resListas));
       setTags(extractList(resTags));
+      setMembros(extractList(resMembros));
 
       if (automacaoId) {
         const resAutomacoes = await automacaoService.listar(quadroId);
@@ -78,6 +82,7 @@ export default function AutomacaoFormPage() {
       listaOrigemId: automacao.listaOrigemId,
       listaDestinoId: automacao.listaDestinoId,
       condicoesJson: automacao.condicoesJson,
+      acoes: automacao.acoes || [],
     };
   }, [automacao]);
 
@@ -159,6 +164,7 @@ export default function AutomacaoFormPage() {
             initialValues={initialValues}
             listas={listas}
             tags={tags}
+            membros={membros}
             loading={salvando}
             onSubmit={handleSubmit}
             onCancel={() => navigate(`/quadros/${quadroId}/automacoes`)}

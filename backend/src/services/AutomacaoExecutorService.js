@@ -2,6 +2,8 @@ const automacaoService = require("./automacaoService");
 const AutomacaoAcaoRepository = require("../repositories/AutomacaoAcaoRepository");
 const AutomacaoExecucaoRepository = require("../repositories/AutomacaoExecucaoRepository");
 const CartaoRepository = require("../repositories/CartaoRepository");
+const QuadroMembroRepository = require("../repositories/QuadroMembroRepository");
+const CartaoAtribuicaoRepository = require("../repositories/CartaoAtribuicaoRepository");
 const CartaoHistoricoService = require("./cartaoHistoricoService");
 
 function contextoPermiteAutomacao(automacao, gatilho, ctx = {}) {
@@ -43,6 +45,12 @@ function contextoPermiteAutomacao(automacao, gatilho, ctx = {}) {
 }
 
 class AutomacaoExecutorService {
+  addDaysFromNow(days) {
+    const date = new Date();
+    date.setDate(date.getDate() + Number(days));
+    return date.toISOString().slice(0, 19).replace("T", " ");
+  }
+
   async executarMoverCartao({ quadroId, cartaoId, configJson = {} }) {
     const listaDestinoId = Number(configJson.listaDestinoId);
     if (!Number.isInteger(listaDestinoId) || listaDestinoId <= 0) {
@@ -69,6 +77,59 @@ class AutomacaoExecutorService {
     return { tagId };
   }
 
+  async executarAdicionarPrazo({ quadroId, cartaoId, configJson = {} }) {
+    const dias = Number(configJson.dias);
+    if (!Number.isInteger(dias) || dias <= 0) {
+      throw new Error("Configuração inválida para ADICIONAR_PRAZO.");
+    }
+    const cartao = await CartaoRepository.obterPorId(quadroId, cartaoId);
+    if (!cartao) throw new Error("Cartão não encontrado.");
+    const prazoEm = this.addDaysFromNow(dias);
+    await CartaoRepository.atualizar(quadroId, cartaoId, { prazoEm });
+    return { prazoEm, dias };
+  }
+
+  async executarAtribuirUsuario({ quadroId, cartaoId, configJson = {} }) {
+    const usuarioId = Number(configJson.usuarioId ?? configJson.membroId);
+    if (!Number.isInteger(usuarioId) || usuarioId <= 0) {
+      throw new Error("Configuração inválida para ATRIBUIR_USUARIO.");
+    }
+    const cartao = await CartaoRepository.obterPorId(quadroId, cartaoId);
+    if (!cartao) throw new Error("Cartão não encontrado.");
+    const membro = await QuadroMembroRepository.obterPorUsuarioId(quadroId, usuarioId);
+    if (!membro || String(membro.status || "").toLowerCase() !== "ativo") {
+      throw new Error("Usuário da ação não é membro ativo do quadro.");
+    }
+    const existente = await CartaoAtribuicaoRepository.obterPorUsuario(
+      quadroId,
+      cartaoId,
+      usuarioId
+    );
+    if (existente) {
+      return { ignored: true, reason: "already_assigned", usuarioId };
+    }
+    await CartaoAtribuicaoRepository.criar({
+      cartaoId,
+      usuarioId,
+      papelNoCartao: "participante",
+      atribuidoPorUsuarioId: null,
+    });
+    return { usuarioId };
+  }
+
+  async executarMudarPrioridade({ quadroId, cartaoId, configJson = {} }) {
+    const prioridade = String(configJson.prioridade || "").toLowerCase();
+    const allowed = new Set(["", "baixa", "media", "alta"]);
+    if (!allowed.has(prioridade)) {
+      throw new Error("Configuração inválida para MUDAR_PRIORIDADE.");
+    }
+    const cartao = await CartaoRepository.obterPorId(quadroId, cartaoId);
+    if (!cartao) throw new Error("Cartão não encontrado.");
+    const prioridadeDestino = prioridade || "media";
+    await CartaoRepository.atualizar(quadroId, cartaoId, { prioridade: prioridadeDestino });
+    return { prioridade: prioridadeDestino };
+  }
+
   async executarAcao({ automacao, acao, quadroId, cartaoId, usuarioId }) {
     const tipo = String(acao.tipoAcao || "").toUpperCase();
     if (tipo === "MOVER_CARTAO") {
@@ -76,6 +137,15 @@ class AutomacaoExecutorService {
     }
     if (tipo === "ADICIONAR_TAG") {
       return this.executarAdicionarTag({ quadroId, cartaoId, configJson: acao.configJson });
+    }
+    if (tipo === "ADICIONAR_PRAZO") {
+      return this.executarAdicionarPrazo({ quadroId, cartaoId, configJson: acao.configJson });
+    }
+    if (tipo === "ATRIBUIR_USUARIO") {
+      return this.executarAtribuirUsuario({ quadroId, cartaoId, configJson: acao.configJson });
+    }
+    if (tipo === "MUDAR_PRIORIDADE") {
+      return this.executarMudarPrioridade({ quadroId, cartaoId, configJson: acao.configJson });
     }
     return { ignored: true, reason: "unsupported_action" };
   }

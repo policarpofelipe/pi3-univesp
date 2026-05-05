@@ -1167,6 +1167,7 @@ export default function QuadroManagementDrawer({
                           initialValues={automacaoEmEdicao || {}}
                           listas={listas}
                           tags={tags}
+                          membros={membros}
                           loading={automacaoSalvando}
                           onSubmit={async (payload) => {
                             if (automacoesMode === "editar" && automacaoEmEdicao?.id) {

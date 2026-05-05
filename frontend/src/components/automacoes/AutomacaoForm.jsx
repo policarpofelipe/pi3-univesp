@@ -25,6 +25,9 @@ function normalize(initialValues = {}) {
     condicoesJson: initialValues.condicoesJson || null,
     acaoTipo,
     tagId: config.tagId || null,
+    prazoDias: config.dias || "",
+    usuarioIdAcao: config.usuarioId || null,
+    prioridadeAcao: config.prioridade || "",
   };
 }
 
@@ -33,6 +36,7 @@ export default function AutomacaoForm({
   initialValues = {},
   listas = [],
   tags = [],
+  membros = [],
   loading = false,
   onSubmit,
   onCancel,
@@ -68,6 +72,18 @@ export default function AutomacaoForm({
     if ((nextValues.acaoTipo || "MOVER_CARTAO") === "ADICIONAR_TAG" && !nextValues.tagId) {
       nextErrors.acao = "Selecione a tag para a ação automática.";
     }
+    if ((nextValues.acaoTipo || "MOVER_CARTAO") === "ADICIONAR_PRAZO") {
+      const dias = Number(nextValues.prazoDias);
+      if (!Number.isInteger(dias) || dias < 1) {
+        nextErrors.acao = "Informe quantos dias devem ser adicionados ao prazo.";
+      }
+    }
+    if ((nextValues.acaoTipo || "MOVER_CARTAO") === "ATRIBUIR_USUARIO" && !nextValues.usuarioIdAcao) {
+      nextErrors.acao = "Selecione um membro para atribuir ao cartão.";
+    }
+    if ((nextValues.acaoTipo || "MOVER_CARTAO") === "MUDAR_PRIORIDADE" && nextValues.prioridadeAcao === undefined) {
+      nextErrors.acao = "Selecione a prioridade da ação automática.";
+    }
     return nextErrors;
   }
 
@@ -79,6 +95,19 @@ export default function AutomacaoForm({
     if (Object.keys(nextErrors).length > 0) return;
 
     try {
+      let configJson = { listaDestinoId: Number(values.listaDestinoId) };
+      if ((values.acaoTipo || "MOVER_CARTAO") === "ADICIONAR_TAG") {
+        configJson = { tagId: Number(values.tagId) };
+      }
+      if ((values.acaoTipo || "MOVER_CARTAO") === "ADICIONAR_PRAZO") {
+        configJson = { dias: Number(values.prazoDias) };
+      }
+      if ((values.acaoTipo || "MOVER_CARTAO") === "ATRIBUIR_USUARIO") {
+        configJson = { usuarioId: Number(values.usuarioIdAcao) };
+      }
+      if ((values.acaoTipo || "MOVER_CARTAO") === "MUDAR_PRIORIDADE") {
+        configJson = { prioridade: values.prioridadeAcao || null };
+      }
       await onSubmit?.({
         nome: values.nome.trim(),
         descricao: values.descricao.trim(),
@@ -91,10 +120,7 @@ export default function AutomacaoForm({
         acoes: [
           {
             tipoAcao: values.acaoTipo || "MOVER_CARTAO",
-            configJson:
-              (values.acaoTipo || "MOVER_CARTAO") === "ADICIONAR_TAG"
-                ? { tagId: Number(values.tagId) }
-                : { listaDestinoId: Number(values.listaDestinoId) },
+            configJson,
           },
         ],
       });
@@ -199,6 +225,9 @@ export default function AutomacaoForm({
           >
             <option value="MOVER_CARTAO">Mover cartão</option>
             <option value="ADICIONAR_TAG">Adicionar tag</option>
+            <option value="ADICIONAR_PRAZO">Adicionar prazo</option>
+            <option value="ATRIBUIR_USUARIO">Atribuir membro</option>
+            <option value="MUDAR_PRIORIDADE">Mudar prioridade</option>
           </select>
         </div>
         {acaoTipo === "ADICIONAR_TAG" ? (
@@ -227,6 +256,91 @@ export default function AutomacaoForm({
                   {tag.nome}
                 </option>
               ))}
+            </select>
+          </div>
+        ) : null}
+        {acaoTipo === "ADICIONAR_PRAZO" ? (
+          <div>
+            <label
+              htmlFor="automacao-acao-prazo"
+              className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
+            >
+              Dias para adicionar
+            </label>
+            <input
+              id="automacao-acao-prazo"
+              type="number"
+              min={1}
+              step={1}
+              value={values.prazoDias ?? ""}
+              disabled={loading}
+              onChange={(event) =>
+                setValues((prev) => ({
+                  ...prev,
+                  prazoDias: event.target.value ? Number(event.target.value) : "",
+                }))
+              }
+              className="w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)]"
+            />
+          </div>
+        ) : null}
+        {acaoTipo === "ATRIBUIR_USUARIO" ? (
+          <div>
+            <label
+              htmlFor="automacao-acao-usuario"
+              className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
+            >
+              Membro para atribuir
+            </label>
+            <select
+              id="automacao-acao-usuario"
+              value={values.usuarioIdAcao || ""}
+              disabled={loading}
+              onChange={(event) =>
+                setValues((prev) => ({
+                  ...prev,
+                  usuarioIdAcao: event.target.value ? Number(event.target.value) : null,
+                }))
+              }
+              className="w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)]"
+            >
+              <option value="">Selecione um membro</option>
+              {membros.map((membro) => {
+                const id = membro.usuarioId ?? membro.id;
+                if (!id) return null;
+                return (
+                  <option key={`${id}-${membro.nome || "membro"}`} value={id}>
+                    {membro.nome || `Usuário ${id}`}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        ) : null}
+        {acaoTipo === "MUDAR_PRIORIDADE" ? (
+          <div>
+            <label
+              htmlFor="automacao-acao-prioridade"
+              className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]"
+            >
+              Prioridade
+            </label>
+            <select
+              id="automacao-acao-prioridade"
+              value={values.prioridadeAcao ?? ""}
+              disabled={loading}
+              onChange={(event) =>
+                setValues((prev) => ({
+                  ...prev,
+                  prioridadeAcao: event.target.value,
+                }))
+              }
+              className="w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)]"
+            >
+              <option value="">Sem prioridade</option>
+              <option value="alta">Alta</option>
+              <option value="media">Média</option>
+              <option value="baixa">Baixa</option>
             </select>
           </div>
         ) : null}

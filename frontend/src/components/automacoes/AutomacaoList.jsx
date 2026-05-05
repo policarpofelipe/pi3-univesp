@@ -12,6 +12,9 @@ const GATILHO_LABELS = {
 const ACAO_LABELS = {
   MOVER_CARTAO: "Mover cartão",
   ADICIONAR_TAG: "Adicionar tag",
+  ADICIONAR_PRAZO: "Adicionar prazo",
+  ATRIBUIR_USUARIO: "Atribuir membro",
+  MUDAR_PRIORIDADE: "Mudar prioridade",
 };
 
 export default function AutomacaoList({

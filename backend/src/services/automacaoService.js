@@ -17,7 +17,13 @@ function toId(v) {
 
 class AutomacaoService {
   parseAcoes(dados = {}, fallbackAutomacao = null) {
-    const allowed = new Set(["MOVER_CARTAO", "ADICIONAR_TAG"]);
+    const allowed = new Set([
+      "MOVER_CARTAO",
+      "ADICIONAR_TAG",
+      "ADICIONAR_PRAZO",
+      "ATRIBUIR_USUARIO",
+      "MUDAR_PRIORIDADE",
+    ]);
     if (!Array.isArray(dados.acoes) || !dados.acoes.length) {
       if (fallbackAutomacao?.listaDestinoId) {
         return [
@@ -59,6 +65,43 @@ class AutomacaoService {
           throw error;
         }
         normalized.push({ tipoAcao, configJson: { tagId }, ativo: item?.ativo !== false });
+      }
+      if (tipoAcao === "ADICIONAR_PRAZO") {
+        const dias = Number(config.dias);
+        if (!Number.isInteger(dias) || dias <= 0) {
+          const error = new Error("Ação ADICIONAR_PRAZO exige número de dias válido.");
+          error.statusCode = 400;
+          error.code = "AUTOMACAO_ACAO_PRAZO_INVALIDA";
+          throw error;
+        }
+        normalized.push({ tipoAcao, configJson: { dias }, ativo: item?.ativo !== false });
+      }
+      if (tipoAcao === "ATRIBUIR_USUARIO") {
+        const usuarioId = Number(config.usuarioId ?? config.membroId);
+        if (!Number.isInteger(usuarioId) || usuarioId <= 0) {
+          const error = new Error("Ação ATRIBUIR_USUARIO exige usuarioId válido.");
+          error.statusCode = 400;
+          error.code = "AUTOMACAO_ACAO_ATRIBUICAO_INVALIDA";
+          throw error;
+        }
+        normalized.push({ tipoAcao, configJson: { usuarioId }, ativo: item?.ativo !== false });
+      }
+      if (tipoAcao === "MUDAR_PRIORIDADE") {
+        const prioridade = String(config.prioridade || "").toLowerCase();
+        const allowedPrioridades = new Set(["", "baixa", "media", "alta"]);
+        if (!allowedPrioridades.has(prioridade)) {
+          const error = new Error(
+            "Ação MUDAR_PRIORIDADE exige prioridade válida: sem prioridade, baixa, media ou alta."
+          );
+          error.statusCode = 400;
+          error.code = "AUTOMACAO_ACAO_PRIORIDADE_INVALIDA";
+          throw error;
+        }
+        normalized.push({
+          tipoAcao,
+          configJson: { prioridade: prioridade || null },
+          ativo: item?.ativo !== false,
+        });
       }
     }
     return normalized;
