@@ -418,9 +418,9 @@ export default function QuadroManagementDrawer({
                     <div className="quadro-management-drawer__btn-stack mt-6">
                       <Button
                         type="button"
-                        variant="secondary"
+                        variant="primary"
+                        className="quadro-management-drawer__geral-btn quadro-management-drawer__geral-btn--blue"
                         leftIcon={<LayoutList size={16} aria-hidden="true" />}
-                        fullWidth
                         onClick={() => onNovaLista?.()}
                       >
                         Nova lista
@@ -440,9 +440,9 @@ export default function QuadroManagementDrawer({
                       <div className="quadro-management-drawer__btn-stack">
                         <Button
                           type="button"
-                          variant="secondary"
+                          variant="primary"
+                          className="quadro-management-drawer__geral-btn quadro-management-drawer__geral-btn--blue"
                           leftIcon={<FileDigit size={16} aria-hidden="true" />}
-                          fullWidth
                           onClick={() => {
                             navigate(`/quadros/${quadro.id}/consultas/cnpj`, {
                               state: { background: location },
@@ -454,9 +454,9 @@ export default function QuadroManagementDrawer({
                         </Button>
                         <Button
                           type="button"
-                          variant="secondary"
+                          variant="primary"
+                          className="quadro-management-drawer__geral-btn quadro-management-drawer__geral-btn--blue"
                           leftIcon={<MapPin size={16} aria-hidden="true" />}
-                          fullWidth
                           onClick={() => {
                             navigate(`/quadros/${quadro.id}/consultas/endereco`, {
                               state: { background: location },
@@ -485,9 +485,9 @@ export default function QuadroManagementDrawer({
                       <div className="quadro-management-drawer__btn-stack">
                         <Button
                           type="button"
-                          variant="secondary"
+                          variant="primary"
+                          className="quadro-management-drawer__geral-btn quadro-management-drawer__geral-btn--green"
                           leftIcon={<Braces size={16} aria-hidden="true" />}
-                          fullWidth
                           onClick={() => {
                             navigate(`/quadros/${quadro.id}/api-rest`);
                             onClose?.();
@@ -504,8 +504,8 @@ export default function QuadroManagementDrawer({
                         <Button
                           type="button"
                           variant="secondary"
+                          className="quadro-management-drawer__geral-btn quadro-management-drawer__geral-btn--gray"
                           leftIcon={<Settings size={16} aria-hidden="true" />}
-                          fullWidth
                           onClick={() => onNavigateConfiguracoes?.()}
                         >
                           Abrir configurações completas
@@ -529,9 +529,6 @@ export default function QuadroManagementDrawer({
                           onClick={() => setMembrosMode("criar")}
                         >
                           Convidar
-                        </Button>
-                        <Button variant="ghost" onClick={() => onNavigateMembros?.()}>
-                          Abrir página
                         </Button>
                       </div>
                     </div>
@@ -905,13 +902,6 @@ export default function QuadroManagementDrawer({
                         >
                           Nova visão
                         </Button>
-                        <Button
-                          variant="ghost"
-                          leftIcon={<Eye size={14} aria-hidden="true" />}
-                          onClick={() => onNavigateVisoes?.()}
-                        >
-                          Abrir página
-                        </Button>
                       </div>
                     </div>
                     <p className="quadro-detalhe-page__section-text">
@@ -1025,13 +1015,6 @@ export default function QuadroManagementDrawer({
                         >
                           Novo campo
                         </Button>
-                        <Button
-                          variant="ghost"
-                          leftIcon={<SlidersHorizontal size={14} aria-hidden="true" />}
-                          onClick={() => onNavigateCamposPersonalizados?.()}
-                        >
-                          Abrir página
-                        </Button>
                       </div>
                     </div>
                     <p className="quadro-detalhe-page__section-text">
@@ -1110,13 +1093,6 @@ export default function QuadroManagementDrawer({
                           }}
                         >
                           Nova automação
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          leftIcon={<Bot size={14} aria-hidden="true" />}
-                          onClick={() => onNavigateAutomacoes?.()}
-                        >
-                          Abrir página
                         </Button>
                       </div>
                     </div>
@@ -1204,9 +1180,6 @@ export default function QuadroManagementDrawer({
                           }}
                         >
                           Novo papel
-                        </Button>
-                        <Button variant="ghost" onClick={() => onNavigatePapeis?.()}>
-                          Abrir página
                         </Button>
                       </div>
                     </div>

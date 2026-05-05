@@ -34,7 +34,7 @@
   display: flex;
   flex-direction: column;
   /* ~704px: costuma comportar as 8 abas em linha; barra horizontal se zoom/fonte exigir */
-  width: min(44rem, 100vw);
+  width: min(37.5rem, 100vw);
   max-height: 100%;
   margin: 0;
   padding: 0;
@@ -143,11 +143,32 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .quadro-management-drawer__btn-stack .button--full-width {
   width: 100%;
+}
+
+.quadro-management-drawer__geral-btn {
+  justify-content: flex-start;
+}
+
+.quadro-management-drawer__geral-btn .button__content {
+  justify-content: flex-start;
+}
+
+.quadro-management-drawer__geral-btn--blue {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.quadro-management-drawer__geral-btn--green {
+  border-color: var(--color-success, #16a34a);
+  background-color: var(--color-success, #16a34a);
+  color: var(--color-on-success, #ffffff);
 }
 
 .quadro-management-drawer__geral-footer {
