@@ -5,8 +5,7 @@ export default function CampoOpcaoForm({ loading = false, onAdd }) {
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
 
-  async function handleSubmit(event) {
-    event.preventDefault();
+  async function handleAdd() {
     setError("");
     const value = label.trim();
     if (!value) {
@@ -19,13 +18,19 @@ export default function CampoOpcaoForm({ loading = false, onAdd }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-wrap items-start gap-2" noValidate>
+    <div className="flex flex-wrap items-start gap-2">
       <div className="min-w-[220px] flex-1">
         <input
           type="text"
           value={label}
           disabled={loading}
           onChange={(event) => setLabel(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              handleAdd();
+            }
+          }}
           placeholder="Nova opção"
           className="w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-[var(--font-size-sm)]"
           aria-invalid={Boolean(error)}
@@ -36,9 +41,9 @@ export default function CampoOpcaoForm({ loading = false, onAdd }) {
           </p>
         ) : null}
       </div>
-      <Button type="submit" variant="secondary" loading={loading}>
+      <Button type="button" variant="secondary" loading={loading} onClick={handleAdd}>
         Adicionar opção
       </Button>
-    </form>
+    </div>
   );
 }
