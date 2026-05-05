@@ -30,6 +30,11 @@ export default function BoardQuickFilters({
   onChange,
   tags = [],
   membros = [],
+  visoes = [],
+  selectedVisaoId = "",
+  onSelectVisao,
+  onClearVisao,
+  onClearFilters,
   actions = null,
 }) {
   const baseId = useId();
@@ -113,12 +118,37 @@ export default function BoardQuickFilters({
             id={`${baseId}-busca`}
             type="search"
             className="board-quick-filters__input"
-            placeholder="Buscar cartões…"
+            placeholder="Buscar cartões..."
             value={filters.busca || ""}
             onChange={(e) => patch({ busca: e.target.value })}
             autoComplete="off"
           />
         </div>
+        <div className="board-quick-filters__visao-select-wrap">
+          <label className="sr-only" htmlFor={`${baseId}-visao`}>
+            Selecionar visão
+          </label>
+          <select
+            id={`${baseId}-visao`}
+            className="board-quick-filters__select"
+            value={selectedVisaoId || ""}
+            onChange={(e) => onSelectVisao?.(e.target.value)}
+          >
+            <option value="">Selecionar visão</option>
+            {visoes
+              .filter((visao) => visao.ativa !== false)
+              .map((visao) => (
+                <option key={visao.id} value={String(visao.id)}>
+                  {visao.nome}
+                </option>
+              ))}
+          </select>
+        </div>
+        {selectedVisaoId ? (
+          <Button type="button" variant="ghost" size="sm" onClick={() => onClearVisao?.()}>
+            Limpar visão
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="secondary"
@@ -136,7 +166,11 @@ export default function BoardQuickFilters({
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() =>
+            onClick={() => {
+              if (typeof onClearFilters === "function") {
+                onClearFilters();
+                return;
+              }
               onChange?.({
                 busca: "",
                 tagId: "",
@@ -144,8 +178,8 @@ export default function BoardQuickFilters({
                 prazo: "",
                 situacao: "",
                 membroId: "",
-              })
-            }
+              });
+            }}
           >
             Limpar filtros
           </Button>

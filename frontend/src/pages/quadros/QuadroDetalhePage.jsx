@@ -70,6 +70,15 @@ function pathnameEhEditorListaNoQuadro(pathname) {
   return /\/quadros\/[^/]+\/listas\/nova$/.test(p) || /\/quadros\/[^/]+\/listas\/[^/]+\/editar$/.test(p);
 }
 
+const FILTERS_DEFAULT = {
+  busca: "",
+  tagId: "",
+  prioridade: "",
+  prazo: "",
+  situacao: "",
+  membroId: "",
+};
+
 export default function QuadroDetalhePage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -109,14 +118,8 @@ export default function QuadroDetalhePage() {
   const [criandoTag, setCriandoTag] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerSection, setDrawerSection] = useState("geral");
-  const [filters, setFilters] = useState({
-    busca: "",
-    tagId: "",
-    prioridade: "",
-    prazo: "",
-    situacao: "",
-    membroId: "",
-  });
+  const [selectedVisaoId, setSelectedVisaoId] = useState("");
+  const [filters, setFilters] = useState(FILTERS_DEFAULT);
 
   const carregar = useCallback(async () => {
     if (!quadroId) return;
@@ -944,6 +947,39 @@ export default function QuadroDetalhePage() {
     [listas, navigate, location, quadroId]
   );
 
+  useEffect(() => {
+    if (!selectedVisaoId) return;
+    const exists = visoes.some((v) => String(v.id) === String(selectedVisaoId));
+    if (!exists) {
+      setSelectedVisaoId("");
+    }
+  }, [visoes, selectedVisaoId]);
+
+  function handleSelecionarVisao(visaoId) {
+    const id = String(visaoId || "");
+    setSelectedVisaoId(id);
+    if (!id) {
+      setFilters(FILTERS_DEFAULT);
+      return;
+    }
+    const visao = visoes.find((v) => String(v.id) === id);
+    const filtro = visao?.filtroJson && typeof visao.filtroJson === "object" ? visao.filtroJson : {};
+    setFilters({
+      ...FILTERS_DEFAULT,
+      busca: String(filtro.busca || ""),
+      tagId: String(filtro.tagId || ""),
+      prioridade: String(filtro.prioridade || ""),
+      prazo: String(filtro.prazo || ""),
+      situacao: String(filtro.situacao || ""),
+      membroId: String(filtro.membroId || ""),
+    });
+  }
+
+  function handleLimparVisao() {
+    setSelectedVisaoId("");
+    setFilters(FILTERS_DEFAULT);
+  }
+
   async function handleReenviarConviteQuadro(conviteId) {
     setMembroSalvando(true);
     setMembrosErro("");
@@ -1039,6 +1075,11 @@ export default function QuadroDetalhePage() {
             onChange={setFilters}
             tags={tags}
             membros={membros}
+            visoes={visoes}
+            selectedVisaoId={selectedVisaoId}
+            onSelectVisao={handleSelecionarVisao}
+            onClearVisao={handleLimparVisao}
+            onClearFilters={() => setFilters(FILTERS_DEFAULT)}
             actions={
               <Button
                 type="button"
