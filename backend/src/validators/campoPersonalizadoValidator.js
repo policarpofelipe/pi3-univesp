@@ -1,9 +1,11 @@
 const validateRequestMiddleware = require("../middlewares/validateRequestMiddleware");
 
 const TIPOS = new Set([
+  "texto",
   "texto_curto",
   "texto_longo",
   "numero",
+  "moeda",
   "data",
   "data_hora",
   "booleano",
@@ -22,7 +24,7 @@ function validateCriarBody(body = {}) {
     errors.push("Tipo do campo é obrigatório.");
   } else if (!TIPOS.has(tipo)) {
     errors.push(
-      "Tipo inválido. Use: texto_curto, texto_longo, numero, data, data_hora, booleano, selecao ou usuario."
+      "Tipo inválido. Use: texto, texto_curto, texto_longo, numero, moeda, data, data_hora, booleano, selecao ou usuario."
     );
   }
   return errors;
