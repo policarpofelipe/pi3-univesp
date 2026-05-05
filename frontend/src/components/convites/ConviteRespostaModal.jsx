@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
 import Button from "../ui/Button";
@@ -136,7 +137,7 @@ export default function ConviteRespostaModal({
   const pendente = String(detalhe?.status || "").toLowerCase() === "pendente";
   const msgStatus = detalhe ? statusMensagem(detalhe.status) : "";
 
-  return (
+  return createPortal(
     <div
       className="convite-resposta-modal__overlay"
       role="presentation"
@@ -256,6 +257,7 @@ export default function ConviteRespostaModal({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
