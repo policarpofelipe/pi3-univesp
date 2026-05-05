@@ -118,7 +118,7 @@ export default function BoardQuickFilters({
             id={`${baseId}-busca`}
             type="search"
             className="board-quick-filters__input"
-            placeholder="Buscar cartões..."
+            placeholder="Digite para buscar cartões..."
             value={filters.busca || ""}
             onChange={(e) => patch({ busca: e.target.value })}
             autoComplete="off"

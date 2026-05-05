@@ -421,13 +421,13 @@
   background: var(--input-bg);
   color: var(--input-text);
   font-size: var(--font-size-sm);
-  padding: var(--space-2) var(--space-3) var(--space-2) 2.8rem;
+  padding: var(--space-2) 2.8rem var(--space-2) var(--space-3);
   min-height: 2.5rem;
 }
 
 .board-quick-filters__search-icon {
   position: absolute;
-  left: 0.95rem;
+  right: 0.95rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--color-text-soft);
