@@ -983,6 +983,8 @@ export default function QuadroManagementDrawer({
                         <VisaoForm
                           modo={visoesMode === "editar" ? "editar" : "criar"}
                           initialValues={visaoEmEdicao || {}}
+                          tags={tags}
+                          membros={membros}
                           loading={visaoSalvando}
                           onSubmit={async (payload) => {
                             if (visoesMode === "editar" && visaoEmEdicao?.id) {

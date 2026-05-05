@@ -11,6 +11,8 @@ const INITIAL = {
 export default function VisaoForm({
   modo = "criar",
   initialValues = {},
+  tags = [],
+  membros = [],
   loading = false,
   onSubmit,
   onCancel,
@@ -107,6 +109,8 @@ export default function VisaoForm({
 
       <FiltroBuilder
         initialValue={values.filtroJson}
+        tags={tags}
+        membros={membros}
         disabled={loading}
         onChange={(filtroJson, valido) => {
           setValues((prev) => ({ ...prev, filtroJson }));

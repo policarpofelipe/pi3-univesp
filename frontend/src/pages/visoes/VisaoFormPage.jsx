@@ -10,6 +10,8 @@ import VisaoForm from "../../components/visoes/VisaoForm";
 import useAuth from "../../hooks/useAuth";
 import quadroService from "../../services/quadroService";
 import visaoService from "../../services/visaoService";
+import tagService from "../../services/tagService";
+import quadroMembroService from "../../services/quadroMembroService";
 import { extractList, extractObject } from "../../utils/apiData";
 
 export default function VisaoFormPage() {
@@ -23,14 +25,22 @@ export default function VisaoFormPage() {
   const [erro, setErro] = useState("");
   const [quadro, setQuadro] = useState(null);
   const [visao, setVisao] = useState(null);
+  const [tags, setTags] = useState([]);
+  const [membros, setMembros] = useState([]);
 
   const carregar = useCallback(async () => {
     setLoading(true);
     setErro("");
     try {
-      const resQuadro = await quadroService.obterPorId(quadroId);
+      const [resQuadro, resTags, resMembros] = await Promise.all([
+        quadroService.obterPorId(quadroId),
+        tagService.listar(quadroId).catch(() => ({ data: [] })),
+        quadroMembroService.listar(quadroId).catch(() => ({ data: [] })),
+      ]);
       const dataQuadro = extractObject(resQuadro) || resQuadro;
       setQuadro(dataQuadro);
+      setTags(extractList(resTags));
+      setMembros(extractList(resMembros));
 
       if (visaoId) {
         const resVisoes = await visaoService.listar(quadroId);
@@ -136,12 +146,14 @@ export default function VisaoFormPage() {
       <div className="space-y-4">
         <PageHeader
           title={modo === "criar" ? "Nova visão" : "Editar visão"}
-          description="Configure nome, status e filtro JSON da visão."
+          description="Configure nome, status e filtros amigáveis da visão."
         />
         <section className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
           <VisaoForm
             modo={modo}
             initialValues={initialValues}
+            tags={tags}
+            membros={membros}
             loading={salvando}
             onSubmit={handleSubmit}
             onCancel={() => navigate(`/quadros/${quadroId}/visoes`)}
