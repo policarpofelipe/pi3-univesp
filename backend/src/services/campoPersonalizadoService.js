@@ -6,6 +6,17 @@ function toId(v) {
   return Number.isInteger(n) && n > 0 ? n : null;
 }
 
+const TIPOS_SUPORTADOS = new Set([
+  "texto",
+  "numero",
+  "moeda",
+  "data",
+  "data_hora",
+  "booleano",
+  "selecao",
+  "usuario",
+]);
+
 class CampoPersonalizadoService {
   async listar(quadroId) {
     const qId = toId(quadroId);
@@ -24,6 +35,11 @@ class CampoPersonalizadoService {
     const tipo = String(dados.tipo || "").trim();
     if (!nome || !tipo) {
       throw Object.assign(new Error("Nome e tipo do campo são obrigatórios."), {
+        statusCode: 400,
+      });
+    }
+    if (!TIPOS_SUPORTADOS.has(tipo)) {
+      throw Object.assign(new Error("Tipo de campo personalizado inválido."), {
         statusCode: 400,
       });
     }

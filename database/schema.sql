@@ -88,7 +88,7 @@ CREATE TABLE `campos_personalizados` (
   `id` int UNSIGNED NOT NULL,
   `quadro_id` int UNSIGNED NOT NULL,
   `nome` varchar(120) NOT NULL,
-  `tipo` enum('texto_curto','texto_longo','numero','data','data_hora','booleano','selecao','usuario') NOT NULL,
+  `tipo` enum('texto_curto','texto_longo','numero','moeda','data','data_hora','booleano','selecao','usuario') NOT NULL,
   `descricao` varchar(255) DEFAULT NULL,
   `obrigatorio` tinyint(1) NOT NULL DEFAULT '0',
   `posicao` bigint NOT NULL DEFAULT '1000',

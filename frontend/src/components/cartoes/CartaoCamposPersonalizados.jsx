@@ -6,6 +6,7 @@ import cartaoCampoValorService from "../../services/cartaoCampoValorService";
 import { extractList } from "../../utils/apiData";
 import RenderCampoTexto from "../camposPersonalizados/RenderCampoTexto";
 import RenderCampoNumero from "../camposPersonalizados/RenderCampoNumero";
+import RenderCampoMoeda from "../camposPersonalizados/RenderCampoMoeda";
 import RenderCampoData from "../camposPersonalizados/RenderCampoData";
 import RenderCampoDataHora from "../camposPersonalizados/RenderCampoDataHora";
 import RenderCampoBooleano from "../camposPersonalizados/RenderCampoBooleano";
@@ -16,6 +17,8 @@ function renderByType(campo, value, onChange) {
   switch (campo.tipo) {
     case "numero":
       return <RenderCampoNumero value={value} onChange={onChange} />;
+    case "moeda":
+      return <RenderCampoMoeda value={value} onChange={onChange} />;
     case "data":
       return <RenderCampoData value={value} onChange={onChange} />;
     case "data_hora":

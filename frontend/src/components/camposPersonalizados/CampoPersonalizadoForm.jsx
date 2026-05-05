@@ -5,6 +5,7 @@ import CampoOpcaoForm from "./CampoOpcaoForm";
 const TIPOS = [
   { id: "texto", label: "Texto" },
   { id: "numero", label: "Número" },
+  { id: "moeda", label: "Moeda (2 casas)" },
   { id: "data", label: "Data" },
   { id: "data_hora", label: "Data e hora" },
   { id: "booleano", label: "Booleano" },

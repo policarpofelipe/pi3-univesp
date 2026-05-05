@@ -15,6 +15,18 @@ function parseDateTime(value) {
   return date.toISOString().slice(0, 19).replace("T", " ");
 }
 
+function parseCurrency(value) {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) return null;
+    return Math.round(value * 100) / 100;
+  }
+  const normalized = String(value).trim().replace(/\./g, "").replace(",", ".");
+  const num = Number(normalized);
+  if (!Number.isFinite(num)) return null;
+  return Math.round(num * 100) / 100;
+}
+
 function normalizeByType(tipo, rawValue) {
   const base = {
     valorTexto: null,
@@ -42,6 +54,16 @@ function normalizeByType(tipo, rawValue) {
   if (tipo === "numero") {
     const num = Number(rawValue);
     if (Number.isNaN(num)) return { invalid: true };
+    return {
+      empty: false,
+      payload: { ...base, valorNumero: num, valorJson: JSON.stringify(num) },
+      normalizedValue: num,
+    };
+  }
+
+  if (tipo === "moeda") {
+    const num = parseCurrency(rawValue);
+    if (num === null) return { invalid: true };
     return {
       empty: false,
       payload: { ...base, valorNumero: num, valorJson: JSON.stringify(num) },
@@ -107,6 +129,7 @@ function extractValueFromRow(tipo, row) {
   if (!row) return null;
   if (tipo === "texto" || tipo === "selecao") return row.valorTexto;
   if (tipo === "numero") return row.valorNumero != null ? Number(row.valorNumero) : null;
+  if (tipo === "moeda") return row.valorNumero != null ? Number(row.valorNumero) : null;
   if (tipo === "data") return row.valorData;
   if (tipo === "data_hora") return row.valorDataHora;
   if (tipo === "booleano") return row.valorBooleano == null ? null : Boolean(row.valorBooleano);

@@ -4,6 +4,7 @@ function labelTipo(tipo) {
   const labels = {
     texto: "Texto",
     numero: "Número",
+    moeda: "Moeda",
     data: "Data",
     data_hora: "Data e hora",
     booleano: "Booleano",
