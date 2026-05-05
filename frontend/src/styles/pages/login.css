@@ -395,6 +395,35 @@
   text-decoration: underline;
 }
 
+.login__github-link {
+  margin-top: var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  transition:
+    transform var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.login__github-link:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+  color: var(--color-primary-hover);
+  text-decoration: none;
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;

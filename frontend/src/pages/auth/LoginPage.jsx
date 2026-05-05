@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, LogIn } from "lucide-react";
+import { Eye, EyeOff, Github, LogIn } from "lucide-react";
 
 import useAuth from "../../hooks/useAuth";
 import Button from "../../components/ui/Button";
@@ -268,6 +268,16 @@ export default function LoginPage() {
                 Ainda não tem uma conta?{" "}
                 <Link to="/cadastro">Criar conta</Link>
               </span>
+              <a
+                href="https://github.com/policarpofelipe/pi3-univesp"
+                target="_blank"
+                rel="noreferrer"
+                className="login__github-link"
+                aria-label="Abrir diretório do projeto no GitHub"
+              >
+                <Github size={16} aria-hidden="true" />
+                <span>Diretório do projeto no GitHub</span>
+              </a>
             </footer>
           </div>
         </section>
