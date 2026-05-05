@@ -180,6 +180,10 @@ export default function HomePage() {
     return null;
   }, [counts]);
 
+  const deveOcultarProximosPassos = useMemo(() => {
+    return counts.quadros > 0 && counts.cartoes !== 0;
+  }, [counts.quadros, counts.cartoes]);
+
   function handleCreateOrganization() {
     navigate("/organizacoes");
   }
@@ -410,10 +414,11 @@ export default function HomePage() {
               </Link>
             </section>
 
-            <section
-              className="home-page__section"
-              aria-labelledby="home-steps-title"
-            >
+            {!deveOcultarProximosPassos ? (
+              <section
+                className="home-page__section"
+                aria-labelledby="home-steps-title"
+              >
               <h3 id="home-steps-title" className="home-page__section-title">
                 Próximos passos
               </h3>
@@ -485,7 +490,8 @@ export default function HomePage() {
                   </div>
                 </li>
               </ol>
-            </section>
+              </section>
+            ) : null}
           </aside>
         </section>
       </div>

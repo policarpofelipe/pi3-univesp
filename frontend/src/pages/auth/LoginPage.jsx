@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 
 import useAuth from "../../hooks/useAuth";
@@ -40,7 +40,6 @@ const MEMBROS_GRUPO_3_ALFABETICO = [
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { login } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -52,10 +51,6 @@ export default function LoginPage() {
   const [carregando, setCarregando] = useState(false);
   const [touched, setTouched] = useState({});
   const [fieldErrors, setFieldErrors] = useState({});
-
-  const from = useMemo(() => {
-    return location.state?.from?.pathname || "/home";
-  }, [location.state]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -115,7 +110,7 @@ export default function LoginPage() {
     try {
       setCarregando(true);
       await login(email, senha);
-      navigate(from, { replace: true });
+      navigate("/home", { replace: true });
     } catch (err) {
       setErro(
         err?.response?.data?.message ||
