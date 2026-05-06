@@ -1,12 +1,11 @@
 /**
- * Grade e cartões dos campos personalizados no detalhe do cartão.
- * (CSS dedicado: garante 2 colunas e bordas mesmo se utilitários Tailwind falharem no build.)
+ * Grade dos campos personalizados no detalhe do cartão (2 colunas para campos curtos).
  */
 
 .campos-personalizados-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-3, 0.75rem);
+  gap: var(--space-2, 0.5rem);
   width: 100%;
 }
 
@@ -22,11 +21,6 @@
 
 .cartao-campo-personalizado {
   min-width: 0;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-xs);
-  padding: var(--space-3) var(--space-4);
 }
 
 .cartao-campo-personalizado__head {
@@ -34,7 +28,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
 }
 
 .cartao-campo-personalizado__label {

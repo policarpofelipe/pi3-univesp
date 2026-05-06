@@ -227,7 +227,7 @@ export default function CartaoCamposPersonalizados({
       Nenhum campo personalizado ativo para este quadro.
     </p>
   ) : (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       {feedback.type === "error" && feedback.message ? (
         <p
           className="rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
