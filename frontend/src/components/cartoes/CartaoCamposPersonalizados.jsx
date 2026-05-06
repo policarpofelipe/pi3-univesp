@@ -13,6 +13,21 @@ import RenderCampoBooleano from "../camposPersonalizados/RenderCampoBooleano";
 import RenderCampoSelecao from "../camposPersonalizados/RenderCampoSelecao";
 import RenderCampoUsuario from "../camposPersonalizados/RenderCampoUsuario";
 
+/** Tipos compactos em duas colunas; texto ocupa a linha inteira. */
+function isCampoCurto(campo) {
+  const t = campo?.tipo;
+  if (!t || t === "texto") return false;
+  return (
+    t === "numero" ||
+    t === "moeda" ||
+    t === "data" ||
+    t === "data_hora" ||
+    t === "booleano" ||
+    t === "selecao" ||
+    t === "usuario"
+  );
+}
+
 function renderByType(campo, value, onChange) {
   switch (campo.tipo) {
     case "numero":
@@ -118,7 +133,7 @@ export default function CartaoCamposPersonalizados({
       Nenhum campo personalizado ativo para este quadro.
     </p>
   ) : (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       {feedback.message ? (
         <p
           className={
@@ -131,28 +146,44 @@ export default function CartaoCamposPersonalizados({
           {feedback.message}
         </p>
       ) : null}
-      {campos.map((campo) => (
-        <div key={campo.id}>
-          <label className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]">
-            {campo.nome}
-          </label>
-          {renderByType(campo, values[campo.id], (next) =>
-            setValues((prev) => ({ ...prev, [campo.id]: next }))
-          )}
-          <div className="mt-2">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              loading={savingId === campo.id}
-              disabled={savingId != null}
-              onClick={() => salvarCampo(campo)}
-            >
-              Salvar campo
-            </Button>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        {campos.map((campo) => (
+          <div
+            key={campo.id}
+            className={[
+              "cartao-campo-personalizado rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-3 shadow-[var(--shadow-xs)]",
+              !isCampoCurto(campo) ? "md:col-span-2" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="shrink-0 sm:mt-0.5"
+                loading={savingId === campo.id}
+                disabled={savingId != null}
+                onClick={() => salvarCampo(campo)}
+                aria-label={`Salvar ${campo.nome}`}
+              >
+                Salvar
+              </Button>
+              <div className="min-w-0 flex-1">
+                <label className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]">
+                  {campo.nome}
+                </label>
+                <div className="cartao-campo-personalizado__control">
+                  {renderByType(campo, values[campo.id], (next) =>
+                    setValues((prev) => ({ ...prev, [campo.id]: next }))
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 
