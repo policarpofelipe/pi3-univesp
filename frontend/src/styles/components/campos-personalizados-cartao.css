@@ -1,0 +1,58 @@
+/**
+ * Grade e cartões dos campos personalizados no detalhe do cartão.
+ * (CSS dedicado: garante 2 colunas e bordas mesmo se utilitários Tailwind falharem no build.)
+ */
+
+.campos-personalizados-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3, 0.75rem);
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .campos-personalizados-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.campos-personalizados-grid__item--full {
+  grid-column: 1 / -1;
+}
+
+.cartao-campo-personalizado {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+  padding: var(--space-3) var(--space-4);
+}
+
+.cartao-campo-personalizado__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.cartao-campo-personalizado__label {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.cartao-campo-personalizado__saving {
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.cartao-campo-personalizado__control :where(input, select, textarea):not(
+    [type="checkbox"]
+  ):not([type="radio"]) {
+  width: 100%;
+  box-sizing: border-box;
+}

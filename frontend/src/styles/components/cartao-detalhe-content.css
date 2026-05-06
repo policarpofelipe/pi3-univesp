@@ -525,13 +525,6 @@
   width: auto;
 }
 
-.cartao-campo-personalizado__control :where(input, select, textarea):not(
-    [type="checkbox"]
-  ):not([type="radio"]) {
-  width: 100%;
-  box-sizing: border-box;
-}
-
 .cartao-checklist :where(ul, ol),
 .cartao-checklist__list {
   list-style: none;
