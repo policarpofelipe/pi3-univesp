@@ -320,7 +320,7 @@ const CartaoAnexos = forwardRef(function CartaoAnexos(
               disabled={enviando}
               onClick={() => inputRef.current?.click()}
             >
-              + Anexo
+              Anexo
             </Button>
           </div>
         ) : (

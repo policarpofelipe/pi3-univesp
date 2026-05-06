@@ -613,7 +613,7 @@ export default function CartaoDetalheContent({
                   disabled={enviandoAnexoAcao}
                   onClick={() => anexosRef.current?.abrirSeletorArquivo?.()}
                 >
-                  + Anexo
+                  Anexo
                 </Button>
                 <Button
                   type="button"
