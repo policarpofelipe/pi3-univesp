@@ -3,6 +3,8 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
+  useRef,
   useState,
 } from "react";
 import { ListChecks, Plus, Trash2 } from "lucide-react";
@@ -10,9 +12,18 @@ import { ListChecks, Plus, Trash2 } from "lucide-react";
 import Button from "../ui/Button";
 import CartaoChecklistItem from "./CartaoChecklistItem";
 import cartaoChecklistService from "../../services/cartaoChecklistService";
-import { extractList } from "../../utils/apiData";
+import { extractList, extractObject } from "../../utils/apiData";
 
-function BlocoChecklist({ checklist, quadroId, cartaoId, onChanged }) {
+function BlocoChecklist({
+  checklist,
+  quadroId,
+  cartaoId,
+  onChanged,
+  pedirFocoTitulo = false,
+  onFocoTituloConsumido,
+}) {
+  const tituloInputRef = useRef(null);
+  const blocoRef = useRef(null);
   const [titulo, setTitulo] = useState(checklist.titulo || "");
   const [novoItem, setNovoItem] = useState("");
   const [salvandoTitulo, setSalvandoTitulo] = useState(false);
@@ -23,6 +34,29 @@ function BlocoChecklist({ checklist, quadroId, cartaoId, onChanged }) {
   useEffect(() => {
     setTitulo(checklist.titulo || "");
   }, [checklist.id, checklist.titulo]);
+
+  useLayoutEffect(() => {
+    if (!pedirFocoTitulo) return undefined;
+
+    const run = () => {
+      blocoRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "nearest",
+      });
+      window.requestAnimationFrame(() => {
+        const el = tituloInputRef.current;
+        if (el) {
+          el.focus({ preventScroll: true });
+          el.select?.();
+        }
+        onFocoTituloConsumido?.();
+      });
+    };
+
+    const t = window.setTimeout(run, 0);
+    return () => window.clearTimeout(t);
+  }, [pedirFocoTitulo, onFocoTituloConsumido]);
 
   async function salvarTituloLista() {
     const t = titulo.trim();
@@ -78,7 +112,10 @@ function BlocoChecklist({ checklist, quadroId, cartaoId, onChanged }) {
   const progresso = total > 0 ? Math.round((concluidos / total) * 100) : 0;
 
   return (
-    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-4 cartao-checklist__block">
+    <div
+      ref={blocoRef}
+      className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-4 cartao-checklist__block"
+    >
       <div className="cartao-checklist__block-header">
         <button
           type="button"
@@ -90,6 +127,7 @@ function BlocoChecklist({ checklist, quadroId, cartaoId, onChanged }) {
           {expandido ? "▾" : "▸"}
         </button>
         <input
+          ref={tituloInputRef}
           type="text"
           value={titulo}
           onChange={(e) => setTitulo(e.target.value)}
@@ -171,6 +209,12 @@ const CartaoChecklist = forwardRef(function CartaoChecklist(
   const [listas, setListas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [criando, setCriando] = useState(false);
+  const [checklistIdParaFocarTitulo, setChecklistIdParaFocarTitulo] =
+    useState(null);
+
+  const consumirFocoTitulo = useCallback(() => {
+    setChecklistIdParaFocarTitulo(null);
+  }, []);
 
   const carregar = useCallback(async () => {
     if (!quadroId || !cartaoId) return;
@@ -196,8 +240,13 @@ const CartaoChecklist = forwardRef(function CartaoChecklist(
   const novaChecklist = useCallback(async () => {
     setCriando(true);
     try {
-      await cartaoChecklistService.criarChecklist(quadroId, cartaoId, {});
+      const res = await cartaoChecklistService.criarChecklist(quadroId, cartaoId, {});
+      const criada = extractObject(res);
+      const novoId = criada?.id ?? criada?.checklistId;
       await carregar();
+      if (novoId != null) {
+        setChecklistIdParaFocarTitulo(novoId);
+      }
     } catch {
       await carregar();
     } finally {
@@ -233,6 +282,11 @@ const CartaoChecklist = forwardRef(function CartaoChecklist(
             quadroId={quadroId}
             cartaoId={cartaoId}
             onChanged={carregar}
+            pedirFocoTitulo={
+              checklistIdParaFocarTitulo != null &&
+              String(checklistIdParaFocarTitulo) === String(cl.id)
+            }
+            onFocoTituloConsumido={consumirFocoTitulo}
           />
         ))}
       </div>
