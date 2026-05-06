@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import AppLayout from "../layout/AppLayout";
@@ -28,7 +28,14 @@ import { extractList, extractObject } from "../../utils/apiData";
 import { emitQuadroListasCartoesTagsAtualizados } from "../../utils/quadroSyncEvents";
 import useAuth from "../../hooks/useAuth";
 
-import { FileText, ListTodo, Trash2 } from "lucide-react";
+import {
+  FileText,
+  ListTodo,
+  Paperclip,
+  Plus,
+  SlidersHorizontal,
+  Trash2,
+} from "lucide-react";
 
 import "../../styles/components/cartao-detalhe-content.css";
 
@@ -67,6 +74,29 @@ export default function CartaoDetalheContent({
   const [salvandoPrioridade, setSalvandoPrioridade] = useState(false);
   const [salvandoTags, setSalvandoTags] = useState(false);
   const [historicoTick, setHistoricoTick] = useState(0);
+
+  const checklistRef = useRef(null);
+  const anexosRef = useRef(null);
+  const [checklistMeta, setChecklistMeta] = useState({
+    total: 0,
+    loading: true,
+  });
+  const [anexoMeta, setAnexoMeta] = useState({ total: 0, loading: true });
+  const [criandoChecklistAcao, setCriandoChecklistAcao] = useState(false);
+  const [enviandoAnexoAcao, setEnviandoAnexoAcao] = useState(false);
+
+  const handleChecklistMeta = useCallback((meta) => {
+    setChecklistMeta(meta);
+  }, []);
+
+  const handleAnexoMeta = useCallback((meta) => {
+    setAnexoMeta(meta);
+  }, []);
+
+  const mostrarBlocoChecklistAnexos =
+    !checklistMeta.loading &&
+    !anexoMeta.loading &&
+    (checklistMeta.total > 0 || anexoMeta.total > 0);
 
   const bumpHistorico = useCallback(() => {
     setHistoricoTick((n) => n + 1);
@@ -464,23 +494,70 @@ export default function CartaoDetalheContent({
             )}
           </section>
 
-          <section className="cartao-modal-section" aria-labelledby="cartao-checklist-titulo">
+          <section
+            className="cartao-modal-section"
+            aria-labelledby="cartao-campos-pers-titulo"
+          >
             <div className="cartao-modal-section__header">
-              <h2 id="cartao-checklist-titulo">
-                <ListTodo size={16} />
-                <span>Checklists</span>
+              <h2 id="cartao-campos-pers-titulo">
+                <SlidersHorizontal size={16} />
+                <span>Campos personalizados</span>
               </h2>
             </div>
-            <CartaoChecklist quadroId={quadroId} cartaoId={cartaoId} />
-          </section>
-
-          <section className="cartao-modal-section">
-            <CartaoAnexos
+            <CartaoCamposPersonalizados
               quadroId={quadroId}
               cartaoId={cartaoId}
-              onHistoricoMudou={bumpHistorico}
+              embedded
             />
           </section>
+
+          <div
+            className={[
+              "cartao-detalhe__checklist-anexos-host",
+              !mostrarBlocoChecklistAnexos
+                ? "cartao-detalhe__checklist-anexos-offscreen"
+                : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            aria-hidden={mostrarBlocoChecklistAnexos ? undefined : true}
+          >
+            <section className="cartao-modal-section" aria-labelledby="cartao-checklist-titulo">
+              <div className="cartao-modal-section__header">
+                <h2 id="cartao-checklist-titulo">
+                  <ListTodo size={16} />
+                  <span>Checklists</span>
+                </h2>
+              </div>
+              <CartaoChecklist
+                ref={checklistRef}
+                quadroId={quadroId}
+                cartaoId={cartaoId}
+                embedded
+                esconderBotaoNova
+                onMetadadosChange={handleChecklistMeta}
+              />
+            </section>
+
+            <section className="cartao-modal-section" aria-labelledby="cartao-anexos-titulo">
+              <div className="cartao-modal-section__header">
+                <h2 id="cartao-anexos-titulo">
+                  <Paperclip size={16} />
+                  <span>Anexos</span>
+                </h2>
+              </div>
+              <CartaoAnexos
+                ref={anexosRef}
+                quadroId={quadroId}
+                cartaoId={cartaoId}
+                embedded
+                onHistoricoMudou={bumpHistorico}
+                esconderBotaoCabecalho
+                onMetadadosChange={handleAnexoMeta}
+                onEnviandoChange={setEnviandoAnexoAcao}
+              />
+            </section>
+          </div>
 
           <section className="cartao-modal-section">
             <CartaoComentarios
@@ -506,11 +583,42 @@ export default function CartaoDetalheContent({
           <CartaoSidebar>
             <section className="cartao-modal-section cartao-modal-section--compact">
               <h3>Ações</h3>
-              <div className="cartao-modal-actions">
+              <div className="cartao-modal-actions cartao-modal-actions--stack">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="cartao-modal-actions__full"
+                  leftIcon={<Plus size={16} aria-hidden="true" focusable="false" />}
+                  loading={criandoChecklistAcao}
+                  disabled={criandoChecklistAcao}
+                  onClick={async () => {
+                    setCriandoChecklistAcao(true);
+                    try {
+                      await checklistRef.current?.criarNovaChecklist?.();
+                    } finally {
+                      setCriandoChecklistAcao(false);
+                    }
+                  }}
+                >
+                  Nova checklist
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="cartao-modal-actions__full"
+                  leftIcon={<Plus size={16} aria-hidden="true" focusable="false" />}
+                  loading={enviandoAnexoAcao}
+                  disabled={enviandoAnexoAcao}
+                  onClick={() => anexosRef.current?.abrirSeletorArquivo?.()}
+                >
+                  + Anexo
+                </Button>
                 <Button
                   type="button"
                   variant="danger"
-                  className="cartao-modal-actions__delete-btn"
+                  className="cartao-modal-actions__delete-btn cartao-modal-actions__full"
                   leftIcon={<Trash2 size={16} aria-hidden="true" focusable="false" />}
                   onClick={handleExcluir}
                   loading={excluindo}
@@ -571,10 +679,6 @@ export default function CartaoDetalheContent({
                 onChange={handleSalvarTagIds}
                 onTagsRefresh={carregarTags}
               />
-            </section>
-
-            <section className="cartao-modal-section cartao-modal-section--compact">
-              <CartaoCamposPersonalizados quadroId={quadroId} cartaoId={cartaoId} />
             </section>
 
             <section className="cartao-modal-section cartao-modal-section--compact">

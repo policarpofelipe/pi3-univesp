@@ -1,4 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { Download, Paperclip, Trash2 } from "lucide-react";
 
 import Button from "../ui/Button";
@@ -29,11 +36,18 @@ function mimeDeDataUrl(dataUrl) {
   return m ? m[1] : "application/octet-stream";
 }
 
-export default function CartaoAnexos({
-  quadroId,
-  cartaoId,
-  onHistoricoMudou,
-}) {
+const CartaoAnexos = forwardRef(function CartaoAnexos(
+  {
+    quadroId,
+    cartaoId,
+    onHistoricoMudou,
+    esconderBotaoCabecalho = false,
+    onMetadadosChange,
+    onEnviandoChange,
+    embedded = false,
+  },
+  ref
+) {
   const [itens, setItens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [enviando, setEnviando] = useState(false);
@@ -59,6 +73,24 @@ export default function CartaoAnexos({
   useEffect(() => {
     carregar();
   }, [carregar]);
+
+  useEffect(() => {
+    onMetadadosChange?.({ total: itens.length, loading });
+  }, [itens.length, loading, onMetadadosChange]);
+
+  useEffect(() => {
+    onEnviandoChange?.(enviando);
+  }, [enviando, onEnviandoChange]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      abrirSeletorArquivo: () => {
+        inputRef.current?.click();
+      },
+    }),
+    []
+  );
 
   async function enviarArquivo(file) {
     if (!file) return;
@@ -151,40 +183,18 @@ export default function CartaoAnexos({
     }
   }
 
-  return (
-    <section
-      className="card-section"
-      aria-labelledby="cartao-anexos-titulo"
-    >
-      <div className="card-section__header">
-        <div className="card-section__title">
-          <Paperclip
-            size={16}
-            aria-hidden="true"
-          />
-          <h2 id="cartao-anexos-titulo">Anexos</h2>
-        </div>
-        <div>
-          <input
-            ref={inputRef}
-            type="file"
-            className="sr-only"
-            accept="*/*"
-            onChange={handleArquivo}
-          />
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            loading={enviando}
-            disabled={enviando}
-            onClick={() => inputRef.current?.click()}
-          >
-            Enviar arquivo
-          </Button>
-        </div>
-      </div>
+  const inputArquivo = (
+    <input
+      ref={inputRef}
+      type="file"
+      className="sr-only"
+      accept="*/*"
+      onChange={handleArquivo}
+    />
+  );
 
+  const corpoLista = (
+    <>
       <p className="text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
         Limite de {MAX_BYTES / (1024 * 1024)} MB por arquivo (armazenamento em
         memória; reinicia com o servidor).
@@ -274,6 +284,53 @@ export default function CartaoAnexos({
           ))}
         </ul>
       )}
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <>
+        {inputArquivo}
+        {corpoLista}
+      </>
+    );
+  }
+
+  return (
+    <section
+      className="card-section"
+      aria-labelledby="cartao-anexos-titulo"
+    >
+      <div className="card-section__header">
+        <div className="card-section__title">
+          <Paperclip
+            size={16}
+            aria-hidden="true"
+          />
+          <h2 id="cartao-anexos-titulo">Anexos</h2>
+        </div>
+        {!esconderBotaoCabecalho ? (
+          <div>
+            {inputArquivo}
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              loading={enviando}
+              disabled={enviando}
+              onClick={() => inputRef.current?.click()}
+            >
+              + Anexo
+            </Button>
+          </div>
+        ) : (
+          inputArquivo
+        )}
+      </div>
+
+      {corpoLista}
     </section>
   );
-}
+});
+
+export default CartaoAnexos;

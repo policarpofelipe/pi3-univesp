@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from "react";
 import { ListChecks, Plus, Trash2 } from "lucide-react";
 
 import Button from "../ui/Button";
@@ -158,7 +164,10 @@ function BlocoChecklist({ checklist, quadroId, cartaoId, onChanged }) {
   );
 }
 
-export default function CartaoChecklist({ quadroId, cartaoId }) {
+const CartaoChecklist = forwardRef(function CartaoChecklist(
+  { quadroId, cartaoId, esconderBotaoNova = false, onMetadadosChange, embedded = false },
+  ref
+) {
   const [listas, setListas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [criando, setCriando] = useState(false);
@@ -180,7 +189,11 @@ export default function CartaoChecklist({ quadroId, cartaoId }) {
     carregar();
   }, [carregar]);
 
-  async function novaChecklist() {
+  useEffect(() => {
+    onMetadadosChange?.({ total: listas.length, loading });
+  }, [listas.length, loading, onMetadadosChange]);
+
+  const novaChecklist = useCallback(async () => {
     setCriando(true);
     try {
       await cartaoChecklistService.criarChecklist(quadroId, cartaoId, {});
@@ -190,6 +203,43 @@ export default function CartaoChecklist({ quadroId, cartaoId }) {
     } finally {
       setCriando(false);
     }
+  }, [quadroId, cartaoId, carregar]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      criarNovaChecklist: novaChecklist,
+    }),
+    [novaChecklist]
+  );
+
+  const corpo =
+    loading ? (
+      <p className="mt-4 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+        Carregando checklists…
+      </p>
+    ) : listas.length === 0 ? (
+      <p className="mt-4 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+        {embedded
+          ? 'Nenhuma checklist. Use "Nova checklist" na barra lateral para começar.'
+          : 'Nenhuma checklist. Use "Nova checklist" para começar.'}
+      </p>
+    ) : (
+      <div className="mt-4 flex flex-col gap-4">
+        {listas.map((cl) => (
+          <BlocoChecklist
+            key={cl.id}
+            checklist={cl}
+            quadroId={quadroId}
+            cartaoId={cartaoId}
+            onChanged={carregar}
+          />
+        ))}
+      </div>
+    );
+
+  if (embedded) {
+    return corpo;
   }
 
   return (
@@ -205,39 +255,23 @@ export default function CartaoChecklist({ quadroId, cartaoId }) {
           />
           <h2 id="cartao-checklists-titulo">Checklists</h2>
         </div>
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          loading={criando}
-          leftIcon={<Plus size={14} />}
-          onClick={novaChecklist}
-        >
-          Nova checklist
-        </Button>
+        {!esconderBotaoNova ? (
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            loading={criando}
+            leftIcon={<Plus size={14} />}
+            onClick={novaChecklist}
+          >
+            Nova checklist
+          </Button>
+        ) : null}
       </div>
 
-      {loading ? (
-        <p className="mt-4 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-          Carregando checklists…
-        </p>
-      ) : listas.length === 0 ? (
-        <p className="mt-4 text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-          Nenhuma checklist. Use &quot;Nova checklist&quot; para começar.
-        </p>
-      ) : (
-        <div className="mt-4 flex flex-col gap-4">
-          {listas.map((cl) => (
-            <BlocoChecklist
-              key={cl.id}
-              checklist={cl}
-              quadroId={quadroId}
-              cartaoId={cartaoId}
-              onChanged={carregar}
-            />
-          ))}
-        </div>
-      )}
+      {corpo}
     </section>
   );
-}
+});
+
+export default CartaoChecklist;

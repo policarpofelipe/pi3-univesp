@@ -40,7 +40,11 @@ function renderByType(campo, value, onChange) {
   }
 }
 
-export default function CartaoCamposPersonalizados({ quadroId, cartaoId }) {
+export default function CartaoCamposPersonalizados({
+  quadroId,
+  cartaoId,
+  embedded = false,
+}) {
   const [loading, setLoading] = useState(true);
   const [campos, setCampos] = useState([]);
   const [values, setValues] = useState({});
@@ -105,6 +109,57 @@ export default function CartaoCamposPersonalizados({ quadroId, cartaoId }) {
     }
   }
 
+  const body = loading ? (
+    <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+      Carregando campos personalizados…
+    </p>
+  ) : campos.length === 0 ? (
+    <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
+      Nenhum campo personalizado ativo para este quadro.
+    </p>
+  ) : (
+    <div className="space-y-3">
+      {feedback.message ? (
+        <p
+          className={
+            feedback.type === "error"
+              ? "rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
+              : "rounded-lg border border-[var(--color-success-border)] bg-[var(--color-success-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-success-text)]"
+          }
+          role={feedback.type === "error" ? "alert" : "status"}
+        >
+          {feedback.message}
+        </p>
+      ) : null}
+      {campos.map((campo) => (
+        <div key={campo.id}>
+          <label className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]">
+            {campo.nome}
+          </label>
+          {renderByType(campo, values[campo.id], (next) =>
+            setValues((prev) => ({ ...prev, [campo.id]: next }))
+          )}
+          <div className="mt-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              loading={savingId === campo.id}
+              disabled={savingId != null}
+              onClick={() => salvarCampo(campo)}
+            >
+              Salvar campo
+            </Button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (embedded) {
+    return body;
+  }
+
   return (
     <section className="card-section">
       <div className="card-section__header">
@@ -113,53 +168,7 @@ export default function CartaoCamposPersonalizados({ quadroId, cartaoId }) {
           Campos personalizados
         </h2>
       </div>
-
-      {loading ? (
-        <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-          Carregando campos personalizados…
-        </p>
-      ) : campos.length === 0 ? (
-        <p className="text-[var(--font-size-sm)] text-[var(--color-text-muted)]">
-          Nenhum campo personalizado ativo para este quadro.
-        </p>
-      ) : (
-        <div className="space-y-3">
-          {feedback.message ? (
-            <p
-              className={
-                feedback.type === "error"
-                  ? "rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-danger-text)]"
-                  : "rounded-lg border border-[var(--color-success-border)] bg-[var(--color-success-surface)] px-3 py-2 text-[var(--font-size-sm)] text-[var(--color-success-text)]"
-              }
-              role={feedback.type === "error" ? "alert" : "status"}
-            >
-              {feedback.message}
-            </p>
-          ) : null}
-          {campos.map((campo) => (
-            <div key={campo.id}>
-              <label className="mb-1 block text-[var(--font-size-sm)] font-medium text-[var(--color-text)]">
-                {campo.nome}
-              </label>
-              {renderByType(campo, values[campo.id], (next) =>
-                setValues((prev) => ({ ...prev, [campo.id]: next }))
-              )}
-              <div className="mt-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  loading={savingId === campo.id}
-                  disabled={savingId != null}
-                  onClick={() => salvarCampo(campo)}
-                >
-                  Salvar campo
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {body}
     </section>
   );
 }
