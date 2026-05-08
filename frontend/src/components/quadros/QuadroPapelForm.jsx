@@ -166,33 +166,34 @@ export default function QuadroPapelForm({
         />
       </div>
 
-      <fieldset className="rounded-lg border border-[var(--color-border)] p-3">
+      <fieldset
+        className="quadro-papel-form__permissions rounded-lg border border-[var(--color-border)] p-3"
+      >
         <legend className="px-1 text-[var(--font-size-sm)] font-semibold text-[var(--color-text)]">
           Permissões
         </legend>
-        <div className="mt-2 flex flex-col gap-3">
+        <ul className="quadro-papel-form__permissions-list mt-2">
           {PERMISSOES_QUADRO_PADRAO.map(({ key, label, description }) => (
-            <label
-              key={key}
-              className="flex cursor-pointer items-start gap-3 rounded-md px-1 py-1"
-            >
+            <li key={key} className="quadro-papel-form__permissions-item">
+              <label className="quadro-papel-form__permission-label">
                 <input
                   type="checkbox"
                   checked={Boolean(permissoes[key])}
                   onChange={() => togglePermissao(key)}
-                  className="mt-1 h-4 w-4 rounded border-[var(--color-border)]"
+                  className="quadro-papel-form__permission-checkbox mt-1 h-4 w-4 rounded border-[var(--color-border)]"
                 />
-                <span className="flex min-w-0 flex-col gap-1">
-                  <span className="block leading-5 text-[var(--font-size-sm)] font-medium text-[var(--color-text)]">
+                <span className="quadro-papel-form__permission-text flex min-w-0 flex-col gap-1">
+                  <span className="quadro-papel-form__permission-title block leading-5 text-[var(--font-size-sm)] font-medium text-[var(--color-text)]">
                     {label}
                   </span>
-                  <span className="block leading-5 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
+                  <span className="quadro-papel-form__permission-description block leading-5 text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
                     {description}
                   </span>
                 </span>
-            </label>
+              </label>
+            </li>
           ))}
-        </div>
+        </ul>
       </fieldset>
 
       {submitError ? (
