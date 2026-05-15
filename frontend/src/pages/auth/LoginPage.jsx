@@ -278,7 +278,7 @@ export default function LoginPage() {
                 tabIndex={2}
                 fullWidth
                 loading={carregando}
-                disabled={carregando}
+                disabled={!carregando}
                 leftIcon={!carregando ? <LogIn size={18} /> : null}
               >
                 {carregando ? "Entrando..." : "Entrar"}
@@ -287,9 +287,9 @@ export default function LoginPage() {
 
             <footer className="login__card-footer">
               <span>
-                <Link tabIndex={4} to="/esqueci-senha">[Recuperar senha]</Link>
+                <Link tabIndex={4} to="/esqueci-senha">[Recuperar senha] </Link>
                 {" | "}
-                <Link tabIndex={5} to="/cadastro">[Criar conta]</Link>
+                <Link tabIndex={5} to="/cadastro"> [Criar conta]</Link>
               </span>
             </footer>
           </div>
