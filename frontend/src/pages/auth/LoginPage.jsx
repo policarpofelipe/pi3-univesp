@@ -156,9 +156,11 @@ export default function LoginPage() {
                 ))}
               </ul>
               <p className="login__hero-copy__tema">
-                Otimização do Fluxo de Trabalho e Gestão de Prazos
+                OTIMIZAÇÃO DO FLUXO DE TRABALHO E GESTÃO DE PRAZOS:<br />
+                Implementação de Sistema Web Responsivo com Foco em Soberania Digital
               </p>
-              <p className="login__hero-copy__data">{dataCapa}</p>                            <a
+              <p className="login__hero-copy__data">{dataCapa}</p>
+              <a
                 href="https://github.com/policarpofelipe/pi3-univesp"
                 tabIndex={6}
                 target="_blank"
@@ -285,7 +287,7 @@ export default function LoginPage() {
             <footer className="login__card-footer">
               <span>
                 <Link tabIndex={4} to="/esqueci-senha">[Recuperar senha]</Link>
-                {"   "}|{"  "}
+                {"   |  "}
                 <Link tabIndex={5} to="/cadastro">[Criar conta]</Link>
               </span>
             </footer>
