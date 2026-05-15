@@ -3,7 +3,7 @@ import clsx from "clsx";
 import "../../styles/components/button.css";
 
 function Spinner() {
-  return <span className="button__spinner" aria-hidden="true" />;
+ // return <span className="button__spinner" aria-hidden="true" />;
 }
 
 const Button = React.forwardRef(function Button(
