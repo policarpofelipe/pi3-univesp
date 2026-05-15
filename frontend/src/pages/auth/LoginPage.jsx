@@ -156,7 +156,7 @@ export default function LoginPage() {
                 ))}
               </ul>
               <p className="login__hero-copy__tema">
-                OTIMIZAÇÃO DO FLUXO DE TRABALHO E GESTÃO DE PRAZOS:<br />
+                OTIMIZAÇÃO DO FLUXO DE TRABALHO E GESTÃO DE PRAZOS:
                 Implementação de Sistema Web Responsivo com Foco em Soberania Digital
               </p>
               <p className="login__hero-copy__data">{dataCapa}</p>
@@ -287,7 +287,7 @@ export default function LoginPage() {
             <footer className="login__card-footer">
               <span>
                 <Link tabIndex={4} to="/esqueci-senha">[Recuperar senha]</Link>
-                {"   |  "}
+                {"     |  "}
                 <Link tabIndex={5} to="/cadastro">[Criar conta]</Link>
               </span>
             </footer>
