@@ -278,8 +278,8 @@ export default function LoginPage() {
                 tabIndex={2}
                 fullWidth
                 loading={carregando}
-                disabled={!carregando}
-                leftIcon={!carregando ? <LogIn size={18} /> : null}
+                disabled={carregando}
+                leftIcon={carregando ? <LogIn size={18} /> : null}
               >
                 {carregando ? "Entrando..." : "Entrar"}
               </Button>
