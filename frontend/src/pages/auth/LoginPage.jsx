@@ -253,7 +253,7 @@ export default function LoginPage() {
                     {fieldErrors.senha}
                   </span>
                 )}
-                <Link to="/esqueci-senha">Esqueceu a senha?</Link>
+                
               </div>
 
               {erro && (
@@ -274,7 +274,8 @@ export default function LoginPage() {
 
             <footer className="login__card-footer">
               <span>
-                Ainda não tem uma conta?{" "}
+                <Link to="/esqueci-senha">Esqueceu a senha?</Link>
+                {" "}Ainda não tem uma conta?{" "}
                 <Link to="/cadastro">Criar conta</Link>
               </span>
             </footer>
