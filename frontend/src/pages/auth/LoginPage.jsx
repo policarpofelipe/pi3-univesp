@@ -278,7 +278,7 @@ export default function LoginPage() {
                 tabIndex={2}
                 fullWidth
                 loading={carregando}
-                leftIcon={!carregando ? <LogIn size={18} /> : null}
+                leftIcon={!carregando ? null : null}
                 rightIcon={!carregando ? null : null}
               >
                 {carregando ? "Entrando..." : "Entrar"}
