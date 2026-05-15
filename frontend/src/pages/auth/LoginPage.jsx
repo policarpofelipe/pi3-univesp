@@ -156,6 +156,7 @@ export default function LoginPage() {
               </p>
               <p className="login__hero-copy__data">{dataCapa}</p>                            <a
                 href="https://github.com/policarpofelipe/pi3-univesp"
+                tabIndex={6}
                 target="_blank"
                 rel="noreferrer"
                 className="login__github-link"
@@ -278,9 +279,9 @@ export default function LoginPage() {
 
             <footer className="login__card-footer">
               <span>
-                <Link to="/esqueci-senha">Esqueceu a senha?</Link>
-                {" "}Ainda não tem uma conta?{" "}
-                <Link to="/cadastro">Criar conta</Link>
+                <Link tabIndex={4} to="/esqueci-senha">[Recuperar senha]</Link>
+                {"  "}|{"  "}
+                <Link tabIndex={5} to="/cadastro">[Criar conta]</Link>
               </span>
             </footer>
           </div>
