@@ -8,6 +8,14 @@ import IconButton from "../../components/ui/IconButton";
 
 import "../../styles/pages/login.css";
 
+
+function handleKeyDownEmail(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    document.getElementById("senha")?.focus();
+  }
+}
+
 function validateLoginForm({ email, senha }) {
   const errors = {};
 
@@ -189,6 +197,7 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={handleChange}
                   onBlur={handleBlur}
+                  onKeyDown={handleKeyDownEmail}
                   autoComplete="email"
                   autoFocus
                   disabled={carregando}
@@ -276,7 +285,7 @@ export default function LoginPage() {
             <footer className="login__card-footer">
               <span>
                 <Link tabIndex={4} to="/esqueci-senha">[Recuperar senha]</Link>
-                {"  "}|{"  "}
+                {"   "}|{"  "}
                 <Link tabIndex={5} to="/cadastro">[Criar conta]</Link>
               </span>
             </footer>
