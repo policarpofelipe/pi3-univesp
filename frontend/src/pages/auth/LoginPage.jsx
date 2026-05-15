@@ -211,7 +211,7 @@ export default function LoginPage() {
               <div className="login__field">
                 <div className="login__field-row">
                   <label htmlFor="senha">Senha</label>
-                  <Link to="/esqueci-senha">Esqueceu a senha?</Link>
+                  
                 </div>
 
                 <div className="login__password">
@@ -253,6 +253,7 @@ export default function LoginPage() {
                     {fieldErrors.senha}
                   </span>
                 )}
+                <Link to="/esqueci-senha">Esqueceu a senha?</Link>
               </div>
 
               {erro && (
