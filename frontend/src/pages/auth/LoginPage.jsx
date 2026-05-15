@@ -34,7 +34,6 @@ const MEMBROS_GRUPO_3_ALFABETICO = [
   "Felipe Martins Policarpo",
   "Isabella Aparecida Marzola",
   "Jair Waldo Jara Palomino",
-  "Julio Cesar Monteiro dos Santos",
   "Norma Terezinha da Silva",
 ];
 
