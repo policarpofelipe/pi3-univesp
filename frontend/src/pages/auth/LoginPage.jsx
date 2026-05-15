@@ -287,7 +287,7 @@ export default function LoginPage() {
             <footer className="login__card-footer">
               <span>
                 <Link tabIndex={4} to="/esqueci-senha">[Recuperar senha] </Link>
-                {" | "}
+                &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                 <Link tabIndex={5} to="/cadastro"> [Criar conta]</Link>
               </span>
             </footer>
