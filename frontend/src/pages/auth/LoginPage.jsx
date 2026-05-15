@@ -131,10 +131,6 @@ export default function LoginPage() {
 
   return (
     <div className="login">
-      <a href="#login-formulario" className="skip-link">
-        Ir para o formulário de login
-      </a>
-
       <main className="login__container">
         <section
           className="login__hero"
