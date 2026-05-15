@@ -187,6 +187,7 @@ export default function LoginPage() {
                   id="email"
                   name="email"
                   type="email"
+                  tabIndex={1}
                   placeholder="seuemail@exemplo.com"
                   value={formData.email}
                   onChange={handleChange}
@@ -218,6 +219,7 @@ export default function LoginPage() {
                   <input
                     id="senha"
                     name="senha"
+                    tabIndex={1}
                     type={mostrarSenha ? "text" : "password"}
                     placeholder="Digite sua senha"
                     value={formData.senha}
@@ -235,6 +237,7 @@ export default function LoginPage() {
 
                   <IconButton
                     type="button"
+                    tabIndex={3}
                     onClick={() => setMostrarSenha((prev) => !prev)}
                     icon={
                       mostrarSenha ? (
@@ -264,6 +267,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
+                tabIndex={2}
                 fullWidth
                 loading={carregando}
                 leftIcon={!carregando ? <LogIn size={18} /> : null}
