@@ -155,6 +155,16 @@ export default function LoginPage() {
                 Otimização do Fluxo de Trabalho e Gestão de Prazos
               </p>
               <p className="login__hero-copy__data">{dataCapa}</p>
+                            <a
+                href="https://github.com/policarpofelipe/pi3-univesp"
+                target="_blank"
+                rel="noreferrer"
+                className="login__github-link"
+                aria-label="Abrir diretório do projeto no GitHub"
+              >
+                <Github size={16} aria-hidden="true" />
+                <span>Diretório do projeto no GitHub</span>
+              </a>
             </div>
           </div>
         </section>
