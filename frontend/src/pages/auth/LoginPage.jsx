@@ -154,8 +154,7 @@ export default function LoginPage() {
               <p className="login__hero-copy__tema">
                 Otimização do Fluxo de Trabalho e Gestão de Prazos
               </p>
-              <p className="login__hero-copy__data">{dataCapa}</p>
-                            <a
+              <p className="login__hero-copy__data">{dataCapa}</p>                            <a
                 href="https://github.com/policarpofelipe/pi3-univesp"
                 target="_blank"
                 rel="noreferrer"
@@ -277,16 +276,6 @@ export default function LoginPage() {
                 Ainda não tem uma conta?{" "}
                 <Link to="/cadastro">Criar conta</Link>
               </span>
-              <a
-                href="https://github.com/policarpofelipe/pi3-univesp"
-                target="_blank"
-                rel="noreferrer"
-                className="login__github-link"
-                aria-label="Abrir diretório do projeto no GitHub"
-              >
-                <Github size={16} aria-hidden="true" />
-                <span>Diretório do projeto no GitHub</span>
-              </a>
             </footer>
           </div>
         </section>
