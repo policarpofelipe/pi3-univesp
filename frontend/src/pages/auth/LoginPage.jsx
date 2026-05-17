@@ -240,15 +240,18 @@ export default function LoginPage() {
     }
   }}
   // Vincula a instrução audível
-  aria-describedby="dica-senha"
+  //aria-describedby="dica-senha" 
+    aria-describedby={
+    `dica-senha ${touched.senha && fieldErrors.senha ? "senha-error" : ""}`.trim()
+  }
                     autoComplete="current-password"
                     disabled={carregando}
                     aria-invalid={Boolean(touched.senha && fieldErrors.senha)}
-                    aria-describedby={
-                      touched.senha && fieldErrors.senha
-                        ? "senha-error"
-                        : undefined
-                    }
+                    //aria-describedby={
+                    //  touched.senha && fieldErrors.senha
+                    //    ? "senha-error"
+                    //    : undefined
+                    //}
                   />
 
 
