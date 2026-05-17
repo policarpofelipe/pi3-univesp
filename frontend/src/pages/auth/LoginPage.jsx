@@ -119,6 +119,7 @@ export default function LoginPage() {
     });
 
     if (Object.keys(errors).length > 0) {
+      document.getElementById("email")?.focus();
       return;
     }
 
