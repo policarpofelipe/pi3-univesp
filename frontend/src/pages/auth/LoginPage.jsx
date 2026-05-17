@@ -119,7 +119,6 @@ export default function LoginPage() {
     });
 
     if (Object.keys(errors).length > 0) {
-      document.getElementById("email")?.focus();
       return;
     }
 
@@ -133,7 +132,6 @@ export default function LoginPage() {
           err?.message ||
           "Erro ao autenticar. Verifique suas credenciais."
       );
-      document.getElementById("email")?.focus();
     } finally {
       setCarregando(false);
     }
