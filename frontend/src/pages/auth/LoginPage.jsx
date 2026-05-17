@@ -233,6 +233,14 @@ export default function LoginPage() {
                     value={formData.senha}
                     onChange={handleChange}
                     onBlur={handleBlur}
+  // Detecta o Control e alterna o estado
+  onKeyDown={(e) => {
+    if (e.key === 'Control') {
+      setMostrarSenha((prev) => !prev);
+    }
+  }}
+  // Vincula a instrução audível
+  aria-describedby="dica-senha"
                     autoComplete="current-password"
                     disabled={carregando}
                     aria-invalid={Boolean(touched.senha && fieldErrors.senha)}
@@ -242,6 +250,19 @@ export default function LoginPage() {
                         : undefined
                     }
                   />
+
+
+                  <span id="dica-senha" style={{ display: 'none' }}>
+  Pressione Control para alternar a visibilidade da senha.
+</span>
+
+<div 
+  aria-live="polite" 
+  style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden' }}
+>
+  {mostrarSenha ? "Senha visível" : "Senha oculta"}
+</div>
+
 
                   <IconButton
                     type="button"
