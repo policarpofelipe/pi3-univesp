@@ -128,12 +128,12 @@ export default function LoginPage() {
       await login(email, senha);
       navigate("/home", { replace: true });
     } catch (err) {
-      document.getElementById("email")?.focus();
       setErro(
         err?.response?.data?.message ||
           err?.message ||
           "Erro ao autenticar. Verifique suas credenciais."
       );
+      document.getElementById("email")?.focus();
     } finally {
       setCarregando(false);
     }
